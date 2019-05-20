@@ -34,4 +34,9 @@ public interface IndividuelService {
 	@WebMethod
 	@WebResult(name = "resultat")
 	public boolean testMoxy(@WebParam(name = "individuel") Individuel individu);
+	
+	@WebMethod
+	@WebResult(name = "resultat")
+	public String saveIndividuelByEntity(@WebParam(name = "individuel")@XmlElement(required = true) Individuel request);
+	
 }

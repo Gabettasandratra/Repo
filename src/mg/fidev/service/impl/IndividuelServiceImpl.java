@@ -97,7 +97,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 			em.persist(doc);
 		transaction.commit();
 		em.refresh(individu); // pour que le em connait le id et code du nouveau
-		return "Jereo ny base";
+		return "Okay";
 	}
 
 	@Override
@@ -171,5 +171,16 @@ public class IndividuelServiceImpl implements IndividuelService {
 	public boolean testMoxy(Individuel individu) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public String saveIndividuelByEntity(Individuel request) {
+		transaction.begin();
+		em.persist(request);
+		for (Docidentite doc : request.getDocidentites())
+			em.persist(doc);
+		transaction.commit();
+		em.refresh(request); // pour que le em connait le id et code du nouveau
+		return "Jereo ny base";
 	}
 }

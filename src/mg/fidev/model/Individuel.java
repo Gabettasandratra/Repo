@@ -15,6 +15,10 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -23,6 +27,7 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @NamedQuery(name="Individuel.findAll", query="SELECT i FROM Individuel i")
+@XmlRootElement
 public class Individuel implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -85,6 +90,8 @@ public class Individuel implements Serializable {
 
 	//bi-directional many-to-one association to Docidentite
 	@OneToMany(mappedBy="individuel")
+	@XmlElementWrapper(name="docidentites")
+	@XmlElement(name="docidentite")
 	private List<Docidentite> docidentites;
 
 	//bi-directional many-to-one association to Adresse
