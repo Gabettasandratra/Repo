@@ -1,24 +1,9 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -27,7 +12,6 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @Entity
 @NamedQuery(name="Individuel.findAll", query="SELECT i FROM Individuel i")
-@XmlRootElement
 public class Individuel implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -88,19 +72,20 @@ public class Individuel implements Serializable {
 
 	private String titre;
 
+	//bi-directional many-to-one association to CompteEpargne
+	@OneToMany(mappedBy="individuel")
+	private List<CompteEpargne> compteEpargnes;
+
 	//bi-directional many-to-one association to Docidentite
 	@OneToMany(mappedBy="individuel")
-	@XmlElementWrapper(name="docidentites")
-	@XmlElement(name="docidentite")
 	private List<Docidentite> docidentites;
 
 	//bi-directional many-to-one association to Adresse
-	@ManyToOne(cascade= CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="idAdresse")
 	private Adresse adresse;
 
 	//bi-directional many-to-one association to Groupe
-	
 	@ManyToOne
 	@JoinColumn(name="idGroupe")
 	private Groupe groupe;
@@ -123,7 +108,7 @@ public class Individuel implements Serializable {
 	public void setCodeAgence(String codeAgence) {
 		this.codeAgence = codeAgence;
 	}
-	
+
 	public String getCodeClient() {
 		return this.codeClient;
 	}
@@ -314,6 +299,28 @@ public class Individuel implements Serializable {
 
 	public void setTitre(String titre) {
 		this.titre = titre;
+	}
+
+	public List<CompteEpargne> getCompteEpargnes() {
+		return this.compteEpargnes;
+	}
+
+	public void setCompteEpargnes(List<CompteEpargne> compteEpargnes) {
+		this.compteEpargnes = compteEpargnes;
+	}
+
+	public CompteEpargne addCompteEpargne(CompteEpargne compteEpargne) {
+		getCompteEpargnes().add(compteEpargne);
+		compteEpargne.setIndividuel(this);
+
+		return compteEpargne;
+	}
+
+	public CompteEpargne removeCompteEpargne(CompteEpargne compteEpargne) {
+		getCompteEpargnes().remove(compteEpargne);
+		compteEpargne.setIndividuel(null);
+
+		return compteEpargne;
 	}
 
 	public List<Docidentite> getDocidentites() {

@@ -1,15 +1,8 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+import javax.persistence.*;
 import java.util.List;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -41,17 +34,14 @@ public class Adresse implements Serializable {
 
 	//bi-directional many-to-one association to Entreprise
 	@OneToMany(mappedBy="adresse")
-	@XmlTransient
 	private List<Entreprise> entreprises;
 
 	//bi-directional many-to-one association to Groupe
 	@OneToMany(mappedBy="adresse")
-	@XmlTransient
 	private List<Groupe> groupes;
 
 	//bi-directional many-to-one association to Individuel
 	@OneToMany(mappedBy="adresse")
-	@XmlTransient
 	private List<Individuel> individuels;
 
 	public Adresse() {

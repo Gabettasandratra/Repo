@@ -46,7 +46,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 		/* config */
 		individu.setEstClientIndividuel(true);
 		individu.setEstGarant(false);
-		individu.setEstMembreGroupe(false);
+		individu.setGroupe(null);
 
 		/* les info perso */
 		individu.setParentNom(request.getParentNom());

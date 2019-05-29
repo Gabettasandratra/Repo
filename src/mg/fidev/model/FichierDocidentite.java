@@ -15,15 +15,16 @@ public class FichierDocidentite implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private String codeDocument;
 
 	private String delivrePar;
 
 	private String format;
 
-	private byte isObligatoire;
+	private boolean isObligatoire;
 
-	private byte isUnique;
+	private boolean isUnique;
 
 	private int largeur;
 
@@ -56,19 +57,19 @@ public class FichierDocidentite implements Serializable {
 		this.format = format;
 	}
 
-	public byte getIsObligatoire() {
+	public boolean getIsObligatoire() {
 		return this.isObligatoire;
 	}
 
-	public void setIsObligatoire(byte isObligatoire) {
+	public void setIsObligatoire(boolean isObligatoire) {
 		this.isObligatoire = isObligatoire;
 	}
 
-	public byte getIsUnique() {
+	public boolean getIsUnique() {
 		return this.isUnique;
 	}
 
-	public void setIsUnique(byte isUnique) {
+	public void setIsUnique(boolean isUnique) {
 		this.isUnique = isUnique;
 	}
 

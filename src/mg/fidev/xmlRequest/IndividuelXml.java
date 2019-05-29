@@ -164,8 +164,8 @@ public class IndividuelXml implements Serializable {
 		return estMembreGroupe;
 	}
 
-	public void setEstMembreGroupe(boolean estMembreGroupe) {
-		this.estMembreGroupe = estMembreGroupe;
+	public void setEstMembreGroupe(boolean b) {
+		this.estMembreGroupe = b;
 	}
 
 	public String getEtatCivil() {

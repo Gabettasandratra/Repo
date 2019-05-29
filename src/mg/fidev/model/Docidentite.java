@@ -1,17 +1,8 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+import javax.persistence.*;
 import java.util.Date;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQuery;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.eclipse.persistence.oxm.annotations.XmlInverseReference;
 
 
 /**
@@ -41,7 +32,6 @@ public class Docidentite implements Serializable {
 	//bi-directional many-to-one association to Individuel
 	@ManyToOne
 	@JoinColumn(name="rowIdClient")
-	@XmlInverseReference(mappedBy="docidentites")
 	private Individuel individuel;
 
 	public Docidentite() {

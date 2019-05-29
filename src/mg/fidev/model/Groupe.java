@@ -32,6 +32,10 @@ public class Groupe implements Serializable {
 
 	private String numeroMobile;
 
+	//bi-directional many-to-one association to CompteEpargne
+	@OneToMany(mappedBy="groupe")
+	private List<CompteEpargne> compteEpargnes;
+
 	//bi-directional many-to-one association to Adresse
 	@ManyToOne
 	@JoinColumn(name="idAdresse")
@@ -98,6 +102,28 @@ public class Groupe implements Serializable {
 
 	public void setNumeroMobile(String numeroMobile) {
 		this.numeroMobile = numeroMobile;
+	}
+
+	public List<CompteEpargne> getCompteEpargnes() {
+		return this.compteEpargnes;
+	}
+
+	public void setCompteEpargnes(List<CompteEpargne> compteEpargnes) {
+		this.compteEpargnes = compteEpargnes;
+	}
+
+	public CompteEpargne addCompteEpargne(CompteEpargne compteEpargne) {
+		getCompteEpargnes().add(compteEpargne);
+		compteEpargne.setGroupe(this);
+
+		return compteEpargne;
+	}
+
+	public CompteEpargne removeCompteEpargne(CompteEpargne compteEpargne) {
+		getCompteEpargnes().remove(compteEpargne);
+		compteEpargne.setGroupe(null);
+
+		return compteEpargne;
 	}
 
 	public Adresse getAdresse() {
