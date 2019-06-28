@@ -13,10 +13,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class GroupeXml implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	@XmlElement(name = "rowId", required = false, nillable = true)
+	/*@XmlElement(name = "rowId", required = false, nillable = true)
 	private int rowId;
 	@XmlElement(name = "codeAgence", required = true)
-	private String codeAgence;
+	private String codeAgence;*/
 	@XmlElement(name = "codeClient",  required = false, nillable = true)
 	private String codeClient;
 	@XmlElement(name = "dateInscription",  required = true)
@@ -29,18 +29,21 @@ public class GroupeXml implements Serializable {
 	private String numeroMobile;
 	@XmlElement(name = "adresse",  required = false, nillable = true)
 	private AdresseXml adresse;
-	public int getRowId() {
+	
+	/*public int getRowId() {
 		return rowId;
 	}
 	public void setRowId(int rowId) {
 		this.rowId = rowId;
 	}
+	
 	public String getCodeAgence() {
 		return codeAgence;
 	}
 	public void setCodeAgence(String codeAgence) {
 		this.codeAgence = codeAgence;
-	}
+	}*/
+	
 	public String getCodeClient() {
 		return codeClient;
 	}

@@ -31,7 +31,7 @@ public class Docidentite implements Serializable {
 
 	//bi-directional many-to-one association to Individuel
 	@ManyToOne
-	@JoinColumn(name="rowIdClient")
+	@JoinColumn(name="codeClient")
 	private Individuel individuel;
 
 	public Docidentite() {

@@ -16,7 +16,6 @@ public class PlanComptable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="num_plan_comptable")
 	private String numPlanComptable;
 
@@ -25,6 +24,15 @@ public class PlanComptable implements Serializable {
 	//bi-directional many-to-one association to CompteCaisse
 	@OneToMany(mappedBy="planComptable")
 	private List<CompteCaisse> compteCaisses;
+
+	//bi-directional many-to-one association to PlanComptable
+	@ManyToOne
+	@JoinColumn(name="Plan_comptablenum_plan_comptable")
+	private PlanComptable planComptable;
+
+	//bi-directional many-to-one association to PlanComptable
+	@OneToMany(mappedBy="planComptable")
+	private List<PlanComptable> planComptables;
 
 	public PlanComptable() {
 	}
@@ -65,6 +73,36 @@ public class PlanComptable implements Serializable {
 		compteCaiss.setPlanComptable(null);
 
 		return compteCaiss;
+	}
+
+	public PlanComptable getPlanComptable() {
+		return this.planComptable;
+	}
+
+	public void setPlanComptable(PlanComptable planComptable) {
+		this.planComptable = planComptable;
+	}
+
+	public List<PlanComptable> getPlanComptables() {
+		return this.planComptables;
+	}
+
+	public void setPlanComptables(List<PlanComptable> planComptables) {
+		this.planComptables = planComptables;
+	}
+
+	public PlanComptable addPlanComptable(PlanComptable planComptable) {
+		getPlanComptables().add(planComptable);
+		planComptable.setPlanComptable(this);
+
+		return planComptable;
+	}
+
+	public PlanComptable removePlanComptable(PlanComptable planComptable) {
+		getPlanComptables().remove(planComptable);
+		planComptable.setPlanComptable(null);
+
+		return planComptable;
 	}
 
 }

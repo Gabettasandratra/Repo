@@ -20,14 +20,15 @@ public interface GroupeService {
 	@WebResult(name = "resultat")
 	public boolean addMembreGroupe(
 			@WebParam(name = "nomGroupe") String codeGroupe,
-			@WebParam(name = "rowIndividuel") int rowIndividuel);
+			@WebParam(name = "rowIndividuel") String codeInd);
 	@WebMethod
 	@WebResult(name = "resultat")
 	public List<GroupeXml> getAllGroupe();
 
 	@WebMethod
 	@WebResult(name = "resultat")
-	public String saveGroupe(@WebParam(name = "groupe")@XmlElement(required = true) GroupeXml request);
+	public String saveGroupe(@WebParam(name = "groupe")@XmlElement(required = true) GroupeXml request,
+			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence);
 	
 	@WebMethod
 	@WebResult(name = "resultat")

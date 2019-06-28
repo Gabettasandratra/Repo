@@ -27,9 +27,9 @@ public class UserServiceImpl implements UserService {
 	private static EntityManager em = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME).createEntityManager();
 	private static EntityTransaction transaction = em.getTransaction();
 	
+	///	Méthode pour l'authentification d'un utilisateur
 	@Override
 	public List<Acces> authentifie(String loginUser, String mdpUser) {
-		// select * from utilisateur where loginUtilisateur=? and mdpUtilisateur=?
 		List<Acces> a = new ArrayList<Acces>();	//	Instance une liste d'accès pour stocker
 												//	la liste d'accès d'un utilisateur quelconque
 		
@@ -39,13 +39,14 @@ public class UserServiceImpl implements UserService {
 		q.setParameter("param1", loginUser);
 		q.setParameter("param2", mdpUser);
 		
-		//	Instance utilisateur correspondant à la réponse de la requête précédente
-		Utilisateur ut = q.getSingleResult();
+		Utilisateur ut = new Utilisateur();
 		
 		//	Traitement à faire en fonction du résultat de la requête
 		//	Login et mot de passe valides ou non
 		System.out.println("Utilisateur ready !!");
-		if(!ut.equals(null)){
+		if((q.getSingleResult()) != null){
+			//	Instance utilisateur correspondant à la réponse de la requête précédente
+			ut = q.getSingleResult();
 			for(Acces ac : ut.getFonction().getAcces()){
 				System.out.println(ac.getTitreAcces());
 				a.add(ac);
@@ -57,31 +58,43 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
+	///	Méthode pour l'enregistrement d'un nouvel utilisateur
 	@Override
-	public boolean insertUser(String nomUser, String loginUser, String mdpUser,
-			String genreUser, String telUser, int fonctionId) {
+	public boolean insertUser(String nomUser, String loginUser, String mdpUser, String mdpConf,
+			String genreUser, String telUser, List<String> listCptCaisse, int fonctionId) {
 		//	Instance nouvel utilisateur à insérer
 		Utilisateur user = new Utilisateur();
+		List<CompteCaisse> cptCaisse = new ArrayList<CompteCaisse>();
 		
 		//	Affectation informations utilisateur
-		user.setNomUtilisateur(nomUser);
-		user.setLoginUtilisateur(loginUser);
-		user.setMdpUtilisateur(mdpUser);
-		user.setGenreUser(genreUser);
-		user.setTelUser(telUser);
-		Fonction fct = em.find(Fonction.class, fonctionId);
-		user.setFonction(fct);
-		
-		//	Insertion dans la base de données
-		System.out.println("Information utilisateur prête");
-		try{
-			transaction.begin();
-			em.persist(user);
-			transaction.commit();
-			System.out.println("Nouvel utilisateur inséré");
-			return true;
-		}catch(Exception ex){
-			System.err.println(ex.getMessage());
+		if(mdpUser.equals(mdpConf)){
+			user.setNomUtilisateur(nomUser);
+			user.setLoginUtilisateur(loginUser);
+			user.setMdpUtilisateur(mdpUser);
+			user.setGenreUser(genreUser);
+			user.setTelUser(telUser);
+			for(String a : listCptCaisse){
+				cptCaisse.add(em.find(CompteCaisse.class, a));
+			}
+			user.setCompteCaisses(cptCaisse);
+			Fonction fct = em.find(Fonction.class, fonctionId);
+			user.setFonction(fct);
+			
+			//	Insertion dans la base de données
+			System.out.println("Information utilisateur prête");
+			try{	//	Insertion résussie
+				transaction.begin();
+				em.persist(user);
+				transaction.commit();
+				System.out.println("Nouvel utilisateur inséré");
+				return true;
+			}catch(Exception ex){	//	Erreur d'insertion
+				System.err.println(ex.getMessage());
+				return false;
+			}
+		}
+		else{
+			System.out.println("Mot de passe non conforme");
 			return false;
 		}
 	}
@@ -91,53 +104,63 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
+	///	Méthode pour ouvrir un compte client
 	@Override
-	public boolean creerCompteClient(String numCompte, Date dateOuverture,
-			Date dateEcheance, double solde, String idProduitEp,
-			int individuelId, int groupeId, int userId) {
+	public boolean creerCompteClient(String dateOuverture,
+			Date dateEcheance, String idProduitEp,
+			String individuelId, String groupeId, int userId) {
 		//	Instance nouveau compte_epargne
 		CompteEpargne cpt_ep = new CompteEpargne();
 		
 		//	Insertion des informations sur le compte
-		cpt_ep.setNumCompteEp(numCompte);
 		cpt_ep.setDateOuverture(dateOuverture);
 		cpt_ep.setDateEcheance(dateEcheance);
-		cpt_ep.setSolde(solde);
 		ProduitEpargne pdt_ep = em.find(ProduitEpargne.class, idProduitEp);
 		Individuel ind = em.find(Individuel.class, individuelId);
 		Groupe grp = em.find(Groupe.class, groupeId);
 		Utilisateur ut = em.find(Utilisateur.class, userId);
-		cpt_ep.setProduitEpargne(pdt_ep);
-		cpt_ep.setIndividuel(ind);
-		cpt_ep.setGroupe(grp);
 		cpt_ep.setUtilisateur(ut);
+		cpt_ep.setProduitEpargne(pdt_ep);
+		cpt_ep.setIsActif(true);
+		if(ind != null){
+			System.out.println("Compte individuel");
+			cpt_ep.setIndividuel(ind);
+		}
+		else if(grp != null){
+			System.out.println("Compte groupe");
+			cpt_ep.setGroupe(grp);
+		}
 		
 		//	Enregistrement du compte lorsque toutes les informations nécessaires
 		//	sont valides et complètes
-		System.out.println("Information compte épargne prête");
-		
-		try{
-			transaction.begin();
-			em.persist(cpt_ep);
-			transaction.commit();
-			System.out.println("Nouveau compte épargne ouvert");
-			return true;
-		}catch(Exception ex){
-			System.err.println(ex.getMessage());
-			return false;
+		if(cpt_ep.getIndividuel() != null || cpt_ep.getGroupe() != null){
+			System.out.println("Information compte épargne prête");
+			try{
+				transaction.begin();
+				em.persist(cpt_ep);
+				transaction.commit();
+				System.out.println("Nouveau compte épargne ouvert");
+				return true;
+			}catch(Exception ex){
+				System.err.println(ex.getMessage());
+				return false;
+			}
 		}
+		else
+			return false;
 	}
 
+	///	Méthode pour faire une transaction sur un compte épargne
 	@Override
-	public boolean transactionCompte(String typeTransac, Date dateTransac,
+	public boolean transactionCompte(String typeTransac, String dateTransac,
 			double montant, String description, String pieceCompta,
 			String nomCptCaisse, String numCptEp) {
 		//	Instance de nouvelle transaction
 		TransactionEpargne trans = new TransactionEpargne();
 		
 		//	Initialisation des informations sur la transaction
-		trans.setTypeTransEp(typeTransac);
 		trans.setDateTransaction(dateTransac);
+		trans.setTypeTransEp(typeTransac);
 		trans.setMontant(montant);
 		trans.setDescription(description);
 		trans.setPièceCompta(pieceCompta);
@@ -146,26 +169,23 @@ public class UserServiceImpl implements UserService {
 		trans.setCompteCaisse(cptCaisse);
 		trans.setCompteEpargne(cptEp);
 		
-		System.out.println("Informations sur la transaction prêtes");
-		
 		//	Enregistrement de la transaction
-		try {
-			transaction.begin();
-			if(trans.getTypeTransEp().equals("DE")){
-				trans.getCompteEpargne().setSolde(trans.getCompteEpargne().getSolde() + trans.getMontant());
-				System.out.println("Dépot");
+		if(trans.getCompteEpargne() != null){
+			System.out.println("Informations sur la transaction prêtes");
+			try {
+				transaction.begin();
+				em.flush();
+				em.persist(trans);
+				transaction.commit();
+				System.out.println("Transaction réussie");
+				return true;
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				return false;
 			}
-			else if(trans.getTypeTransEp().equals("RE")){
-				trans.getCompteEpargne().setSolde(trans.getCompteEpargne().getSolde() - trans.getMontant());
-				System.out.println("Retrait");
-			}
-			em.flush();
-			em.persist(trans);
-			transaction.commit();
-			System.out.println("Transaction réussie");
-			return true;
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
+		}
+		else{
+			System.out.println("Erreur de transaction, compte épargne null");
 			return false;
 		}
 	}

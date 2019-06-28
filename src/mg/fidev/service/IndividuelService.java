@@ -19,7 +19,8 @@ import mg.fidev.xmlRequest.IndividuelXml;
 public interface IndividuelService {
 	@WebMethod
 	@WebResult(name = "resultat")
-	public String saveIndividuel(@WebParam(name = "individuel")@XmlElement(required = true) IndividuelXml request);
+	public String saveIndividuel(@WebParam(name = "individuel") @XmlElement(required = true) IndividuelXml request,
+			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence);
 	
 	@WebMethod
 	@WebResult(name = "resultat")

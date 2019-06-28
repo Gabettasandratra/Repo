@@ -1,7 +1,10 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -15,19 +18,16 @@ import java.util.List;
 public class Individuel implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	//private String codeAgence;
+
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private int rowId;
-
-	private String codeAgence;
-
+	@Column(name="codeInd")
 	private String codeClient;
 
 	@Temporal(TemporalType.DATE)
 	private Date dateInscription;
 
-	@Temporal(TemporalType.DATE)
-	private Date dateNaissance;
+	private String dateNaissance;
 
 	@Temporal(TemporalType.DATE)
 	private Date dateSortie;
@@ -87,27 +87,19 @@ public class Individuel implements Serializable {
 
 	//bi-directional many-to-one association to Groupe
 	@ManyToOne
-	@JoinColumn(name="idGroupe")
+	@JoinColumn(name="codeGrp")
 	private Groupe groupe;
 
 	public Individuel() {
 	}
 
-	public int getRowId() {
-		return this.rowId;
-	}
-
-	public void setRowId(int rowId) {
-		this.rowId = rowId;
-	}
-
-	public String getCodeAgence() {
+	/*public String getCodeAgence() {
 		return this.codeAgence;
 	}
 
 	public void setCodeAgence(String codeAgence) {
 		this.codeAgence = codeAgence;
-	}
+	}*/
 
 	public String getCodeClient() {
 		return this.codeClient;
@@ -125,12 +117,13 @@ public class Individuel implements Serializable {
 		this.dateInscription = dateInscription;
 	}
 
-	public Date getDateNaissance() {
+	public String getDateNaissance() {
 		return this.dateNaissance;
 	}
 
-	public void setDateNaissance(Date dateNaissance) {
-		this.dateNaissance = dateNaissance;
+	public void setDateNaissance(String dateNaissance) {
+		LocalDate dtUtil = LocalDate.parse(dateNaissance);
+		this.dateNaissance = dtUtil.toString();
 	}
 
 	public Date getDateSortie() {

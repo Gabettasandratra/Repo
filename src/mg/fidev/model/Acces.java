@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 import java.util.List;
 
 
@@ -11,6 +17,9 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Acces.findAll", query="SELECT a FROM Acces a")
+@XmlRootElement
+@XmlType
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Acces implements Serializable {
 	private static final long serialVersionUID = 1L;
 

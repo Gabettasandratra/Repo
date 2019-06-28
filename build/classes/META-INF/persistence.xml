@@ -6,7 +6,6 @@
 		<class>mg.fidev.model.Agence</class>
 		<class>mg.fidev.model.CatEpargne</class>
 		<class>mg.fidev.model.CompteCaisse</class>
-		<class>mg.fidev.model.CompteEpargne</class>
 		<class>mg.fidev.model.Docidentite</class>
 		<class>mg.fidev.model.Entreprise</class>
 		<class>mg.fidev.model.FichierDocidentite</class>
@@ -18,10 +17,13 @@
 		<class>mg.fidev.model.Groupe</class>
 		<class>mg.fidev.model.Individuel</class>
 		<class>mg.fidev.model.PlanComptable</class>
-		<class>mg.fidev.model.ProduitEpargne</class>
 		<class>mg.fidev.model.TransactionEpargne</class>
 		<class>mg.fidev.model.TypeEpargne</class>
 		<class>mg.fidev.model.Utilisateur</class>
+		<class>mg.fidev.model.ConfigInteretProdEp</class>
+		<class>mg.fidev.model.ConfigProdEp</class>
+		<class>mg.fidev.model.ProduitEpargne</class>
+		<class>mg.fidev.model.CompteEpargne</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/microfinance_v1"/>
 			<property name="javax.persistence.jdbc.user" value="root"/>

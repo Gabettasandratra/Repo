@@ -13,6 +13,7 @@ import mg.fidev.model.Adresse;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
 import mg.fidev.service.GroupeService;
+import mg.fidev.utils.CodeIncrement;
 import mg.fidev.xmlRequest.AdresseXml;
 import mg.fidev.xmlRequest.GroupeXml;
 import mg.fidev.xmlRequest.IndividuelXml;
@@ -25,7 +26,7 @@ public class GroupeServiceImpl implements GroupeService {
 	private static EntityTransaction transaction = em.getTransaction();
 
 	@Override
-	public boolean addMembreGroupe(String nomGroupe, int rowIndividuel) {
+	public boolean addMembreGroupe(String nomGroupe, String codeInd) {
 		// Recupere le groupe
 		TypedQuery<Groupe> q1 = em.createQuery(
 				"select g from Groupe g where g.nomGroupe = :nomGroupe",
@@ -36,9 +37,9 @@ public class GroupeServiceImpl implements GroupeService {
 		// Recupere l'individuel
 		TypedQuery<Individuel> q2 = em
 				.createQuery(
-						"select i from Individuel i where i.rowId = :rowIndividuel",
+						"select i from Individuel i where i.codeClient = :codeInd",
 						Individuel.class);
-		q2.setParameter("rowIndividuel", rowIndividuel);
+		q2.setParameter("codeInd", codeInd);
 		Individuel individuel = q2.getSingleResult();
 
 		// on ajoute dans le groupe
@@ -60,7 +61,7 @@ public class GroupeServiceImpl implements GroupeService {
 		for (Groupe g : results) {
 			GroupeXml groupe = new GroupeXml();
 			groupe.setCodeClient(g.getCodeClient());
-			groupe.setCodeAgence(g.getCodeAgence());
+			//groupe.setCodeAgence(g.getCodeAgence());
 			groupe.setNomGroupe(g.getNomGroupe());
 			groupe.setNumeroMobile(g.getNumeroMobile());
 			groupe.setEmail(g.getEmail());
@@ -71,9 +72,10 @@ public class GroupeServiceImpl implements GroupeService {
 	}
 
 	@Override
-	public String saveGroupe(GroupeXml request) {
+	public String saveGroupe(GroupeXml request, String codeAgence) {
 		Groupe groupe = new Groupe();
-		groupe.setCodeAgence(request.getCodeAgence());
+		//groupe.setCodeAgence(request.getCodeAgence());
+		groupe.setCodeClient(CodeIncrement.getCodeGrp(em, codeAgence));
 		groupe.setNomGroupe(request.getNomGroupe());
 		groupe.setNumeroMobile(request.getNumeroMobile());
 		groupe.setEmail(request.getEmail());
@@ -112,7 +114,6 @@ public class GroupeServiceImpl implements GroupeService {
 		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
 		for (Individuel i : membre) {
 			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setRowId(i.getRowId());
 			individuXml.setCodeClient(i.getCodeClient());
 			individuXml.setNomClient(i.getNomClient());
 			individuXml.setPrenomClient(i.getPrenomClient());
@@ -138,7 +139,6 @@ public class GroupeServiceImpl implements GroupeService {
 		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
 		for (Individuel i : results) {
 			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setRowId(i.getRowId());
 			individuXml.setCodeClient(i.getCodeClient());
 			individuXml.setNomClient(i.getNomClient());
 			individuXml.setPrenomClient(i.getPrenomClient());
@@ -147,7 +147,7 @@ public class GroupeServiceImpl implements GroupeService {
 			individuXml.setNumeroMobile(i.getNumeroMobile());
 			individuXml.setDateInscription(i.getDateInscription());
 			individuXml.setDateNaissance(i.getDateNaissance());
-			individuXml.setCodeAgence(i.getCodeAgence());
+			//individuXml.setCodeAgence(i.getCodeAgence());
 			individuXml.setTitre(i.getTitre());
 			individuels.add(individuXml);
 		}

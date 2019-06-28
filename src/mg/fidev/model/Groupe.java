@@ -1,7 +1,9 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+
 import java.util.Date;
 import java.util.List;
 
@@ -15,12 +17,10 @@ import java.util.List;
 public class Groupe implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	//private String codeAgence;
+
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private int rowId;
-
-	private String codeAgence;
-
+	@Column(name="codeGrp")
 	private String codeClient;
 
 	@Temporal(TemporalType.DATE)
@@ -37,7 +37,7 @@ public class Groupe implements Serializable {
 	private List<CompteEpargne> compteEpargnes;
 
 	//bi-directional many-to-one association to Adresse
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="idAdresse")
 	private Adresse adresse;
 
@@ -48,21 +48,13 @@ public class Groupe implements Serializable {
 	public Groupe() {
 	}
 
-	public int getRowId() {
-		return this.rowId;
-	}
-
-	public void setRowId(int rowId) {
-		this.rowId = rowId;
-	}
-
-	public String getCodeAgence() {
+	/*public String getCodeAgence() {
 		return this.codeAgence;
 	}
 
 	public void setCodeAgence(String codeAgence) {
 		this.codeAgence = codeAgence;
-	}
+	}*/
 
 	public String getCodeClient() {
 		return this.codeClient;

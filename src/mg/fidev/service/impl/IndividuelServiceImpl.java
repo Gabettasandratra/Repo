@@ -17,6 +17,7 @@ import mg.fidev.model.Adresse;
 import mg.fidev.model.Docidentite;
 import mg.fidev.model.Individuel;
 import mg.fidev.service.IndividuelService;
+import mg.fidev.utils.CodeIncrement;
 import mg.fidev.xmlRequest.AdresseXml;
 import mg.fidev.xmlRequest.DocidentiteXml;
 import mg.fidev.xmlRequest.IndividuelXml;
@@ -29,18 +30,19 @@ public class IndividuelServiceImpl implements IndividuelService {
 	private static EntityTransaction transaction = em.getTransaction();
 
 	@Override
-	public String saveIndividuel(IndividuelXml request) {
+	public String saveIndividuel(IndividuelXml request, String codeAgence) {
 		/* CETTE OPERATION CONSISTE A TRANSFORMER L'OBJET REQUEST EN PERSISTENCE */
 		/* INDIVIDUEL A SUAVEGARDER */
 		Individuel individu = new Individuel();
 		individu.setNomClient(request.getNomClient());
+		individu.setCodeClient(CodeIncrement.getCodeInd(em, codeAgence));
 		individu.setPrenomClient(request.getPrenomClient());
 		individu.setSexe(request.getSexe());
 		individu.setEmail(request.getEmail());
 		individu.setNumeroMobile(request.getNumeroMobile());
 		individu.setDateInscription(request.getDateInscription());
 		individu.setDateNaissance(request.getDateNaissance());
-		individu.setCodeAgence(request.getCodeAgence());
+		//individu.setCodeAgence(request.getCodeAgence());
 		individu.setTitre(request.getTitre());
 
 		/* config */
@@ -113,7 +115,6 @@ public class IndividuelServiceImpl implements IndividuelService {
 		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
 		for (Individuel i : results) {
 			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setRowId(i.getRowId());
 			individuXml.setCodeClient(i.getCodeClient());
 			individuXml.setNomClient(i.getNomClient());
 			individuXml.setPrenomClient(i.getPrenomClient());
@@ -122,7 +123,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 			individuXml.setNumeroMobile(i.getNumeroMobile());
 			individuXml.setDateInscription(i.getDateInscription());
 			individuXml.setDateNaissance(i.getDateNaissance());
-			individuXml.setCodeAgence(i.getCodeAgence());
+			//individuXml.setCodeAgence(i.getCodeAgence());
 			individuXml.setTitre(i.getTitre());
 
 			individuXml.setEstMembreGroupe(i.getEstMembreGroupe());
@@ -147,7 +148,6 @@ public class IndividuelServiceImpl implements IndividuelService {
 		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
 		for (Individuel i : results) {
 			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setRowId(i.getRowId());
 			individuXml.setCodeClient(i.getCodeClient());
 			individuXml.setNomClient(i.getNomClient());
 			individuXml.setPrenomClient(i.getPrenomClient());
@@ -156,7 +156,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 			individuXml.setNumeroMobile(i.getNumeroMobile());
 			individuXml.setDateInscription(i.getDateInscription());
 			individuXml.setDateNaissance(i.getDateNaissance());
-			individuXml.setCodeAgence(i.getCodeAgence());
+			//individuXml.setCodeAgence(i.getCodeAgence());
 			individuXml.setTitre(i.getTitre());
 
 			individuXml.setEstMembreGroupe(i.getEstMembreGroupe());

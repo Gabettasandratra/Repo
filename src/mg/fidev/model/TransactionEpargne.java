@@ -2,7 +2,6 @@ package mg.fidev.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
-import java.util.Date;
 
 
 /**
@@ -20,9 +19,8 @@ public class TransactionEpargne implements Serializable {
 	@Column(name="id_transaction_ep")
 	private int idTransactionEp;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="date_transaction")
-	private Date dateTransaction;
+	private String dateTransaction;
 
 	private String description;
 
@@ -30,6 +28,8 @@ public class TransactionEpargne implements Serializable {
 
 	@Column(name="pièce_compta")
 	private String pièceCompta;
+
+	private double solde;
 
 	@Column(name="type_trans_ep")
 	private String typeTransEp;
@@ -55,11 +55,11 @@ public class TransactionEpargne implements Serializable {
 		this.idTransactionEp = idTransactionEp;
 	}
 
-	public Date getDateTransaction() {
+	public String getDateTransaction() {
 		return this.dateTransaction;
 	}
 
-	public void setDateTransaction(Date dateTransaction) {
+	public void setDateTransaction(String dateTransaction) {
 		this.dateTransaction = dateTransaction;
 	}
 
@@ -87,6 +87,14 @@ public class TransactionEpargne implements Serializable {
 		this.pièceCompta = pièceCompta;
 	}
 
+	public double getSolde() {
+		return this.solde;
+	}
+
+	public void setSolde(double solde) {
+		this.solde = solde;
+	}
+
 	public String getTypeTransEp() {
 		return this.typeTransEp;
 	}
@@ -108,7 +116,41 @@ public class TransactionEpargne implements Serializable {
 	}
 
 	public void setCompteEpargne(CompteEpargne compteEpargne) {
-		this.compteEpargne = compteEpargne;
+		if(compteEpargne.getSolde() == 0){
+			if(this.getTypeTransEp().equals("OU")){
+				compteEpargne.setSolde(montant);
+				if(compteEpargne.getSolde() != 0){
+					this.setMontant(montant);
+					this.setSolde(montant);
+					this.compteEpargne = compteEpargne;
+				}
+				else{
+					System.err.println("Erreur de transaction");
+				}
+			}
+		}
+		else if(this.getTypeTransEp().equals("DE")){
+			compteEpargne.setSolde(compteEpargne.getSolde() + montant);
+			if(compteEpargne.getSolde() != 0){
+				this.setSolde(compteEpargne.getSolde());
+				this.setMontant(montant);
+				this.compteEpargne = compteEpargne;
+			}
+			else{
+				System.err.println("Erreur de transaction");
+			}
+		}
+		else if(this.getTypeTransEp().equals("RE")){
+			compteEpargne.setSolde(compteEpargne.getSolde() - montant);
+			if(compteEpargne.getSolde() != 0){
+				this.setSolde(compteEpargne.getSolde());
+				this.setMontant(montant);
+				this.compteEpargne = compteEpargne;
+			}
+			else{
+				System.err.println("Erreur de transaction");
+			}
+		}
 	}
 
 }

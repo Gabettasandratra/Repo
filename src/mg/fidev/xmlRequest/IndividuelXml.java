@@ -15,11 +15,11 @@ public class IndividuelXml implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	@XmlElement(name = "rowId", required = false, nillable = true)
+	/*@XmlElement(name = "rowId", required = false, nillable = true)
 	private int rowId;
 
 	@XmlElement(name = "codeAgence", required = true)
-	private String codeAgence;
+	private String codeAgence;*/
 
 	@XmlElement(name = "codeClient", required = false, nillable = true)
 	private String codeClient;
@@ -28,7 +28,7 @@ public class IndividuelXml implements Serializable {
 	private Date dateInscription;
 
 	@XmlElement(name = "dateNaissance", required = true)
-	private Date dateNaissance;
+	private String dateNaissance;
 
 	@XmlElement(name = "dateSortie", required = false, nillable = true)
 	private Date dateSortie;
@@ -88,7 +88,7 @@ public class IndividuelXml implements Serializable {
 	public IndividuelXml() {
 	}
 
-	public int getRowId() {
+	/*public int getRowId() {
 		return rowId;
 	}
 
@@ -102,7 +102,7 @@ public class IndividuelXml implements Serializable {
 
 	public void setCodeAgence(String codeAgence) {
 		this.codeAgence = codeAgence;
-	}
+	}*/
 
 	public String getCodeClient() {
 		return codeClient;
@@ -120,12 +120,12 @@ public class IndividuelXml implements Serializable {
 		this.dateInscription = dateInscription;
 	}
 
-	public Date getDateNaissance() {
+	public String getDateNaissance() {
 		return dateNaissance;
 	}
 
-	public void setDateNaissance(Date dateNaissance) {
-		this.dateNaissance = dateNaissance;
+	public void setDateNaissance(String string) {
+		this.dateNaissance = string;
 	}
 
 	public Date getDateSortie() {
