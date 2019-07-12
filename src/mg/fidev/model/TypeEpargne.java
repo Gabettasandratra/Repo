@@ -16,6 +16,7 @@ public class TypeEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="nom_type_epargne")
 	private String nomTypeEpargne;
 

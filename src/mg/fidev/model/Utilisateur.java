@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.List;
 
 
@@ -11,6 +17,8 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Utilisateur.findAll", query="SELECT u FROM Utilisateur u")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Utilisateur implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -30,6 +38,7 @@ public class Utilisateur implements Serializable {
 
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 
 	//bi-directional many-to-many association to Agence
@@ -43,6 +52,7 @@ public class Utilisateur implements Serializable {
 			@JoinColumn(name="AgencecodeAgence")
 			}
 		)
+	@XmlTransient
 	private List<Agence> agences;
 
 	//bi-directional many-to-many association to CompteCaisse
@@ -56,12 +66,29 @@ public class Utilisateur implements Serializable {
 			@JoinColumn(name="Compte_caissenom_cpt_caisse")
 			}
 		)
+	@XmlTransient
 	private List<CompteCaisse> compteCaisses;
 
 	//bi-directional many-to-one association to Fonction
 	@ManyToOne
 	@JoinColumn(name="fonctionId")
+	@XmlTransient
 	private Fonction fonction;
+
+	//bi-directional many-to-one association to CommissionCredit
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<CommissionCredit> commissionCredits;
+
+	//bi-directional many-to-one association to Decaissement
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<Decaissement> decaissements;
+
+	//bi-directional many-to-one association to Remboursement
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<Remboursement> remboursements;
 
 	public Utilisateur() {
 	}
@@ -158,6 +185,72 @@ public class Utilisateur implements Serializable {
 
 	public void setFonction(Fonction fonction) {
 		this.fonction = fonction;
+	}
+
+	public List<CommissionCredit> getCommissionCredits() {
+		return this.commissionCredits;
+	}
+
+	public void setCommissionCredits(List<CommissionCredit> commissionCredits) {
+		this.commissionCredits = commissionCredits;
+	}
+
+	public CommissionCredit addCommissionCredit(CommissionCredit commissionCredit) {
+		getCommissionCredits().add(commissionCredit);
+		commissionCredit.setUtilisateur(this);
+
+		return commissionCredit;
+	}
+
+	public CommissionCredit removeCommissionCredit(CommissionCredit commissionCredit) {
+		getCommissionCredits().remove(commissionCredit);
+		commissionCredit.setUtilisateur(null);
+
+		return commissionCredit;
+	}
+
+	public List<Decaissement> getDecaissements() {
+		return this.decaissements;
+	}
+
+	public void setDecaissements(List<Decaissement> decaissements) {
+		this.decaissements = decaissements;
+	}
+
+	public Decaissement addDecaissement(Decaissement decaissement) {
+		getDecaissements().add(decaissement);
+		decaissement.setUtilisateur(this);
+
+		return decaissement;
+	}
+
+	public Decaissement removeDecaissement(Decaissement decaissement) {
+		getDecaissements().remove(decaissement);
+		decaissement.setUtilisateur(null);
+
+		return decaissement;
+	}
+
+	public List<Remboursement> getRemboursements() {
+		return this.remboursements;
+	}
+
+	public void setRemboursements(List<Remboursement> remboursements) {
+		this.remboursements = remboursements;
+	}
+
+	public Remboursement addRemboursement(Remboursement remboursement) {
+		getRemboursements().add(remboursement);
+		remboursement.setUtilisateur(this);
+
+		return remboursement;
+	}
+
+	public Remboursement removeRemboursement(Remboursement remboursement) {
+		getRemboursements().remove(remboursement);
+		remboursement.setUtilisateur(null);
+
+		return remboursement;
 	}
 
 }

@@ -3,8 +3,12 @@ package mg.fidev.model;
 import java.io.Serializable;
 
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -15,98 +19,125 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Individuel.findAll", query="SELECT i FROM Individuel i")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "Individuel", namespace = "http://individuel.fidev.mg")
 public class Individuel implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	//private String codeAgence;
-
 	@Id
-	@Column(name="codeInd")
-	private String codeClient;
+	@XmlElement
+	private String codeInd;
 
 	@Temporal(TemporalType.DATE)
+	@XmlElement
 	private Date dateInscription;
 
+	@XmlElement
 	private String dateNaissance;
 
 	@Temporal(TemporalType.DATE)
+	@XmlElement
 	private Date dateSortie;
 
+	@XmlElement
 	private String email;
 
+	@XmlElement
 	private boolean estClientIndividuel;
 
+	@XmlElement
 	private boolean estGarant;
 
+	@XmlElement
 	private boolean estMembreGroupe;
 
+	@XmlElement
 	private String etatCivil;
 
+	@XmlElement
 	private String langue;
 
+	@XmlElement
 	private String lieuNaissance;
 
+	@XmlElement
 	private int nbEnfant;
 
+	@XmlElement
 	private int nbPersCharge;
 
+	@XmlElement
 	private String niveauEtude;
 
+	@XmlElement
 	private String nomClient;
 
+	@XmlElement
 	private String nomConjoint;
 
+	@XmlElement
+	private String numDmdCrdtAGarantir;
+
+	@XmlElement
 	private String numeroMobile;
 
+	@XmlElement
 	private String parentAdresse;
 
+	@XmlElement
 	private String parentNom;
 
+	@XmlElement
 	private String prenomClient;
 
+	@XmlElement
 	private String profession;
 
+	@XmlElement
 	private String raisonSortie;
 
+	@XmlElement
 	private String sexe;
 
+	@XmlElement
 	private String titre;
 
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="individuel")
+	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
+
+	//bi-directional many-to-one association to DemandeCredit
+	@OneToMany(mappedBy="individuel")
+	@XmlTransient
+	private List<DemandeCredit> demandeCredits;
 
 	//bi-directional many-to-one association to Docidentite
 	@OneToMany(mappedBy="individuel")
+	@XmlTransient
 	private List<Docidentite> docidentites;
 
 	//bi-directional many-to-one association to Adresse
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="idAdresse")
+	@XmlTransient
 	private Adresse adresse;
 
 	//bi-directional many-to-one association to Groupe
 	@ManyToOne
 	@JoinColumn(name="codeGrp")
+	@XmlTransient
 	private Groupe groupe;
 
 	public Individuel() {
 	}
 
-	/*public String getCodeAgence() {
-		return this.codeAgence;
+	public String getCodeInd() {
+		return this.codeInd;
 	}
 
-	public void setCodeAgence(String codeAgence) {
-		this.codeAgence = codeAgence;
-	}*/
-
-	public String getCodeClient() {
-		return this.codeClient;
-	}
-
-	public void setCodeClient(String codeClient) {
-		this.codeClient = codeClient;
+	public void setCodeInd(String codeInd) {
+		this.codeInd = codeInd;
 	}
 
 	public Date getDateInscription() {
@@ -122,8 +153,7 @@ public class Individuel implements Serializable {
 	}
 
 	public void setDateNaissance(String dateNaissance) {
-		LocalDate dtUtil = LocalDate.parse(dateNaissance);
-		this.dateNaissance = dtUtil.toString();
+		this.dateNaissance = dateNaissance;
 	}
 
 	public Date getDateSortie() {
@@ -230,6 +260,14 @@ public class Individuel implements Serializable {
 		this.nomConjoint = nomConjoint;
 	}
 
+	public String getNumDmdCrdtAGarantir() {
+		return this.numDmdCrdtAGarantir;
+	}
+
+	public void setNumDmdCrdtAGarantir(String numDmdCrdtAGarantir) {
+		this.numDmdCrdtAGarantir = numDmdCrdtAGarantir;
+	}
+
 	public String getNumeroMobile() {
 		return this.numeroMobile;
 	}
@@ -314,6 +352,28 @@ public class Individuel implements Serializable {
 		compteEpargne.setIndividuel(null);
 
 		return compteEpargne;
+	}
+
+	public List<DemandeCredit> getDemandeCredits() {
+		return this.demandeCredits;
+	}
+
+	public void setDemandeCredits(List<DemandeCredit> demandeCredits) {
+		this.demandeCredits = demandeCredits;
+	}
+
+	public DemandeCredit addDemandeCredit(DemandeCredit demandeCredit) {
+		getDemandeCredits().add(demandeCredit);
+		demandeCredit.setIndividuel(this);
+
+		return demandeCredit;
+	}
+
+	public DemandeCredit removeDemandeCredit(DemandeCredit demandeCredit) {
+		getDemandeCredits().remove(demandeCredit);
+		demandeCredit.setIndividuel(null);
+
+		return demandeCredit;
 	}
 
 	public List<Docidentite> getDocidentites() {

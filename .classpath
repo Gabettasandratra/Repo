@@ -40,5 +40,12 @@
 	<classpathentry kind="lib" path="C:/Users/STAGE/Documents/FIDEV-planing/Sandratra &amp; Miel/eclipselink-2.5.1.v20130918-f2b9fc5/eclipselink/jlib/moxy/javax.mail_1.4.0.v201005080615.jar"/>
 	<classpathentry kind="lib" path="C:/Users/STAGE/Documents/FIDEV-planing/Sandratra &amp; Miel/eclipselink-2.5.1.v20130918-f2b9fc5/eclipselink/jlib/moxy/javax.xml.bind_2.2.0.v201105210648.jar"/>
 	<classpathentry kind="lib" path="C:/Users/STAGE/Documents/FIDEV-planing/Sandratra &amp; Miel/eclipselink-2.5.1.v20130918-f2b9fc5/eclipselink/jlib/moxy/javax.xml.stream_1.0.1.v201004272200.jar"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/httpRestUtils"/>
+	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/json-20180813.jar"/>
+	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/jersey.jar"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/javax.ws.rs-api-2.1.1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jaxrs-api.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/javax.ws.rs.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

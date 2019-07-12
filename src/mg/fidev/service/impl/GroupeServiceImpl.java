@@ -60,7 +60,7 @@ public class GroupeServiceImpl implements GroupeService {
 		List<GroupeXml> groups = new ArrayList<GroupeXml>();
 		for (Groupe g : results) {
 			GroupeXml groupe = new GroupeXml();
-			groupe.setCodeClient(g.getCodeClient());
+			groupe.setCodeClient(g.getCodeGrp());
 			//groupe.setCodeAgence(g.getCodeAgence());
 			groupe.setNomGroupe(g.getNomGroupe());
 			groupe.setNumeroMobile(g.getNumeroMobile());
@@ -75,7 +75,7 @@ public class GroupeServiceImpl implements GroupeService {
 	public String saveGroupe(GroupeXml request, String codeAgence) {
 		Groupe groupe = new Groupe();
 		//groupe.setCodeAgence(request.getCodeAgence());
-		groupe.setCodeClient(CodeIncrement.getCodeGrp(em, codeAgence));
+		groupe.setCodeGrp(CodeIncrement.getCodeGrp(em, codeAgence));
 		groupe.setNomGroupe(request.getNomGroupe());
 		groupe.setNumeroMobile(request.getNumeroMobile());
 		groupe.setEmail(request.getEmail());
@@ -114,7 +114,7 @@ public class GroupeServiceImpl implements GroupeService {
 		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
 		for (Individuel i : membre) {
 			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setCodeClient(i.getCodeClient());
+			individuXml.setCodeClient(i.getCodeInd());
 			individuXml.setNomClient(i.getNomClient());
 			individuXml.setPrenomClient(i.getPrenomClient());
 			individuXml.setEmail(i.getEmail());
@@ -139,7 +139,7 @@ public class GroupeServiceImpl implements GroupeService {
 		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
 		for (Individuel i : results) {
 			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setCodeClient(i.getCodeClient());
+			individuXml.setCodeClient(i.getCodeInd());
 			individuXml.setNomClient(i.getNomClient());
 			individuXml.setPrenomClient(i.getPrenomClient());
 			individuXml.setSexe(i.getSexe());

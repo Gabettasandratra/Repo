@@ -2,10 +2,27 @@
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 	<persistence-unit name="FIDEV-Repository" transaction-type="RESOURCE_LOCAL">
 		<class>mg.fidev.model.Acces</class>
+		<class>mg.fidev.model.Account</class>
 		<class>mg.fidev.model.Adresse</class>
 		<class>mg.fidev.model.Agence</class>
+		<class>mg.fidev.model.Calpaiementdue</class>
 		<class>mg.fidev.model.CatEpargne</class>
+		<class>mg.fidev.model.CommissionCredit</class>
 		<class>mg.fidev.model.CompteCaisse</class>
+		<class>mg.fidev.model.CompteEpargne</class>
+		<class>mg.fidev.model.CompteFerme</class>
+		<class>mg.fidev.model.ConfigCredit</class>
+		<class>mg.fidev.model.ConfigCreditIndividuel</class>
+		<class>mg.fidev.model.ConfigFraisCredit</class>
+		<class>mg.fidev.model.ConfigGarantieCredit</class>
+		<class>mg.fidev.model.ConfigGeneralCredit</class>
+		<class>mg.fidev.model.ConfigGlCredit</class>
+		<class>mg.fidev.model.ConfigGlEpargne</class>
+		<class>mg.fidev.model.ConfigInteretProdEp</class>
+		<class>mg.fidev.model.ConfigPenaliteCredit</class>
+		<class>mg.fidev.model.ConfigProdEp</class>
+		<class>mg.fidev.model.Decaissement</class>
+		<class>mg.fidev.model.DemandeCredit</class>
 		<class>mg.fidev.model.Docidentite</class>
 		<class>mg.fidev.model.Entreprise</class>
 		<class>mg.fidev.model.FichierDocidentite</class>
@@ -14,16 +31,17 @@
 		<class>mg.fidev.model.FichierRegiongeo</class>
 		<class>mg.fidev.model.FichierTitre</class>
 		<class>mg.fidev.model.Fonction</class>
+		<class>mg.fidev.model.GarantieCredit</class>
 		<class>mg.fidev.model.Groupe</class>
 		<class>mg.fidev.model.Individuel</class>
 		<class>mg.fidev.model.PlanComptable</class>
+		<class>mg.fidev.model.ProduitCredit</class>
+		<class>mg.fidev.model.ProduitEpargne</class>
+		<class>mg.fidev.model.RembMontant</class>
+		<class>mg.fidev.model.Remboursement</class>
 		<class>mg.fidev.model.TransactionEpargne</class>
 		<class>mg.fidev.model.TypeEpargne</class>
 		<class>mg.fidev.model.Utilisateur</class>
-		<class>mg.fidev.model.ConfigInteretProdEp</class>
-		<class>mg.fidev.model.ConfigProdEp</class>
-		<class>mg.fidev.model.ProduitEpargne</class>
-		<class>mg.fidev.model.CompteEpargne</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/microfinance_v1"/>
 			<property name="javax.persistence.jdbc.user" value="root"/>

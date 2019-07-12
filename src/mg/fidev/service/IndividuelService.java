@@ -11,6 +11,8 @@ import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.ParameterStyle;
 import javax.xml.bind.annotation.XmlElement;
 
+import mg.fidev.model.Adresse;
+import mg.fidev.model.Docidentite;
 import mg.fidev.model.Individuel;
 import mg.fidev.xmlRequest.IndividuelXml;
 
@@ -21,6 +23,13 @@ public interface IndividuelService {
 	@WebResult(name = "resultat")
 	public String saveIndividuel(@WebParam(name = "individuel") @XmlElement(required = true) IndividuelXml request,
 			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence);
+	
+	@WebMethod
+	@WebResult(name = "resultat")
+	public String insertIndividuel(@WebParam(name = "individuel") @XmlElement(required = true) Individuel individuel,
+			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence,
+			@WebParam(name = "docIdentite") @XmlElement(required = true) Docidentite docIdentite,
+			@WebParam(name = "adresse") @XmlElement(required = true) Adresse adresse);
 	
 	@WebMethod
 	@WebResult(name = "resultat")

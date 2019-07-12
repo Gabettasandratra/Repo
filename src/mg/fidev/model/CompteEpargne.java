@@ -3,6 +3,10 @@ package mg.fidev.model;
 import java.io.Serializable;
 
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -17,22 +21,29 @@ import java.util.List;
 @Entity
 @Table(name="compte_epargne")
 @NamedQuery(name="CompteEpargne.findAll", query="SELECT c FROM CompteEpargne c")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement
 public class CompteEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="num_compte_ep")
+	@XmlElement
 	private String numCompteEp;
 
 	@Temporal(TemporalType.DATE)
 	@Column(name="date_echeance")
+	@XmlElement
 	private Date dateEcheance;
 
 	@Column(name="date_ouverture")
+	@XmlElement
 	private String dateOuverture;
 
+	@XmlElement
 	private boolean isActif;
 
+	@XmlElement
 	private double solde;
 
 	//bi-directional many-to-one association to Groupe
@@ -54,6 +65,10 @@ public class CompteEpargne implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="UtilisateuridUtilisateur")
 	private Utilisateur utilisateur;
+
+	//bi-directional many-to-one association to CompteFerme
+	@OneToMany(mappedBy="compteEpargne")
+	private List<CompteFerme> compteFermes;
 
 	//bi-directional many-to-one association to TransactionEpargne
 	@OneToMany(mappedBy="compteEpargne")
@@ -83,8 +98,8 @@ public class CompteEpargne implements Serializable {
 	}
 
 	public void setDateOuverture(String dateOuverture) {
-		LocalDate date = LocalDate.parse(dateOuverture);
-		this.dateOuverture = date.toString();
+		LocalDate dt = LocalDate.parse(dateOuverture);
+		this.dateOuverture = dt.toString();
 	}
 
 	public boolean getIsActif() {
@@ -101,27 +116,26 @@ public class CompteEpargne implements Serializable {
 
 	public void setSolde(double solde) {
 		ConfigInteretProdEp confIntEp = this.getProduitEpargne().getConfigInteretProdEp();
-		double soldeMinGrp = this.getProduitEpargne().getConfigInteretProdEp().getSoldeMinGrp();
-		if(this.getIndividuel() != null){
-			if(confIntEp.getSoldeMinInd() > solde){
-				System.err.println("Solde minimum de ce produit pour un client individuel : " +
-						confIntEp.getSoldeMinInd());
+		if(this.getIsActif()){
+			if(this.getIndividuel() != null){
+				if(confIntEp.getSoldeMinInd() > solde){
+					System.err.println("Solde minimum de ce produit pour un client individuel : " +
+							confIntEp.getSoldeMinInd());
+				}
+				else
+					this.solde = solde;
 			}
-			else{
-				System.out.println("Solde accepté; client individuel");
-				this.solde = solde;
-			}
-		}
-		else if(this.getGroupe() != null){
-			if(soldeMinGrp > solde){
-				System.err.println("Solde  minimum de ce produit pour un client groupe : " +
-			soldeMinGrp);
-			}
-			else{
-				System.out.println("Solde accepté; client groupe");
-				this.solde = solde;
+			else if(this.getGroupe() != null){
+				if(confIntEp.getSoldeMinGrp() > solde){
+					System.err.println("Solde  minimum de ce produit pour un client groupe : " +
+				confIntEp.getSoldeMinGrp());
+				}
+				else
+					this.solde = solde;
 			}
 		}
+		else
+			System.err.println("Compte inactif");
 	}
 
 	public Groupe getGroupe() {
@@ -130,11 +144,10 @@ public class CompteEpargne implements Serializable {
 
 	public void setGroupe(Groupe groupe) {
 		if(groupe != null){
-			this.setNumCompteEp(groupe.getCodeClient() + "/" + this.getProduitEpargne().getIdProdEpargne());
+			System.out.println("Information groupe complète");
+			this.setNumCompteEp(groupe.getCodeGrp() + "/" + this.getProduitEpargne().getIdProdEpargne());
 			this.groupe = groupe;
 		}
-		else
-			System.err.println("Groupe vide");
 	}
 
 	public Individuel getIndividuel() {
@@ -142,20 +155,20 @@ public class CompteEpargne implements Serializable {
 	}
 
 	public void setIndividuel(Individuel individuel) {
-		int minAge = this.getProduitEpargne().getConfigProdEp().getAgeMinCpt();
+		ConfigProdEp confEp = this.getProduitEpargne().getConfigProdEp();
+		int minAge = confEp.getAgeMinCpt();
 		if(individuel != null){
 			LocalDate naissanceInd = LocalDate.parse(individuel.getDateNaissance());
 			Period period = Period.between(naissanceInd, LocalDate.parse(dateOuverture));
 			if(period.getYears() < minAge){
-				System.err.println("Age minimum requise pour l'ouverture de ce compte : "+minAge+ "\n");
+				System.err.println("Age minimum requise pour l'ouverture de ce compte : "+minAge);
 			}
 			else{
-				this.setNumCompteEp(individuel.getCodeClient() + "/" + this.getProduitEpargne().getIdProdEpargne());
+				System.out.println("Information client individuel complète");
+				this.setNumCompteEp(individuel.getCodeInd() + "/" + this.getProduitEpargne().getIdProdEpargne());
 				this.individuel = individuel;
 			}
 		}
-		else
-			System.err.println("Individuel vide");
 	}
 
 	public ProduitEpargne getProduitEpargne() {
@@ -172,6 +185,28 @@ public class CompteEpargne implements Serializable {
 
 	public void setUtilisateur(Utilisateur utilisateur) {
 		this.utilisateur = utilisateur;
+	}
+
+	public List<CompteFerme> getCompteFermes() {
+		return this.compteFermes;
+	}
+
+	public void setCompteFermes(List<CompteFerme> compteFermes) {
+		this.compteFermes = compteFermes;
+	}
+
+	public CompteFerme addCompteFerme(CompteFerme compteFerme) {
+		getCompteFermes().add(compteFerme);
+		compteFerme.setCompteEpargne(this);
+
+		return compteFerme;
+	}
+
+	public CompteFerme removeCompteFerme(CompteFerme compteFerme) {
+		getCompteFermes().remove(compteFerme);
+		compteFerme.setCompteEpargne(null);
+
+		return compteFerme;
 	}
 
 	public List<TransactionEpargne> getTransactionEpargnes() {

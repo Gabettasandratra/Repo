@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import java.util.List;
@@ -39,21 +40,31 @@ public class ProduitEpargne implements Serializable {
 
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="produitEpargne")
+	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 
+	//bi-directional many-to-one association to ConfigGlEpargne
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configGLepId")
+	@XmlTransient
+	private ConfigGlEpargne configGlEpargne;
+
 	//bi-directional many-to-one association to ConfigInteretProdEp
-	@ManyToOne(cascade = CascadeType.PERSIST)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configIntProId")
+	@XmlTransient
 	private ConfigInteretProdEp configInteretProdEp;
 
 	//bi-directional many-to-one association to ConfigProdEp
-	@ManyToOne(cascade = CascadeType.PERSIST)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configProdId")
+	@XmlTransient
 	private ConfigProdEp configProdEp;
 
 	//bi-directional many-to-one association to TypeEpargne
 	@ManyToOne
 	@JoinColumn(name="Type_epargnenom_type_epargne")
+	@XmlTransient
 	private TypeEpargne typeEpargne;
 
 	public ProduitEpargne() {
@@ -103,6 +114,14 @@ public class ProduitEpargne implements Serializable {
 		compteEpargne.setProduitEpargne(null);
 
 		return compteEpargne;
+	}
+
+	public ConfigGlEpargne getConfigGlEpargne() {
+		return this.configGlEpargne;
+	}
+
+	public void setConfigGlEpargne(ConfigGlEpargne configGlEpargne) {
+		this.configGlEpargne = configGlEpargne;
 	}
 
 	public ConfigInteretProdEp getConfigInteretProdEp() {

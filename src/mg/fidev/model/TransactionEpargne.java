@@ -1,7 +1,10 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+
+import java.time.LocalDateTime;
 
 
 /**
@@ -26,8 +29,8 @@ public class TransactionEpargne implements Serializable {
 
 	private double montant;
 
-	@Column(name="pièce_compta")
-	private String pièceCompta;
+	@Column(name="piece_compta")
+	private String pieceCompta;
 
 	private double solde;
 
@@ -60,7 +63,8 @@ public class TransactionEpargne implements Serializable {
 	}
 
 	public void setDateTransaction(String dateTransaction) {
-		this.dateTransaction = dateTransaction;
+		LocalDateTime dt = LocalDateTime.parse(dateTransaction);
+		this.dateTransaction = dt.toString();
 	}
 
 	public String getDescription() {
@@ -79,12 +83,12 @@ public class TransactionEpargne implements Serializable {
 		this.montant = montant;
 	}
 
-	public String getPièceCompta() {
-		return this.pièceCompta;
+	public String getPieceCompta() {
+		return this.pieceCompta;
 	}
 
-	public void setPièceCompta(String pièceCompta) {
-		this.pièceCompta = pièceCompta;
+	public void setPieceCompta(String pieceCompta) {
+		this.pieceCompta = pieceCompta;
 	}
 
 	public double getSolde() {
@@ -116,12 +120,23 @@ public class TransactionEpargne implements Serializable {
 	}
 
 	public void setCompteEpargne(CompteEpargne compteEpargne) {
-		if(compteEpargne.getSolde() == 0){
-			if(this.getTypeTransEp().equals("OU")){
-				compteEpargne.setSolde(montant);
+		if(compteEpargne.getIsActif()){
+			if(this.getTypeTransEp().equals("DE")){
+				compteEpargne.setSolde(compteEpargne.getSolde() + montant);
 				if(compteEpargne.getSolde() != 0){
+					this.setSolde(compteEpargne.getSolde());
 					this.setMontant(montant);
-					this.setSolde(montant);
+					this.compteEpargne = compteEpargne;
+				}
+				else{
+					System.err.println("Erreur de transaction");
+				}
+			}
+			else if(this.getTypeTransEp().equals("RE")){
+				compteEpargne.setSolde(compteEpargne.getSolde() - montant);
+				if(compteEpargne.getSolde() != 0){
+					this.setSolde(compteEpargne.getSolde());
+					this.setMontant(montant);
 					this.compteEpargne = compteEpargne;
 				}
 				else{
@@ -129,28 +144,8 @@ public class TransactionEpargne implements Serializable {
 				}
 			}
 		}
-		else if(this.getTypeTransEp().equals("DE")){
-			compteEpargne.setSolde(compteEpargne.getSolde() + montant);
-			if(compteEpargne.getSolde() != 0){
-				this.setSolde(compteEpargne.getSolde());
-				this.setMontant(montant);
-				this.compteEpargne = compteEpargne;
-			}
-			else{
-				System.err.println("Erreur de transaction");
-			}
-		}
-		else if(this.getTypeTransEp().equals("RE")){
-			compteEpargne.setSolde(compteEpargne.getSolde() - montant);
-			if(compteEpargne.getSolde() != 0){
-				this.setSolde(compteEpargne.getSolde());
-				this.setMontant(montant);
-				this.compteEpargne = compteEpargne;
-			}
-			else{
-				System.err.println("Erreur de transaction");
-			}
-		}
+		else
+			System.err.println("Compte inactif");
 	}
 
 }

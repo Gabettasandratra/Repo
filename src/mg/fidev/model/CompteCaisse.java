@@ -16,6 +16,7 @@ public class CompteCaisse implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="nom_cpt_caisse")
 	private String nomCptCaisse;
 

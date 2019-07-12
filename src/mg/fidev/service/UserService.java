@@ -34,7 +34,7 @@ public interface UserService {
 	
 	@WebMethod @WebResult(name="listeAcces")
 	public List<String> getAcces(
-			@XmlElement(required=true) @WebParam(name="userName") String userName
+			@XmlElement(required=true) @WebParam(name="userName") int userName
 			);
 	
 	@WebMethod @WebResult(name="statusCreateCmpt")
@@ -56,5 +56,14 @@ public interface UserService {
 			@XmlElement(required=true) @WebParam(name="pieceCompta") String pieceCompta,
 			@XmlElement(required=true) @WebParam(name="nomCompteCaisse") String nomCptCaisse,
 			@XmlElement(required=true) @WebParam(name="numCptEp") String numCptEp
+			);
+	
+	@WebMethod @WebResult(name="statusCreateCmpt")
+	public boolean fermerCompteClient(
+			@XmlElement(required=true) @WebParam(name="dateFermeture") Date dateFermeture,
+			@XmlElement(required=true) @WebParam(name="fraisCloture") double fraisCloture,
+			@XmlElement(required=true) @WebParam(name="raison") String raison,
+			@XmlElement(required=true) @WebParam(name="numRecu") String numRecu,
+			@XmlElement(required=true) @WebParam(name="numCpt") String numCompte
 			);
 }

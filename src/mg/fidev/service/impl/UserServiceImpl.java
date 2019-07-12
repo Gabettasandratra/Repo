@@ -13,6 +13,7 @@ import javax.persistence.TypedQuery;
 import mg.fidev.model.Acces;
 import mg.fidev.model.CompteCaisse;
 import mg.fidev.model.CompteEpargne;
+import mg.fidev.model.CompteFerme;
 import mg.fidev.model.Fonction;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
@@ -99,9 +100,15 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	///	Méthode pour avoir les accès d'un utilisateur quelconque
 	@Override
-	public List<String> getAcces(String userName) {
-		return null;
+	public List<String> getAcces(int userName) {
+		List<String> st = new ArrayList<String>();
+		Utilisateur ut = em.find(Utilisateur.class, userName);
+		for(Acces a: ut.getFonction().getAcces()){
+			st.add(a.getTitreAcces());
+		}
+		return st;
 	}
 
 	///	Méthode pour ouvrir un compte client
@@ -163,7 +170,7 @@ public class UserServiceImpl implements UserService {
 		trans.setTypeTransEp(typeTransac);
 		trans.setMontant(montant);
 		trans.setDescription(description);
-		trans.setPièceCompta(pieceCompta);
+		trans.setPieceCompta(pieceCompta);
 		CompteCaisse cptCaisse = em.find(CompteCaisse.class, nomCptCaisse);
 		CompteEpargne cptEp = em.find(CompteEpargne.class, numCptEp);
 		trans.setCompteCaisse(cptCaisse);
@@ -185,9 +192,51 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		else{
-			System.out.println("Erreur de transaction, compte épargne null");
+			System.out.println("Erreur de transaction, compte inactif");
 			return false;
 		}
+	}
+
+	@Override
+	public boolean fermerCompteClient(Date dateFermeture, double fraisCloture,
+			String raison, String numRecu, String numCompte) {
+		CompteFerme cpt = new CompteFerme();
+		cpt.setDateCloture(dateFermeture);
+		cpt.setFraisCloture(fraisCloture);
+		cpt.setRaison(raison);
+		cpt.setNumRecue(numRecu);
+		CompteEpargne c = em.find(CompteEpargne.class, numCompte);
+		cpt.setCompteEpargne(c);
+		//boolean stat = transactionCompte("RE", dateFermeture.toString(), fraisCloture, "Fermeture compte", numRecu, null, numCompte);
+		c.setSolde(c.getSolde() - fraisCloture);
+		c.setIsActif(false);
+		try {
+			transaction.begin();
+			em.flush();
+			em.persist(cpt);
+			transaction.commit();
+			System.out.println("Compte "+c.getNumCompteEp()+" fermé");
+			return true;
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			return false;
+		}
+	}
+	
+	//	Méthode à appeler pour lors d'un mouvement compta
+	static void mvtCompta(){
+		//RESTClient client = new RESTClient();
+		/*String url = "http://192.168.123.4:8080/HelloRestfull/rest/journal",
+			   description = "Depot via REST",
+			   piece = "PIECE N°3",
+			   tcode = "1000000000",
+			   compteDebit = "101xxx",
+			   compteCredit = "40xxxx";
+		Date date = new Date();
+		double montantDebit = 100, montantCredit = 100;
+		
+		String retour = client.postEpargne(url, date, description, piece, tcode, compteDebit, montantDebit, compteCredit, montantCredit); 
+		System.out.println("OUT : "+ retour);*/
 	}
 
 }

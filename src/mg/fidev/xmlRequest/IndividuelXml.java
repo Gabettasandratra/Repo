@@ -124,8 +124,8 @@ public class IndividuelXml implements Serializable {
 		return dateNaissance;
 	}
 
-	public void setDateNaissance(String string) {
-		this.dateNaissance = string;
+	public void setDateNaissance(String date) {
+		this.dateNaissance = date;
 	}
 
 	public Date getDateSortie() {

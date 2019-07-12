@@ -35,7 +35,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 		/* INDIVIDUEL A SUAVEGARDER */
 		Individuel individu = new Individuel();
 		individu.setNomClient(request.getNomClient());
-		individu.setCodeClient(CodeIncrement.getCodeInd(em, codeAgence));
+		individu.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
 		individu.setPrenomClient(request.getPrenomClient());
 		individu.setSexe(request.getSexe());
 		individu.setEmail(request.getEmail());
@@ -115,7 +115,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
 		for (Individuel i : results) {
 			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setCodeClient(i.getCodeClient());
+			individuXml.setCodeClient(i.getCodeInd());
 			individuXml.setNomClient(i.getNomClient());
 			individuXml.setPrenomClient(i.getPrenomClient());
 			individuXml.setSexe(i.getSexe());
@@ -148,7 +148,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
 		for (Individuel i : results) {
 			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setCodeClient(i.getCodeClient());
+			individuXml.setCodeClient(i.getCodeInd());
 			individuXml.setNomClient(i.getNomClient());
 			individuXml.setPrenomClient(i.getPrenomClient());
 			individuXml.setSexe(i.getSexe());
@@ -182,5 +182,26 @@ public class IndividuelServiceImpl implements IndividuelService {
 		transaction.commit();
 		em.refresh(request); // pour que le em connait le id et code du nouveau
 		return "Jereo ny base";
+	}
+
+	@Override
+	public String insertIndividuel(Individuel individuel, String codeAgence,
+			Docidentite docIdentite, Adresse adresse) {
+		individuel.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
+		individuel.setAdresse(adresse);
+		docIdentite.setIndividuel(individuel);
+		try {
+			transaction.begin();
+			em.persist(individuel);
+			em.persist(docIdentite);
+			transaction.commit();
+			em.refresh(individuel);
+			em.refresh(docIdentite);
+			System.out.println("Insertion nouveau client individuel avec succès");
+			return "Succes";
+		} catch (Exception e) {
+			System.err.println("Erreur insertion individuel "+e.getMessage());
+			return "Error";
+		}
 	}
 }

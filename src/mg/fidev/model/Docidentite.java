@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.Date;
 
 
@@ -11,6 +17,8 @@ import java.util.Date;
  */
 @Entity
 @NamedQuery(name="Docidentite.findAll", query="SELECT d FROM Docidentite d")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Docidentite implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -32,6 +40,7 @@ public class Docidentite implements Serializable {
 	//bi-directional many-to-one association to Individuel
 	@ManyToOne
 	@JoinColumn(name="codeClient")
+	@XmlTransient
 	private Individuel individuel;
 
 	public Docidentite() {

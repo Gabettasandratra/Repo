@@ -1,9 +1,7 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-
 import javax.persistence.*;
-
 import java.util.Date;
 import java.util.List;
 
@@ -17,11 +15,9 @@ import java.util.List;
 public class Groupe implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	//private String codeAgence;
-
 	@Id
-	@Column(name="codeGrp")
-	private String codeClient;
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private String codeGrp;
 
 	@Temporal(TemporalType.DATE)
 	private Date dateInscription;
@@ -36,8 +32,12 @@ public class Groupe implements Serializable {
 	@OneToMany(mappedBy="groupe")
 	private List<CompteEpargne> compteEpargnes;
 
+	//bi-directional many-to-one association to DemandeCredit
+	@OneToMany(mappedBy="groupe")
+	private List<DemandeCredit> demandeCredits;
+
 	//bi-directional many-to-one association to Adresse
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="idAdresse")
 	private Adresse adresse;
 
@@ -48,20 +48,12 @@ public class Groupe implements Serializable {
 	public Groupe() {
 	}
 
-	/*public String getCodeAgence() {
-		return this.codeAgence;
+	public String getCodeGrp() {
+		return this.codeGrp;
 	}
 
-	public void setCodeAgence(String codeAgence) {
-		this.codeAgence = codeAgence;
-	}*/
-
-	public String getCodeClient() {
-		return this.codeClient;
-	}
-
-	public void setCodeClient(String codeClient) {
-		this.codeClient = codeClient;
+	public void setCodeGrp(String codeGrp) {
+		this.codeGrp = codeGrp;
 	}
 
 	public Date getDateInscription() {
@@ -116,6 +108,28 @@ public class Groupe implements Serializable {
 		compteEpargne.setGroupe(null);
 
 		return compteEpargne;
+	}
+
+	public List<DemandeCredit> getDemandeCredits() {
+		return this.demandeCredits;
+	}
+
+	public void setDemandeCredits(List<DemandeCredit> demandeCredits) {
+		this.demandeCredits = demandeCredits;
+	}
+
+	public DemandeCredit addDemandeCredit(DemandeCredit demandeCredit) {
+		getDemandeCredits().add(demandeCredit);
+		demandeCredit.setGroupe(this);
+
+		return demandeCredit;
+	}
+
+	public DemandeCredit removeDemandeCredit(DemandeCredit demandeCredit) {
+		getDemandeCredits().remove(demandeCredit);
+		demandeCredit.setGroupe(null);
+
+		return demandeCredit;
 	}
 
 	public Adresse getAdresse() {
