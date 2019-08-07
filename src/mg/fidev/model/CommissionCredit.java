@@ -5,11 +5,8 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import java.util.Date;
 
 
 /**
@@ -25,33 +22,23 @@ public class CommissionCredit implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private int tcode;
+	private String tcode;
 
-	@XmlElement
 	private boolean cash;
 
-	@XmlElement
 	private int cheqid;
 
-	@Temporal(TemporalType.DATE)
 	@Column(name="date_paie")
-	@XmlElement
-	private Date datePaie;
+	private String datePaie;
 
-	@XmlElement
 	private double lcomm;
 
-	@XmlElement
 	private String piece;
 
-	@XmlElement
 	private float stationery;
 
-	@XmlElement
 	private float tdf;
 
-	@XmlElement
 	private float totvat;
 
 	//bi-directional many-to-one association to DemandeCredit
@@ -69,11 +56,11 @@ public class CommissionCredit implements Serializable {
 	public CommissionCredit() {
 	}
 
-	public int getTcode() {
+	public String getTcode() {
 		return this.tcode;
 	}
 
-	public void setTcode(int tcode) {
+	public void setTcode(String tcode) {
 		this.tcode = tcode;
 	}
 
@@ -93,11 +80,11 @@ public class CommissionCredit implements Serializable {
 		this.cheqid = cheqid;
 	}
 
-	public Date getDatePaie() {
+	public String getDatePaie() {
 		return this.datePaie;
 	}
 
-	public void setDatePaie(Date datePaie) {
+	public void setDatePaie(String datePaie) {
 		this.datePaie = datePaie;
 	}
 

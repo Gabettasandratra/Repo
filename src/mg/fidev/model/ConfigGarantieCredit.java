@@ -1,7 +1,12 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.List;
 
 
@@ -12,6 +17,8 @@ import java.util.List;
 @Entity
 @Table(name="config_garantie_credit")
 @NamedQuery(name="ConfigGarantieCredit.findAll", query="SELECT c FROM ConfigGarantieCredit c")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ConfigGarantieCredit implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -43,10 +50,15 @@ public class ConfigGarantieCredit implements Serializable {
 
 	private float percentMontantInd;
 
-	private String produitEpargneId;
+	//bi-directional many-to-one association to ProduitEpargne
+	@ManyToOne
+	@JoinColumn(name="produitEpargneId")
+	@XmlTransient
+	private ProduitEpargne produitEpargne;
 
 	//bi-directional many-to-one association to ProduitCredit
 	@OneToMany(mappedBy="configGarantieCredit")
+	@XmlTransient
 	private List<ProduitCredit> produitCredits;
 
 	public ConfigGarantieCredit() {
@@ -156,12 +168,12 @@ public class ConfigGarantieCredit implements Serializable {
 		this.percentMontantInd = percentMontantInd;
 	}
 
-	public String getProduitEpargneId() {
-		return this.produitEpargneId;
+	public ProduitEpargne getProduitEpargne() {
+		return this.produitEpargne;
 	}
 
-	public void setProduitEpargneId(String produitEpargneId) {
-		this.produitEpargneId = produitEpargneId;
+	public void setProduitEpargne(ProduitEpargne produitEpargne) {
+		this.produitEpargne = produitEpargne;
 	}
 
 	public List<ProduitCredit> getProduitCredits() {

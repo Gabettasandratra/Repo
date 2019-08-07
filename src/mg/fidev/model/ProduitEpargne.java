@@ -5,10 +5,8 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 
 import java.util.List;
 
@@ -21,21 +19,17 @@ import java.util.List;
 @Table(name="produit_epargne")
 @NamedQuery(name="ProduitEpargne.findAll", query="SELECT p FROM ProduitEpargne p")
 @XmlRootElement
-@XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ProduitEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="id_prod_epargne")
-	@XmlElement
 	private String idProdEpargne;
 
-	@XmlElement
 	private boolean etat;
 
 	@Column(name="nom_prod_epargne")
-	@XmlElement
 	private String nomProdEpargne;
 
 	//bi-directional many-to-one association to CompteEpargne
@@ -43,20 +37,25 @@ public class ProduitEpargne implements Serializable {
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 
+	//bi-directional many-to-one association to ConfigGarantieCredit
+	@OneToMany(mappedBy="produitEpargne")
+	@XmlTransient
+	private List<ConfigGarantieCredit> configGarantieCredits;
+
 	//bi-directional many-to-one association to ConfigGlEpargne
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="configGLepId")
 	@XmlTransient
 	private ConfigGlEpargne configGlEpargne;
 
 	//bi-directional many-to-one association to ConfigInteretProdEp
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="configIntProId")
 	@XmlTransient
 	private ConfigInteretProdEp configInteretProdEp;
 
 	//bi-directional many-to-one association to ConfigProdEp
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="configProdId")
 	@XmlTransient
 	private ConfigProdEp configProdEp;
@@ -114,6 +113,28 @@ public class ProduitEpargne implements Serializable {
 		compteEpargne.setProduitEpargne(null);
 
 		return compteEpargne;
+	}
+
+	public List<ConfigGarantieCredit> getConfigGarantieCredits() {
+		return this.configGarantieCredits;
+	}
+
+	public void setConfigGarantieCredits(List<ConfigGarantieCredit> configGarantieCredits) {
+		this.configGarantieCredits = configGarantieCredits;
+	}
+
+	public ConfigGarantieCredit addConfigGarantieCredit(ConfigGarantieCredit configGarantieCredit) {
+		getConfigGarantieCredits().add(configGarantieCredit);
+		configGarantieCredit.setProduitEpargne(this);
+
+		return configGarantieCredit;
+	}
+
+	public ConfigGarantieCredit removeConfigGarantieCredit(ConfigGarantieCredit configGarantieCredit) {
+		getConfigGarantieCredits().remove(configGarantieCredit);
+		configGarantieCredit.setProduitEpargne(null);
+
+		return configGarantieCredit;
 	}
 
 	public ConfigGlEpargne getConfigGlEpargne() {

@@ -5,12 +5,14 @@
 		<class>mg.fidev.model.Account</class>
 		<class>mg.fidev.model.Adresse</class>
 		<class>mg.fidev.model.Agence</class>
+		<class>mg.fidev.model.Calapresdebl</class>
 		<class>mg.fidev.model.Calpaiementdue</class>
 		<class>mg.fidev.model.CatEpargne</class>
 		<class>mg.fidev.model.CommissionCredit</class>
 		<class>mg.fidev.model.CompteCaisse</class>
 		<class>mg.fidev.model.CompteEpargne</class>
 		<class>mg.fidev.model.CompteFerme</class>
+		<class>mg.fidev.model.Compte</class>
 		<class>mg.fidev.model.ConfigCredit</class>
 		<class>mg.fidev.model.ConfigCreditIndividuel</class>
 		<class>mg.fidev.model.ConfigFraisCredit</class>
@@ -32,9 +34,9 @@
 		<class>mg.fidev.model.FichierTitre</class>
 		<class>mg.fidev.model.Fonction</class>
 		<class>mg.fidev.model.GarantieCredit</class>
+		<class>mg.fidev.model.Grandlivre</class>
 		<class>mg.fidev.model.Groupe</class>
 		<class>mg.fidev.model.Individuel</class>
-		<class>mg.fidev.model.PlanComptable</class>
 		<class>mg.fidev.model.ProduitCredit</class>
 		<class>mg.fidev.model.ProduitEpargne</class>
 		<class>mg.fidev.model.RembMontant</class>
@@ -42,10 +44,12 @@
 		<class>mg.fidev.model.TransactionEpargne</class>
 		<class>mg.fidev.model.TypeEpargne</class>
 		<class>mg.fidev.model.Utilisateur</class>
+		<class>mg.fidev.model.Virement</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/microfinance_v1"/>
 			<property name="javax.persistence.jdbc.user" value="root"/>
 			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+			<property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
 		</properties>
 	</persistence-unit>
 </persistence>

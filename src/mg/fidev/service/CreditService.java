@@ -11,7 +11,10 @@ import javax.xml.bind.annotation.XmlElement;
 
 import mg.fidev.model.CommissionCredit;
 import mg.fidev.model.ConfigCreditIndividuel;
+import mg.fidev.model.ConfigFraisCredit;
+import mg.fidev.model.ConfigGarantieCredit;
 import mg.fidev.model.ConfigGeneralCredit;
+import mg.fidev.model.ConfigGlCredit;
 import mg.fidev.model.DemandeCredit;
 import mg.fidev.model.GarantieCredit;
 
@@ -41,6 +44,27 @@ public interface CreditService {
 	
 	@WebMethod
 	@WebResult(name = "validation")
+	public void configFraisCredit(
+			@WebParam(name= "configFraisCredit") @XmlElement(required=true,nillable=false) ConfigFraisCredit configFraisCredit,
+			@WebParam(name= "idProduit") @XmlElement(required=true,nillable=false) String idProduit
+			);
+	
+	@WebMethod
+	@WebResult(name = "validation")
+	public void configGarantiCredit(
+			@WebParam(name= "configGarCredit") @XmlElement(required=true,nillable=false) ConfigGarantieCredit configGarCredit,
+			@WebParam(name= "idProduit") @XmlElement(required=true,nillable=false) String idProduit
+			);
+	
+	@WebMethod
+	@WebResult(name = "validation")
+	public void configGLCredit(
+			@WebParam(name= "configGlCredit") @XmlElement(required=true,nillable=false) ConfigGlCredit configGLCredit,
+			@WebParam(name= "idProduit") @XmlElement(required=true,nillable=false) String idProduit
+			);
+	
+	@WebMethod
+	@WebResult(name = "validation")
 	public void demandeCredit(
 			@WebParam(name="demandeCredit") @XmlElement(required=true,nillable=false) DemandeCredit dmd,
 			@WebParam(name="agence") @XmlElement(required=true,nillable=false) String agence,
@@ -48,8 +72,7 @@ public interface CreditService {
 			@WebParam(name="codeInd") @XmlElement(required=true,nillable=false) String codeInd,
 			@WebParam(name="codeGrp") @XmlElement(required=true,nillable=false) String codeGrp,
 			@WebParam(name="garantie") @XmlElement(required=true,nillable=false) GarantieCredit gar,
-			@WebParam(name="id_user") @XmlElement(required=true,nillable=false) int agenCredit_id
-			//@WebParam(name="calPaiementDue") @XmlElement(required=true,nillable=false) Calpaiementdue cal
+			@WebParam(name="id_user") @XmlElement(required=true,nillable=false) int userId
 			);
 	
 	@WebMethod
@@ -57,7 +80,7 @@ public interface CreditService {
 	public void updateDemandeCredit(
 			@WebParam(name = "num_credit") @XmlElement String numCredit,
 			@WebParam(name = "demandeCredit") @XmlElement DemandeCredit dmd,
-			@WebParam(name="id_user") @XmlElement(required=true,nillable=false) int agenCredit_id,
+			@WebParam(name="id_user") @XmlElement(required=true,nillable=false) int userId,
 			@WebParam(name = "idProduit") @XmlElement String idProduit);
 	
 	@WebMethod

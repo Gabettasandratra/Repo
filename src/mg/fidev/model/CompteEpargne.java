@@ -5,11 +5,9 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.Date;
 import java.util.List;
 
@@ -21,58 +19,69 @@ import java.util.List;
 @Entity
 @Table(name="compte_epargne")
 @NamedQuery(name="CompteEpargne.findAll", query="SELECT c FROM CompteEpargne c")
-@XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CompteEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="num_compte_ep")
-	@XmlElement
 	private String numCompteEp;
 
 	@Temporal(TemporalType.DATE)
 	@Column(name="date_echeance")
-	@XmlElement
 	private Date dateEcheance;
 
 	@Column(name="date_ouverture")
-	@XmlElement
 	private String dateOuverture;
 
-	@XmlElement
 	private boolean isActif;
 
-	@XmlElement
 	private double solde;
 
 	//bi-directional many-to-one association to Groupe
 	@ManyToOne
 	@JoinColumn(name="codeGrp")
+	@XmlTransient
 	private Groupe groupe;
 
 	//bi-directional many-to-one association to Individuel
 	@ManyToOne
 	@JoinColumn(name="codeInd")
+	@XmlTransient
 	private Individuel individuel;
 
 	//bi-directional many-to-one association to ProduitEpargne
 	@ManyToOne
 	@JoinColumn(name="Produit_epargneId")
+	@XmlTransient
 	private ProduitEpargne produitEpargne;
 
 	//bi-directional many-to-one association to Utilisateur
 	@ManyToOne
 	@JoinColumn(name="UtilisateuridUtilisateur")
+	@XmlTransient
 	private Utilisateur utilisateur;
 
 	//bi-directional many-to-one association to CompteFerme
 	@OneToMany(mappedBy="compteEpargne")
+	@XmlTransient
 	private List<CompteFerme> compteFermes;
 
 	//bi-directional many-to-one association to TransactionEpargne
 	@OneToMany(mappedBy="compteEpargne")
+	@XmlTransient
 	private List<TransactionEpargne> transactionEpargnes;
+
+	//bi-directional many-to-one association to Virement
+	@OneToMany(mappedBy="compteEpargne1")
+	@XmlTransient
+	private List<Virement> virements1;
+
+	//bi-directional many-to-one association to Virement
+	@OneToMany(mappedBy="compteEpargne2")
+	@XmlTransient
+	private List<Virement> virements2;
 
 	public CompteEpargne() {
 	}
@@ -98,8 +107,7 @@ public class CompteEpargne implements Serializable {
 	}
 
 	public void setDateOuverture(String dateOuverture) {
-		LocalDate dt = LocalDate.parse(dateOuverture);
-		this.dateOuverture = dt.toString();
+		this.dateOuverture = dateOuverture;
 	}
 
 	public boolean getIsActif() {
@@ -115,27 +123,7 @@ public class CompteEpargne implements Serializable {
 	}
 
 	public void setSolde(double solde) {
-		ConfigInteretProdEp confIntEp = this.getProduitEpargne().getConfigInteretProdEp();
-		if(this.getIsActif()){
-			if(this.getIndividuel() != null){
-				if(confIntEp.getSoldeMinInd() > solde){
-					System.err.println("Solde minimum de ce produit pour un client individuel : " +
-							confIntEp.getSoldeMinInd());
-				}
-				else
-					this.solde = solde;
-			}
-			else if(this.getGroupe() != null){
-				if(confIntEp.getSoldeMinGrp() > solde){
-					System.err.println("Solde  minimum de ce produit pour un client groupe : " +
-				confIntEp.getSoldeMinGrp());
-				}
-				else
-					this.solde = solde;
-			}
-		}
-		else
-			System.err.println("Compte inactif");
+		this.solde = solde;
 	}
 
 	public Groupe getGroupe() {
@@ -143,11 +131,7 @@ public class CompteEpargne implements Serializable {
 	}
 
 	public void setGroupe(Groupe groupe) {
-		if(groupe != null){
-			System.out.println("Information groupe complète");
-			this.setNumCompteEp(groupe.getCodeGrp() + "/" + this.getProduitEpargne().getIdProdEpargne());
-			this.groupe = groupe;
-		}
+		this.groupe = groupe;
 	}
 
 	public Individuel getIndividuel() {
@@ -155,20 +139,7 @@ public class CompteEpargne implements Serializable {
 	}
 
 	public void setIndividuel(Individuel individuel) {
-		ConfigProdEp confEp = this.getProduitEpargne().getConfigProdEp();
-		int minAge = confEp.getAgeMinCpt();
-		if(individuel != null){
-			LocalDate naissanceInd = LocalDate.parse(individuel.getDateNaissance());
-			Period period = Period.between(naissanceInd, LocalDate.parse(dateOuverture));
-			if(period.getYears() < minAge){
-				System.err.println("Age minimum requise pour l'ouverture de ce compte : "+minAge);
-			}
-			else{
-				System.out.println("Information client individuel complète");
-				this.setNumCompteEp(individuel.getCodeInd() + "/" + this.getProduitEpargne().getIdProdEpargne());
-				this.individuel = individuel;
-			}
-		}
+		this.individuel = individuel;
 	}
 
 	public ProduitEpargne getProduitEpargne() {
@@ -229,6 +200,50 @@ public class CompteEpargne implements Serializable {
 		transactionEpargne.setCompteEpargne(null);
 
 		return transactionEpargne;
+	}
+
+	public List<Virement> getVirements1() {
+		return this.virements1;
+	}
+
+	public void setVirements1(List<Virement> virements1) {
+		this.virements1 = virements1;
+	}
+
+	public Virement addVirements1(Virement virements1) {
+		getVirements1().add(virements1);
+		virements1.setCompteEpargne1(this);
+
+		return virements1;
+	}
+
+	public Virement removeVirements1(Virement virements1) {
+		getVirements1().remove(virements1);
+		virements1.setCompteEpargne1(null);
+
+		return virements1;
+	}
+
+	public List<Virement> getVirements2() {
+		return this.virements2;
+	}
+
+	public void setVirements2(List<Virement> virements2) {
+		this.virements2 = virements2;
+	}
+
+	public Virement addVirements2(Virement virements2) {
+		getVirements2().add(virements2);
+		virements2.setCompteEpargne2(this);
+
+		return virements2;
+	}
+
+	public Virement removeVirements2(Virement virements2) {
+		getVirements2().remove(virements2);
+		virements2.setCompteEpargne2(null);
+
+		return virements2;
 	}
 
 }

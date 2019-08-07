@@ -3,8 +3,10 @@ package mg.fidev.model;
 import java.io.Serializable;
 
 import javax.persistence.*;
-
-import java.time.LocalDateTime;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -14,13 +16,14 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name="transaction_epargne")
 @NamedQuery(name="TransactionEpargne.findAll", query="SELECT t FROM TransactionEpargne t")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class TransactionEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="id_transaction_ep")
-	private int idTransactionEp;
+	@Column(name="tcode_ep")
+	private String idTransactionEp;
 
 	@Column(name="date_transaction")
 	private String dateTransaction;
@@ -40,21 +43,23 @@ public class TransactionEpargne implements Serializable {
 	//bi-directional many-to-one association to CompteCaisse
 	@ManyToOne
 	@JoinColumn(name="Compte_caissenom_cpt_caisse")
+	@XmlTransient
 	private CompteCaisse compteCaisse;
 
 	//bi-directional many-to-one association to CompteEpargne
 	@ManyToOne
 	@JoinColumn(name="Compte_epargnenum_compte_ep")
+	@XmlTransient
 	private CompteEpargne compteEpargne;
 
 	public TransactionEpargne() {
 	}
 
-	public int getIdTransactionEp() {
+	public String getIdTransactionEp() {
 		return this.idTransactionEp;
 	}
 
-	public void setIdTransactionEp(int idTransactionEp) {
+	public void setIdTransactionEp(String idTransactionEp) {
 		this.idTransactionEp = idTransactionEp;
 	}
 
@@ -63,8 +68,7 @@ public class TransactionEpargne implements Serializable {
 	}
 
 	public void setDateTransaction(String dateTransaction) {
-		LocalDateTime dt = LocalDateTime.parse(dateTransaction);
-		this.dateTransaction = dt.toString();
+		this.dateTransaction = dateTransaction;
 	}
 
 	public String getDescription() {

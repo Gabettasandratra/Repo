@@ -4,8 +4,7 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAccessorType;import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import java.util.List;
@@ -36,10 +35,30 @@ public class Utilisateur implements Serializable {
 
 	private String telUser;
 
+	//bi-directional many-to-one association to CommissionCredit
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<CommissionCredit> commissionCredits;
+
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
+
+	//bi-directional many-to-one association to Decaissement
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<Decaissement> decaissements;
+
+	//bi-directional many-to-one association to DemandeCredit
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<DemandeCredit> demandeCredits;
+
+	//bi-directional many-to-one association to Remboursement
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<Remboursement> remboursements;
 
 	//bi-directional many-to-many association to Agence
 	@ManyToMany
@@ -74,21 +93,6 @@ public class Utilisateur implements Serializable {
 	@JoinColumn(name="fonctionId")
 	@XmlTransient
 	private Fonction fonction;
-
-	//bi-directional many-to-one association to CommissionCredit
-	@OneToMany(mappedBy="utilisateur")
-	@XmlTransient
-	private List<CommissionCredit> commissionCredits;
-
-	//bi-directional many-to-one association to Decaissement
-	@OneToMany(mappedBy="utilisateur")
-	@XmlTransient
-	private List<Decaissement> decaissements;
-
-	//bi-directional many-to-one association to Remboursement
-	@OneToMany(mappedBy="utilisateur")
-	@XmlTransient
-	private List<Remboursement> remboursements;
 
 	public Utilisateur() {
 	}
@@ -141,52 +145,6 @@ public class Utilisateur implements Serializable {
 		this.telUser = telUser;
 	}
 
-	public List<CompteEpargne> getCompteEpargnes() {
-		return this.compteEpargnes;
-	}
-
-	public void setCompteEpargnes(List<CompteEpargne> compteEpargnes) {
-		this.compteEpargnes = compteEpargnes;
-	}
-
-	public CompteEpargne addCompteEpargne(CompteEpargne compteEpargne) {
-		getCompteEpargnes().add(compteEpargne);
-		compteEpargne.setUtilisateur(this);
-
-		return compteEpargne;
-	}
-
-	public CompteEpargne removeCompteEpargne(CompteEpargne compteEpargne) {
-		getCompteEpargnes().remove(compteEpargne);
-		compteEpargne.setUtilisateur(null);
-
-		return compteEpargne;
-	}
-
-	public List<Agence> getAgences() {
-		return this.agences;
-	}
-
-	public void setAgences(List<Agence> agences) {
-		this.agences = agences;
-	}
-
-	public List<CompteCaisse> getCompteCaisses() {
-		return this.compteCaisses;
-	}
-
-	public void setCompteCaisses(List<CompteCaisse> compteCaisses) {
-		this.compteCaisses = compteCaisses;
-	}
-
-	public Fonction getFonction() {
-		return this.fonction;
-	}
-
-	public void setFonction(Fonction fonction) {
-		this.fonction = fonction;
-	}
-
 	public List<CommissionCredit> getCommissionCredits() {
 		return this.commissionCredits;
 	}
@@ -207,6 +165,28 @@ public class Utilisateur implements Serializable {
 		commissionCredit.setUtilisateur(null);
 
 		return commissionCredit;
+	}
+
+	public List<CompteEpargne> getCompteEpargnes() {
+		return this.compteEpargnes;
+	}
+
+	public void setCompteEpargnes(List<CompteEpargne> compteEpargnes) {
+		this.compteEpargnes = compteEpargnes;
+	}
+
+	public CompteEpargne addCompteEpargne(CompteEpargne compteEpargne) {
+		getCompteEpargnes().add(compteEpargne);
+		compteEpargne.setUtilisateur(this);
+
+		return compteEpargne;
+	}
+
+	public CompteEpargne removeCompteEpargne(CompteEpargne compteEpargne) {
+		getCompteEpargnes().remove(compteEpargne);
+		compteEpargne.setUtilisateur(null);
+
+		return compteEpargne;
 	}
 
 	public List<Decaissement> getDecaissements() {
@@ -231,6 +211,28 @@ public class Utilisateur implements Serializable {
 		return decaissement;
 	}
 
+	public List<DemandeCredit> getDemandeCredits() {
+		return this.demandeCredits;
+	}
+
+	public void setDemandeCredits(List<DemandeCredit> demandeCredits) {
+		this.demandeCredits = demandeCredits;
+	}
+
+	public DemandeCredit addDemandeCredit(DemandeCredit demandeCredit) {
+		getDemandeCredits().add(demandeCredit);
+		demandeCredit.setUtilisateur(this);
+
+		return demandeCredit;
+	}
+
+	public DemandeCredit removeDemandeCredit(DemandeCredit demandeCredit) {
+		getDemandeCredits().remove(demandeCredit);
+		demandeCredit.setUtilisateur(null);
+
+		return demandeCredit;
+	}
+
 	public List<Remboursement> getRemboursements() {
 		return this.remboursements;
 	}
@@ -251,6 +253,30 @@ public class Utilisateur implements Serializable {
 		remboursement.setUtilisateur(null);
 
 		return remboursement;
+	}
+
+	public List<Agence> getAgences() {
+		return this.agences;
+	}
+
+	public void setAgences(List<Agence> agences) {
+		this.agences = agences;
+	}
+
+	public List<CompteCaisse> getCompteCaisses() {
+		return this.compteCaisses;
+	}
+
+	public void setCompteCaisses(List<CompteCaisse> compteCaisses) {
+		this.compteCaisses = compteCaisses;
+	}
+
+	public Fonction getFonction() {
+		return this.fonction;
+	}
+
+	public void setFonction(Fonction fonction) {
+		this.fonction = fonction;
 	}
 
 }

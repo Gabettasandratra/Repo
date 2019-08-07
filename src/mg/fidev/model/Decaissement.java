@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.Date;
 
 
@@ -11,12 +17,13 @@ import java.util.Date;
  */
 @Entity
 @NamedQuery(name="Decaissement.findAll", query="SELECT d FROM Decaissement d")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Decaissement implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private int tcode;
+	private String tcode;
 
 	private boolean cash;
 
@@ -42,21 +49,23 @@ public class Decaissement implements Serializable {
 	//bi-directional many-to-one association to DemandeCredit
 	@ManyToOne
 	@JoinColumn(name="num_credit")
+	@XmlTransient
 	private DemandeCredit demandeCredit;
 
 	//bi-directional many-to-one association to Utilisateur
 	@ManyToOne
 	@JoinColumn(name="user_id")
+	@XmlTransient
 	private Utilisateur utilisateur;
 
 	public Decaissement() {
 	}
 
-	public int getTcode() {
+	public String getTcode() {
 		return this.tcode;
 	}
 
-	public void setTcode(int tcode) {
+	public void setTcode(String tcode) {
 		this.tcode = tcode;
 	}
 

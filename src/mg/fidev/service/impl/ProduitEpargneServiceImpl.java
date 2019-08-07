@@ -10,6 +10,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import mg.fidev.model.CompteEpargne;
+import mg.fidev.model.ConfigGlEpargne;
 import mg.fidev.model.ConfigInteretProdEp;
 import mg.fidev.model.ConfigProdEp;
 import mg.fidev.model.ProduitEpargne;
@@ -157,7 +158,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			em.getTransaction().commit();
 			em.refresh(confProd);
 			
-			System.err.println("Update successful");
+			System.out.println("Update successful");
 			
 			return true;
 		} catch (Exception e) {
@@ -168,29 +169,30 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	}
 	
 	@Override
-	public boolean updateConfigIntProduit(int periodeInteret, float tauxInteret,
+	public boolean updateConfigIntProduit(int periodeInteret, String dateCalcul, float tauxInteret,
 			int nbrJrInteret, int nbrSemInteret, double soldeMinInd,
 			double soldeMinGrp, double interetMinInd, double interetMinGrp,
 			String modeCalcul, List<String> idProduit) {
+		List<ProduitEpargne> listProdEp = new ArrayList<ProduitEpargne>();
+		ConfigInteretProdEp confIntProd = new ConfigInteretProdEp();
+		confIntProd.setPeriodeInteret(periodeInteret);
+		confIntProd.setDateCalcul(dateCalcul);
+		confIntProd.setTauxInteret(tauxInteret);
+		confIntProd.setNbrJrInt(nbrJrInteret);
+		confIntProd.setNbrSemaineInt(nbrSemInteret);
+		confIntProd.setSoldeMinInd(soldeMinInd);
+		confIntProd.setSoldeMinGrp(soldeMinGrp);
+		confIntProd.setInteretMinInd(interetMinInd);
+		confIntProd.setInteretMinGrp(interetMinGrp);
+		confIntProd.setModeCalcul(modeCalcul);
+		for(String pro : idProduit){
+			listProdEp.add(em
+					.find(ProduitEpargne.class, pro));
+		}
+		confIntProd.setProduitEpargnes(listProdEp);
+		for(ProduitEpargne pro : listProdEp)
+			pro.setConfigInteretProdEp(confIntProd);
 		try {
-			List<ProduitEpargne> listProdEp = new ArrayList<ProduitEpargne>();
-			ConfigInteretProdEp confIntProd = new ConfigInteretProdEp();
-			confIntProd.setPeriodeInteret(periodeInteret);
-			confIntProd.setTauxInteret(tauxInteret);
-			confIntProd.setNbrJrInt(nbrJrInteret);
-			confIntProd.setNbrSemaineInt(nbrSemInteret);
-			confIntProd.setSoldeMinInd(soldeMinInd);
-			confIntProd.setSoldeMinGrp(soldeMinGrp);
-			confIntProd.setInteretMinInd(interetMinInd);
-			confIntProd.setInteretMinGrp(interetMinGrp);
-			confIntProd.setModeCalcul(modeCalcul);
-			for(String pro : idProduit){
-				listProdEp.add(em
-						.find(ProduitEpargne.class, pro));
-			}
-			confIntProd.setProduitEpargnes(listProdEp);
-			for(ProduitEpargne pro : listProdEp)
-				pro.setConfigInteretProdEp(confIntProd);
 			
 			em.getTransaction().begin();
 
@@ -199,7 +201,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			em.getTransaction().commit();
 			em.refresh(confIntProd);
 			
-			System.err.println("Update successful");
+			System.out.println("Update successful");
 			
 			return true;
 		} catch (Exception e) {
@@ -268,6 +270,24 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				default:
 					break;
 			}
+		}
+	}
+
+	///	Configuration GL épargne
+	@Override
+	public void configGLepargne(ConfigGlEpargne configGlEpargne,
+			String idProduit) {
+		ProduitEpargne pdtEp = em.find(ProduitEpargne.class, idProduit);
+		List<ProduitEpargne> listProd = new ArrayList<ProduitEpargne>();
+		listProd.add(pdtEp);
+		configGlEpargne.setProduitEpargnes(listProd);
+		try {
+			em.getTransaction().begin();
+			em.persist(configGlEpargne);
+			em.getTransaction().commit();
+			System.out.println("Configuration GL épargne succes");
+		} catch (Exception e) {
+			System.err.println("");
 		}
 	}
 

@@ -8,8 +8,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import java.time.LocalDate;
-
 
 /**
  * The persistent class for the calpaiementdues database table.
@@ -38,7 +36,7 @@ public class Calpaiementdue implements Serializable {
 	private double montantPrinc;
 
 	//bi-directional many-to-one association to DemandeCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="num_credit")
 	@XmlTransient
 	private DemandeCredit demandeCredit;
@@ -59,8 +57,7 @@ public class Calpaiementdue implements Serializable {
 	}
 
 	public void setDate(String date) {
-		LocalDate dt = LocalDate.parse(date);
-		this.date = dt.toString();
+		this.date = date;
 	}
 
 	public float getMontantComm() {

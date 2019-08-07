@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.List;
 
 
@@ -12,6 +18,8 @@ import java.util.List;
 @Entity
 @Table(name="accounts")
 @NamedQuery(name="Account.findAll", query="SELECT a FROM Account a")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Account implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -33,11 +41,18 @@ public class Account implements Serializable {
 	//bi-directional many-to-one association to Account
 	@ManyToOne
 	@JoinColumn(name="parent")
+	@XmlTransient
 	private Account account;
 
 	//bi-directional many-to-one association to Account
 	@OneToMany(mappedBy="account")
+	@XmlTransient
 	private List<Account> accounts;
+
+	//bi-directional many-to-one association to CompteCaisse
+	@OneToMany(mappedBy="account")
+	@XmlTransient
+	private List<CompteCaisse> compteCaisses;
 
 	public Account() {
 	}
@@ -118,6 +133,28 @@ public class Account implements Serializable {
 		account.setAccount(null);
 
 		return account;
+	}
+
+	public List<CompteCaisse> getCompteCaisses() {
+		return this.compteCaisses;
+	}
+
+	public void setCompteCaisses(List<CompteCaisse> compteCaisses) {
+		this.compteCaisses = compteCaisses;
+	}
+
+	public CompteCaisse addCompteCaiss(CompteCaisse compteCaiss) {
+		getCompteCaisses().add(compteCaiss);
+		compteCaiss.setAccount(this);
+
+		return compteCaiss;
+	}
+
+	public CompteCaisse removeCompteCaiss(CompteCaisse compteCaiss) {
+		getCompteCaisses().remove(compteCaiss);
+		compteCaiss.setAccount(null);
+
+		return compteCaiss;
 	}
 
 }

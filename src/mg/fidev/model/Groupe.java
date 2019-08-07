@@ -1,7 +1,12 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.Date;
 import java.util.List;
 
@@ -12,11 +17,12 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Groupe.findAll", query="SELECT g FROM Groupe g")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Groupe implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private String codeGrp;
 
 	@Temporal(TemporalType.DATE)
@@ -30,19 +36,23 @@ public class Groupe implements Serializable {
 
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="groupe")
+	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 
 	//bi-directional many-to-one association to DemandeCredit
 	@OneToMany(mappedBy="groupe")
+	@XmlTransient
 	private List<DemandeCredit> demandeCredits;
 
 	//bi-directional many-to-one association to Adresse
 	@ManyToOne
 	@JoinColumn(name="idAdresse")
+	@XmlTransient
 	private Adresse adresse;
 
 	//bi-directional many-to-one association to Individuel
 	@OneToMany(mappedBy="groupe")
+	@XmlTransient
 	private List<Individuel> individuels;
 
 	public Groupe() {

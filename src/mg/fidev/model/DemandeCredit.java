@@ -1,25 +1,14 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import java.util.List;
 
 
 /**
@@ -38,43 +27,33 @@ public class DemandeCredit implements Serializable {
 	@Column(name="num_credit")
 	private String numCredit;
 
-	//bi-directional many-to-one association to Utilisateur
-	@ManyToOne
-	@JoinColumn(name="agentCredit_id")
-	@XmlTransient
-	private Utilisateur agentCredit_id;
+	private String agentName;
+
+	private String appBy;
 
 	@Column(name="approbation_statut")
-	@XmlElement
 	private String approbationStatut;
 
 	@Column(name="but_credit")
-	@XmlElement
 	private String butCredit;
 
 	@Column(name="date_approbation")
-	@XmlElement
 	private String dateApprobation;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="date_demande")
-	@XmlElement
-	private Date dateDemande;
-	
-	@Column(name="montant_demande")
-	@XmlElement
-	private double montantDmd;
+	private String dateDemande;
 
 	@Column(name="descr_approbation")
-	@XmlElement
 	private String descrApprobation;
 
 	@Column(name="montant_approved")
-	@XmlElement
 	private double montantApproved;
 
+	@Column(name="montant_demande")
+	private double montantDemande;
+
 	//bi-directional many-to-one association to Calpaiementdue
-	@OneToMany(mappedBy="demandeCredit", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy="demandeCredit", cascade= CascadeType.PERSIST)
 	@XmlTransient
 	private List<Calpaiementdue> calpaiementdues;
 
@@ -106,8 +85,14 @@ public class DemandeCredit implements Serializable {
 	@XmlTransient
 	private ProduitCredit produitCredit;
 
+	//bi-directional many-to-one association to Utilisateur
+	@ManyToOne
+	@JoinColumn(name="user_id")
+	@XmlTransient
+	private Utilisateur utilisateur;
+
 	//bi-directional many-to-one association to GarantieCredit
-	@OneToMany(mappedBy="demandeCredit", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy="demandeCredit")
 	@XmlTransient
 	private List<GarantieCredit> garantieCredits;
 
@@ -121,6 +106,11 @@ public class DemandeCredit implements Serializable {
 	@XmlTransient
 	private List<Remboursement> remboursements;
 
+	//bi-directional many-to-one association to Calapresdebl
+	@OneToMany(mappedBy="demandeCredit")
+	@XmlTransient
+	private List<Calapresdebl> calapresdebls;
+
 	public DemandeCredit() {
 	}
 
@@ -130,6 +120,22 @@ public class DemandeCredit implements Serializable {
 
 	public void setNumCredit(String numCredit) {
 		this.numCredit = numCredit;
+	}
+
+	public String getAgentName() {
+		return this.agentName;
+	}
+
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+
+	public String getAppBy() {
+		return this.appBy;
+	}
+
+	public void setAppBy(String appBy) {
+		this.appBy = appBy;
 	}
 
 	public String getApprobationStatut() {
@@ -156,11 +162,11 @@ public class DemandeCredit implements Serializable {
 		this.dateApprobation = dateApprobation;
 	}
 
-	public Date getDateDemande() {
+	public String getDateDemande() {
 		return this.dateDemande;
 	}
 
-	public void setDateDemande(Date dateDemande) {
+	public void setDateDemande(String dateDemande) {
 		this.dateDemande = dateDemande;
 	}
 
@@ -177,7 +183,18 @@ public class DemandeCredit implements Serializable {
 	}
 
 	public void setMontantApproved(double montantApproved) {
-		this.montantApproved = montantApproved;
+		if(montantApproved > montantDemande)
+			System.err.println("Montant approuvé supérieur au montant demandé");
+		else
+			this.montantApproved = montantApproved;
+	}
+
+	public double getMontantDemande() {
+		return this.montantDemande;
+	}
+
+	public void setMontantDemande(double montantDemande) {
+		this.montantDemande = montantDemande;
 	}
 
 	public List<Calpaiementdue> getCalpaiementdues() {
@@ -270,6 +287,14 @@ public class DemandeCredit implements Serializable {
 		this.produitCredit = produitCredit;
 	}
 
+	public Utilisateur getUtilisateur() {
+		return this.utilisateur;
+	}
+
+	public void setUtilisateur(Utilisateur utilisateur) {
+		this.utilisateur = utilisateur;
+	}
+
 	public List<GarantieCredit> getGarantieCredits() {
 		return this.garantieCredits;
 	}
@@ -336,20 +361,26 @@ public class DemandeCredit implements Serializable {
 		return remboursement;
 	}
 
-	public double getMontantDmd() {
-		return montantDmd;
+	public List<Calapresdebl> getCalapresdebls() {
+		return this.calapresdebls;
 	}
 
-	public void setMontantDmd(double montantDmd) {
-		this.montantDmd = montantDmd;
+	public void setCalapresdebls(List<Calapresdebl> calapresdebls) {
+		this.calapresdebls = calapresdebls;
 	}
 
-	public Utilisateur getAgentCredit_id() {
-		return agentCredit_id;
+	public Calapresdebl addCalapresdebl(Calapresdebl calapresdebl) {
+		getCalapresdebls().add(calapresdebl);
+		calapresdebl.setDemandeCredit(this);
+
+		return calapresdebl;
 	}
 
-	public void setAgentCredit_id(Utilisateur agentCredit_id) {
-		this.agentCredit_id = agentCredit_id;
+	public Calapresdebl removeCalapresdebl(Calapresdebl calapresdebl) {
+		getCalapresdebls().remove(calapresdebl);
+		calapresdebl.setDemandeCredit(null);
+
+		return calapresdebl;
 	}
 
 }

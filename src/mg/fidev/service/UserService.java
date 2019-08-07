@@ -12,6 +12,7 @@ import javax.jws.soap.SOAPBinding.ParameterStyle;
 import javax.xml.bind.annotation.XmlElement;
 
 import mg.fidev.model.Acces;
+import mg.fidev.model.CompteCaisse;
 
 @WebService(name="UserService", targetNamespace="http://user.fidev.com/", serviceName="userService", portName="userServicePort")
 @SOAPBinding(parameterStyle=ParameterStyle.WRAPPED)
@@ -65,5 +66,11 @@ public interface UserService {
 			@XmlElement(required=true) @WebParam(name="raison") String raison,
 			@XmlElement(required=true) @WebParam(name="numRecu") String numRecu,
 			@XmlElement(required=true) @WebParam(name="numCpt") String numCompte
+			);
+	
+	@WebMethod @WebResult(name="cptCaisse")
+	public boolean ajoutCptCaisse(
+			@XmlElement(required=true) @WebParam(name="cptCaisse") CompteCaisse cptCaisse,
+			@XmlElement(required=true) @WebParam(name="planCompta") String numCptCompta
 			);
 }

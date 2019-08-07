@@ -5,7 +5,6 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -26,58 +25,40 @@ public class ConfigGeneralCredit implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@XmlElement
 	private int rowId;
 
-	@XmlElement
 	private boolean activePrioriteRembCreditDeclassse;
 
-	@XmlElement
 	private boolean activeRegleDuplum;
 
-	@XmlElement
 	private boolean autoriseDecaisPartiel;
 
-	@XmlElement
 	private String devise;
 
-	@XmlElement
 	private int enregPbliPostDemndCredit;
 
-	@XmlElement
 	private int enregPubliPostDecaiss;
 
-	@XmlElement
 	private boolean exclurePrdtLimitation;
 
-	@XmlElement
 	private boolean methodeDegressifCompose;
 
-	@XmlElement
 	private int nbrJrInt;
 
-	@XmlElement
 	private int nbrSemaine;
 
-	@XmlElement
 	private boolean nePasReinitialiserIntImpayeSoldeDegr;
 
-	@XmlElement
 	private boolean peutChangerCptGLSurpaie;
 
-	@XmlElement
 	private boolean privilegeRembCapitalCreanceDouteuse;
 
-	@XmlElement
 	private boolean produitLieEpargne;
 
-	@XmlElement
 	private String recalcDateEcheanceAuDecais;
 
-	@XmlElement
 	private String recalcINtRembAmortDegr;
 
-	@XmlElement
 	private boolean tauxIntVarSoldeDegr;
 
 	//bi-directional many-to-one association to ProduitCredit
@@ -88,11 +69,11 @@ public class ConfigGeneralCredit implements Serializable {
 	public ConfigGeneralCredit() {
 	}
 
-	public int getrowId() {
+	public int getRowId() {
 		return this.rowId;
 	}
 
-	public void setrowId(int rowId) {
+	public void setRowId(int rowId) {
 		this.rowId = rowId;
 	}
 

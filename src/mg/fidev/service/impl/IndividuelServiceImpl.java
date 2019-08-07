@@ -204,4 +204,29 @@ public class IndividuelServiceImpl implements IndividuelService {
 			return "Error";
 		}
 	}
+
+	@Override
+	public String saveGarant(Individuel individuel, Adresse adresse, Docidentite docId, String codeAgence) {
+		individuel.setEstGarant(true);
+		individuel.setAdresse(adresse);
+		docId.setIndividuel(individuel);
+		
+		if(individuel.getEstClientIndividuel()){
+			individuel.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
+		}
+		else{
+			individuel.setCodeInd(CodeIncrement.getCodeGar(em, codeAgence));
+		}
+		try {
+			transaction.begin();
+			em.persist(individuel);
+			em.persist(docId);
+			transaction.commit();
+			em.refresh(individuel);
+			em.refresh(docId);
+			return "Insertion garant succes";
+		} catch (Exception e) {
+			return "Insertion garant failed "+e.getMessage();
+		}
+	}
 }

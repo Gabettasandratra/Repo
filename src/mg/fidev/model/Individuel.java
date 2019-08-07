@@ -5,7 +5,6 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -19,87 +18,61 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Individuel.findAll", query="SELECT i FROM Individuel i")
+@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "Individuel", namespace = "http://individuel.fidev.mg")
 public class Individuel implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@XmlElement
 	private String codeInd;
 
-	@Temporal(TemporalType.DATE)
-	@XmlElement
-	private Date dateInscription;
+	private String dateInscription;
 
-	@XmlElement
 	private String dateNaissance;
 
 	@Temporal(TemporalType.DATE)
-	@XmlElement
 	private Date dateSortie;
 
-	@XmlElement
 	private String email;
 
-	@XmlElement
 	private boolean estClientIndividuel;
 
-	@XmlElement
 	private boolean estGarant;
 
-	@XmlElement
 	private boolean estMembreGroupe;
 
-	@XmlElement
 	private String etatCivil;
 
-	@XmlElement
 	private String langue;
 
-	@XmlElement
 	private String lieuNaissance;
 
-	@XmlElement
 	private int nbEnfant;
 
-	@XmlElement
 	private int nbPersCharge;
 
-	@XmlElement
 	private String niveauEtude;
 
-	@XmlElement
 	private String nomClient;
 
-	@XmlElement
 	private String nomConjoint;
 
-	@XmlElement
 	private String numDmdCrdtAGarantir;
 
-	@XmlElement
 	private String numeroMobile;
 
-	@XmlElement
 	private String parentAdresse;
 
-	@XmlElement
 	private String parentNom;
 
-	@XmlElement
 	private String prenomClient;
 
-	@XmlElement
 	private String profession;
 
-	@XmlElement
 	private String raisonSortie;
 
-	@XmlElement
 	private String sexe;
 
-	@XmlElement
 	private String titre;
 
 	//bi-directional many-to-one association to CompteEpargne
@@ -140,11 +113,11 @@ public class Individuel implements Serializable {
 		this.codeInd = codeInd;
 	}
 
-	public Date getDateInscription() {
+	public String getDateInscription() {
 		return this.dateInscription;
 	}
 
-	public void setDateInscription(Date dateInscription) {
+	public void setDateInscription(String dateInscription) {
 		this.dateInscription = dateInscription;
 	}
 

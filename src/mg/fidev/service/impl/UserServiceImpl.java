@@ -11,16 +11,21 @@ import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Acces;
+import mg.fidev.model.Account;
 import mg.fidev.model.CompteCaisse;
 import mg.fidev.model.CompteEpargne;
 import mg.fidev.model.CompteFerme;
 import mg.fidev.model.Fonction;
+import mg.fidev.model.Grandlivre;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
 import mg.fidev.model.ProduitEpargne;
 import mg.fidev.model.TransactionEpargne;
 import mg.fidev.model.Utilisateur;
 import mg.fidev.service.UserService;
+import mg.fidev.utils.CodeIncrement;
+
+import org.mindrot.jbcrypt.BCrypt;
 
 @WebService(name="UserService", targetNamespace="http://user.fidev.com/", serviceName="userService", portName="userServicePort", endpointInterface="mg.fidev.service.UserService")
 public class UserServiceImpl implements UserService {
@@ -36,26 +41,33 @@ public class UserServiceImpl implements UserService {
 		
 		//	Requête pour vérifier si le login et le mote de passe sont
 		//	valides et correspondent bien
-		TypedQuery<Utilisateur> q = em.createQuery("select u from Utilisateur u where u.loginUtilisateur= :param1 and u.mdpUtilisateur= :param2", Utilisateur.class);
-		q.setParameter("param1", loginUser);
-		q.setParameter("param2", mdpUser);
+		TypedQuery<Utilisateur> q = em.createQuery("select u from Utilisateur u where u.loginUtilisateur= :log", Utilisateur.class)
+				.setParameter("log", loginUser);
 		
 		Utilisateur ut = new Utilisateur();
 		
 		//	Traitement à faire en fonction du résultat de la requête
 		//	Login et mot de passe valides ou non
 		System.out.println("Utilisateur ready !!");
-		if((q.getSingleResult()) != null){
+		if(!(q.getSingleResult()).equals(null)){
 			//	Instance utilisateur correspondant à la réponse de la requête précédente
 			ut = q.getSingleResult();
-			for(Acces ac : ut.getFonction().getAcces()){
-				System.out.println(ac.getTitreAcces());
-				a.add(ac);
+			String mdpHash = ut.getMdpUtilisateur();
+			if(BCrypt.checkpw(mdpUser, mdpHash)){
+				for(Acces ac : ut.getFonction().getAcces()){
+					System.out.println(ac.getTitreAcces());
+					a.add(ac);
+				}
+				System.out.println("Connexion réussie");
+				return a;
 			}
-			System.out.println("Connexion réussie");
-			return a;
+			else{
+				System.err.println("Mot de passe incorrect");
+				return null;
+			}
 		}
-		System.out.println("Utilisateur null !!");
+		else
+			System.err.println("Utilisateur null !!");
 		return null;
 	}
 
@@ -66,12 +78,13 @@ public class UserServiceImpl implements UserService {
 		//	Instance nouvel utilisateur à insérer
 		Utilisateur user = new Utilisateur();
 		List<CompteCaisse> cptCaisse = new ArrayList<CompteCaisse>();
+		String passHash = BCrypt.hashpw(mdpUser, BCrypt.gensalt());
 		
 		//	Affectation informations utilisateur
 		if(mdpUser.equals(mdpConf)){
 			user.setNomUtilisateur(nomUser);
 			user.setLoginUtilisateur(loginUser);
-			user.setMdpUtilisateur(mdpUser);
+			user.setMdpUtilisateur(passHash);
 			user.setGenreUser(genreUser);
 			user.setTelUser(telUser);
 			for(String a : listCptCaisse){
@@ -165,6 +178,17 @@ public class UserServiceImpl implements UserService {
 		//	Instance de nouvelle transaction
 		TransactionEpargne trans = new TransactionEpargne();
 		
+		///	pour incrémenter le tcode dans la table grandlivre
+				String indexTcode = CodeIncrement.genTcode(em);
+		
+		//	Mouvement comptabilité
+		Grandlivre lDebit = new Grandlivre();
+		Grandlivre lCredit = new Grandlivre();
+		lDebit.setPiece(pieceCompta);
+		lDebit.setTcode(indexTcode);
+		lCredit.setPiece(pieceCompta);
+		lCredit.setTcode(indexTcode);
+		
 		//	Initialisation des informations sur la transaction
 		trans.setDateTransaction(dateTransac);
 		trans.setTypeTransEp(typeTransac);
@@ -173,6 +197,8 @@ public class UserServiceImpl implements UserService {
 		trans.setPieceCompta(pieceCompta);
 		CompteCaisse cptCaisse = em.find(CompteCaisse.class, nomCptCaisse);
 		CompteEpargne cptEp = em.find(CompteEpargne.class, numCptEp);
+		String cptC = String.valueOf(cptCaisse.getAccount().getTkey());
+		trans.setIdTransactionEp(indexTcode);
 		trans.setCompteCaisse(cptCaisse);
 		trans.setCompteEpargne(cptEp);
 		
@@ -180,12 +206,53 @@ public class UserServiceImpl implements UserService {
 		if(trans.getCompteEpargne() != null){
 			System.out.println("Informations sur la transaction prêtes");
 			try {
-				transaction.begin();
-				em.flush();
-				em.persist(trans);
-				transaction.commit();
-				System.out.println("Transaction réussie");
-				return true;
+				if(trans.getTypeTransEp().equals("DE")){
+					lDebit.setCompte(cptC);
+					lDebit.setDebit(montant);
+					lDebit.setDescr("Dépôt épargne");
+					lCredit.setCompte("211");
+					lCredit.setCredit(montant);
+					lCredit.setDescr("Dépôt épargne");
+					transaction.begin();
+					em.flush();
+					em.persist(trans);
+					transaction.commit();
+					em.refresh(trans);
+					transaction.begin();
+					lDebit.setTcode(String.valueOf(trans.getIdTransactionEp()));
+					lDebit.setDate(trans.getDateTransaction());
+					lCredit.setTcode(String.valueOf(trans.getIdTransactionEp()));
+					lCredit.setDate(trans.getDateTransaction());
+					em.persist(lCredit);
+					em.persist(lDebit);
+					transaction.commit();
+					System.out.println("Transaction réussie");
+					return true;
+				}
+				else if(trans.getTypeTransEp().equals("RE")){
+					lDebit.setCompte("211");
+					lDebit.setDebit(montant);
+					lDebit.setDescr("Retrait épargne");
+					lCredit.setCompte(cptC);
+					lCredit.setCredit(montant);
+					lCredit.setDescr("Retrait épargne");
+					transaction.begin();
+					em.flush();
+					em.persist(trans);
+					transaction.commit();
+					em.refresh(trans);
+					transaction.begin();
+					lDebit.setTcode(String.valueOf(trans.getIdTransactionEp()));
+					lDebit.setDate(trans.getDateTransaction());
+					lCredit.setTcode(String.valueOf(trans.getIdTransactionEp()));
+					lCredit.setDate(trans.getDateTransaction());
+					em.persist(lDebit);
+					em.persist(lCredit);
+					transaction.commit();
+					System.out.println("Transaction réussie");
+					return true;
+				}
+				return false;
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 				return false;
@@ -237,6 +304,23 @@ public class UserServiceImpl implements UserService {
 		
 		String retour = client.postEpargne(url, date, description, piece, tcode, compteDebit, montantDebit, compteCredit, montantCredit); 
 		System.out.println("OUT : "+ retour);*/
+	}
+
+	@Override
+	public boolean ajoutCptCaisse(CompteCaisse cptCaisse, String numCptCompta) {
+		Account cptGL = em.find(Account.class, numCptCompta);
+		cptCaisse.setAccount(cptGL);
+		System.out.println("Nouveau compte caisse");
+		try {
+			transaction.begin();
+			em.persist(cptCaisse);
+			transaction.commit();
+			System.out.println("Nouveau compte caisse inséré");
+			return true;
+		} catch (Exception e) {
+			System.err.println("Erreur d'insertion de compte caisse");
+			return false;
+		}
 	}
 
 }

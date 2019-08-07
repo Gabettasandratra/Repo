@@ -10,6 +10,7 @@ import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.ParameterStyle;
 import javax.xml.bind.annotation.XmlElement;
 
+import mg.fidev.model.ConfigGlEpargne;
 import mg.fidev.model.ProduitEpargne;
 
 @WebService(name = "epargneService", targetNamespace = "http://fidev.com/epargneService", serviceName = "epargneService", portName = "epargneServicePort")
@@ -42,6 +43,7 @@ public interface ProduitEpargneService {
 	@WebMethod
 	@WebResult(name="validationInteret")
 	public boolean updateConfigIntProduit(@WebParam(name = "periodeInt") @XmlElement(required=true,nillable=false) int periodeInteret,
+			@WebParam(name = "dateCalcul") @XmlElement(required=true,nillable=false) String dateCalcul,
 			@WebParam(name = "tauxInt") @XmlElement(required=true,nillable=false) float tauxInteret,
 			@WebParam(name = "nbrJrInt") @XmlElement(required=true,nillable=false) int nbrJrInteret,
 			@WebParam(name = "nbrSemInt") @XmlElement(required=true,nillable=false) int nbrSemInteret,
@@ -60,6 +62,13 @@ public interface ProduitEpargneService {
 			@WebParam(name = "ageMinCpt") @XmlElement(required=true,nillable=false) int ageMinCpt,
 			@WebParam(name = "fraisTenuCpt") @XmlElement(required=true,nillable=true) float fraisTenuCpt,
 			@WebParam(name = "idproduit") @XmlElement(required=true,nillable=false) List<String> idProduit);
+	
+	@WebMethod
+	@WebResult(name = "validation")
+	public void configGLepargne(
+			@WebParam(name= "configGlEpargne") @XmlElement(required=true,nillable=false) ConfigGlEpargne configGlEpargne,
+			@WebParam(name= "idProduit") @XmlElement(required=true,nillable=false) String idProduit
+			);
 	
 	@WebMethod
 	@WebResult(name = "interet")

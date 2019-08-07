@@ -50,7 +50,7 @@ public class GarantieCredit implements Serializable {
 	private float percentGar3;
 
 	//bi-directional many-to-one association to DemandeCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade= CascadeType.ALL)
 	@JoinColumn(name="num_credit")
 	@XmlTransient
 	private DemandeCredit demandeCredit;

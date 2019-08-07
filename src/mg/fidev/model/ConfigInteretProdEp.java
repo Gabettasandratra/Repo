@@ -3,9 +3,11 @@ package mg.fidev.model;
 import java.io.Serializable;
 
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -16,6 +18,8 @@ import java.util.List;
 @Entity
 @Table(name="config_interet_prod_ep")
 @NamedQuery(name="ConfigInteretProdEp.findAll", query="SELECT c FROM ConfigInteretProdEp c")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ConfigInteretProdEp implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -23,9 +27,9 @@ public class ConfigInteretProdEp implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int rowId;
 
-	private double interetMinGrp;
-	
 	private String dateCalcul;
+
+	private double interetMinGrp;
 
 	private double interetMinInd;
 
@@ -45,6 +49,7 @@ public class ConfigInteretProdEp implements Serializable {
 
 	//bi-directional many-to-one association to ProduitEpargne
 	@OneToMany(mappedBy="configInteretProdEp")
+	@XmlTransient
 	private List<ProduitEpargne> produitEpargnes;
 
 	public ConfigInteretProdEp() {
@@ -56,6 +61,14 @@ public class ConfigInteretProdEp implements Serializable {
 
 	public void setRowId(int rowId) {
 		this.rowId = rowId;
+	}
+
+	public String getDateCalcul() {
+		return this.dateCalcul;
+	}
+
+	public void setDateCalcul(String dateCalcul) {
+		this.dateCalcul = dateCalcul;
 	}
 
 	public double getInteretMinGrp() {
@@ -150,16 +163,6 @@ public class ConfigInteretProdEp implements Serializable {
 		produitEpargne.setConfigInteretProdEp(null);
 
 		return produitEpargne;
-	}
-
-	public String getDateCalcul() {
-		return dateCalcul;
-	}
-
-	public void setDateCalcul(String dateCalcul) {
-		DateTimeFormatter form = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-		LocalDate dt = LocalDate.parse(dateCalcul, form);
-		this.dateCalcul = dt.toString();
 	}
 
 }

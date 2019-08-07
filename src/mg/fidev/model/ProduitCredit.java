@@ -5,8 +5,8 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import java.util.List;
 
@@ -25,48 +25,52 @@ public class ProduitCredit implements Serializable {
 
 	@Id
 	@Column(name="id_prod_credit")
-	@XmlElement
 	private String idProdCredit;
 
-	@XmlElement
 	private boolean etat;
 
 	@Column(name="nom_prod_credit")
-	@XmlElement
 	private String nomProdCredit;
 
 	//bi-directional many-to-one association to DemandeCredit
 	@OneToMany(mappedBy="produitCredit")
+	@XmlTransient
 	private List<DemandeCredit> demandeCredits;
 
 	//bi-directional many-to-one association to ConfigCreditIndividuel
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="configCreditInd_id")
+	@XmlTransient
 	private ConfigCreditIndividuel configCreditIndividuel;
 
 	//bi-directional many-to-one association to ConfigFraisCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="configFrais_id")
+	@XmlTransient
 	private ConfigFraisCredit configFraisCredit;
 
 	//bi-directional many-to-one association to ConfigGarantieCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="configGarantie_id")
+	@XmlTransient
 	private ConfigGarantieCredit configGarantieCredit;
 
 	//bi-directional many-to-one association to ConfigGeneralCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="configGeneral_id")
+	@XmlTransient
 	private ConfigGeneralCredit configGeneralCredit;
 
 	//bi-directional many-to-one association to ConfigGlCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="configGLcredId")
+	@XmlTransient
 	private ConfigGlCredit configGlCredit;
 
 	//bi-directional many-to-one association to ConfigPenaliteCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="configPenaliteId")
+	@XmlTransient
 	private ConfigPenaliteCredit configPenaliteCredit;
 
 	public ProduitCredit() {

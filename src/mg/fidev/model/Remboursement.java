@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.Date;
 
 
@@ -11,6 +17,8 @@ import java.util.Date;
  */
 @Entity
 @NamedQuery(name="Remboursement.findAll", query="SELECT r FROM Remboursement r")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Remboursement implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -18,7 +26,7 @@ public class Remboursement implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int tcode;
 
-	private boolean cash;
+	private byte cash;
 
 	private float cheqcomm;
 
@@ -40,11 +48,13 @@ public class Remboursement implements Serializable {
 	//bi-directional many-to-one association to DemandeCredit
 	@ManyToOne
 	@JoinColumn(name="num_credit")
+	@XmlTransient
 	private DemandeCredit demandeCredit;
 
 	//bi-directional many-to-one association to Utilisateur
 	@ManyToOne
 	@JoinColumn(name="user_id")
+	@XmlTransient
 	private Utilisateur utilisateur;
 
 	public Remboursement() {
@@ -58,11 +68,11 @@ public class Remboursement implements Serializable {
 		this.tcode = tcode;
 	}
 
-	public boolean getCash() {
+	public byte getCash() {
 		return this.cash;
 	}
 
-	public void setCash(boolean cash) {
+	public void setCash(byte cash) {
 		this.cash = cash;
 	}
 

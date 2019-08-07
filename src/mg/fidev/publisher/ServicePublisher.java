@@ -18,6 +18,7 @@ public class ServicePublisher {
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/produit", new ProduitEpargneServiceImpl());
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/credit", new CreditServiceImpl());
 		System.out.println("-- Service Online --");
+		
 	}
 
 }

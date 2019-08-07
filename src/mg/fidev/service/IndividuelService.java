@@ -26,6 +26,13 @@ public interface IndividuelService {
 	
 	@WebMethod
 	@WebResult(name = "resultat")
+	public String saveGarant(@WebParam(name = "individuel") @XmlElement(required = true) Individuel individuel,
+			@WebParam(name = "adresseGar") @XmlElement(required = true) Adresse adresse,
+			@WebParam(name = "docIndentite") @XmlElement(required = true) Docidentite docId,
+			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence);
+	
+	@WebMethod
+	@WebResult(name = "resultat")
 	public String insertIndividuel(@WebParam(name = "individuel") @XmlElement(required = true) Individuel individuel,
 			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence,
 			@WebParam(name = "docIdentite") @XmlElement(required = true) Docidentite docIdentite,

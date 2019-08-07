@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.List;
 
 
@@ -12,11 +18,12 @@ import java.util.List;
 @Entity
 @Table(name="cat_epargne")
 @NamedQuery(name="CatEpargne.findAll", query="SELECT c FROM CatEpargne c")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CatEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="nom_cat_epargne")
 	private String nomCatEpargne;
 
@@ -25,6 +32,7 @@ public class CatEpargne implements Serializable {
 
 	//bi-directional many-to-one association to TypeEpargne
 	@OneToMany(mappedBy="catEpargne")
+	@XmlTransient
 	private List<TypeEpargne> typeEpargnes;
 
 	public CatEpargne() {

@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.List;
 
 
@@ -12,6 +18,8 @@ import java.util.List;
 @Entity
 @Table(name="config_gl_epargne")
 @NamedQuery(name="ConfigGlEpargne.findAll", query="SELECT c FROM ConfigGlEpargne c")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ConfigGlEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -75,6 +83,7 @@ public class ConfigGlEpargne implements Serializable {
 
 	//bi-directional many-to-one association to ProduitEpargne
 	@OneToMany(mappedBy="configGlEpargne")
+	@XmlTransient
 	private List<ProduitEpargne> produitEpargnes;
 
 	public ConfigGlEpargne() {

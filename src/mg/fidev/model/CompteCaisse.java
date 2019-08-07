@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.List;
 
 
@@ -12,25 +18,29 @@ import java.util.List;
 @Entity
 @Table(name="compte_caisse")
 @NamedQuery(name="CompteCaisse.findAll", query="SELECT c FROM CompteCaisse c")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CompteCaisse implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="nom_cpt_caisse")
 	private String nomCptCaisse;
 
-	//bi-directional many-to-one association to PlanComptable
+	//bi-directional many-to-one association to Account
 	@ManyToOne
 	@JoinColumn(name="Plan_comptablenum_plan_comptable")
-	private PlanComptable planComptable;
+	@XmlTransient
+	private Account account;
 
 	//bi-directional many-to-one association to TransactionEpargne
 	@OneToMany(mappedBy="compteCaisse")
+	@XmlTransient
 	private List<TransactionEpargne> transactionEpargnes;
 
 	//bi-directional many-to-many association to Utilisateur
 	@ManyToMany(mappedBy="compteCaisses")
+	@XmlTransient
 	private List<Utilisateur> utilisateurs;
 
 	public CompteCaisse() {
@@ -44,12 +54,12 @@ public class CompteCaisse implements Serializable {
 		this.nomCptCaisse = nomCptCaisse;
 	}
 
-	public PlanComptable getPlanComptable() {
-		return this.planComptable;
+	public Account getAccount() {
+		return this.account;
 	}
 
-	public void setPlanComptable(PlanComptable planComptable) {
-		this.planComptable = planComptable;
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 
 	public List<TransactionEpargne> getTransactionEpargnes() {
