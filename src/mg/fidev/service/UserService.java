@@ -11,8 +11,8 @@ import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.ParameterStyle;
 import javax.xml.bind.annotation.XmlElement;
 
-import mg.fidev.model.Acces;
 import mg.fidev.model.CompteCaisse;
+import mg.fidev.model.Utilisateur;
 
 @WebService(name="UserService", targetNamespace="http://user.fidev.com/", serviceName="userService", portName="userServicePort")
 @SOAPBinding(parameterStyle=ParameterStyle.WRAPPED)
@@ -28,8 +28,9 @@ public interface UserService {
 			@XmlElement(required=true) @WebParam(name="compteCaisse") List<String> listCptCaisse,
 			@XmlElement(required=true) @WebParam(name="fonction") int fonctionId);
 	
-	@WebMethod @WebResult(name="resultAuth")
-	public List<Acces> authentifie(
+	@WebMethod
+	@WebResult(name="resultAuth")
+	public Utilisateur authentifie(
 			@XmlElement(required=true) @WebParam(name="login") String loginUser, 
 			@XmlElement(required=true) @WebParam(name="mdp") String mdpUser);
 	
@@ -71,6 +72,6 @@ public interface UserService {
 	@WebMethod @WebResult(name="cptCaisse")
 	public boolean ajoutCptCaisse(
 			@XmlElement(required=true) @WebParam(name="cptCaisse") CompteCaisse cptCaisse,
-			@XmlElement(required=true) @WebParam(name="planCompta") String numCptCompta
+			@XmlElement(required=true) @WebParam(name="planCompta") int numCptCompta
 			);
 }

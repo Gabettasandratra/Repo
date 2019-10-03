@@ -17,15 +17,23 @@ import java.util.List;
  */
 @Entity
 @Table(name="demande_credit")
-@NamedQuery(name="DemandeCredit.findAll", query="SELECT d FROM DemandeCredit d")
-@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement
 public class DemandeCredit implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="num_credit")
 	private String numCredit;
+	
+	@Column(name="date_demande")
+	private String dateDemande;
+
+	@Column(name="montant_demande")
+	private double montantDemande;
+
+	@Column(name="but_credit")
+	private String butCredit;
 
 	private String agentName;
 
@@ -34,86 +42,147 @@ public class DemandeCredit implements Serializable {
 	@Column(name="approbation_statut")
 	private String approbationStatut;
 
-	@Column(name="but_credit")
-	private String butCredit;
-
 	@Column(name="date_approbation")
 	private String dateApprobation;
-
-	@Column(name="date_demande")
-	private String dateDemande;
 
 	@Column(name="descr_approbation")
 	private String descrApprobation;
 
 	@Column(name="montant_approved")
 	private double montantApproved;
+	
+	private double solde_total;
+	
+	private double principale_total;
+	
+	private double interet_total;
 
-	@Column(name="montant_demande")
-	private double montantDemande;
-
-	//bi-directional many-to-one association to Calpaiementdue
-	@OneToMany(mappedBy="demandeCredit", cascade= CascadeType.PERSIST)
+	/******************************************************************************************************************************/
+									/**********************RELEATION ONE TO MANY********************************/
+	/******************************************************************************************************************************/
+	
+	/***
+	 * CALENDRIER GENERER AU DEMANDE 
+	 * ***/
+	//bi-directional one-to-many association to Calpaiementdue
+	@OneToMany(mappedBy="demandeCredit", cascade = CascadeType.PERSIST)
 	@XmlTransient
 	private List<Calpaiementdue> calpaiementdues;
 
-	//bi-directional many-to-one association to CommissionCredit
+	
+	/***
+	 * COMMISSION DE CREDIT
+	 * ***/
+	//bi-directional one-to-many association to CommissionCredit
 	@OneToMany(mappedBy="demandeCredit")
 	@XmlTransient
 	private List<CommissionCredit> commissionCredits;
 
-	//bi-directional many-to-one association to Decaissement
+	
+	/***
+	 * DECAISSEMENT
+	 * ***/
+	//bi-directional one-to-many association to Decaissement
 	@OneToMany(mappedBy="demandeCredit")
 	@XmlTransient
 	private List<Decaissement> decaissements;
 
-	//bi-directional many-to-one association to Groupe
-	@ManyToOne
-	@JoinColumn(name="codeGrp")
-	@XmlTransient
-	private Groupe groupe;
 
-	//bi-directional many-to-one association to Individuel
-	@ManyToOne
-	@JoinColumn(name="codeInd")
-	@XmlTransient
-	private Individuel individuel;
-
-	//bi-directional many-to-one association to ProduitCredit
-	@ManyToOne
-	@JoinColumn(name="produitCredit_id")
-	@XmlTransient
-	private ProduitCredit produitCredit;
-
-	//bi-directional many-to-one association to Utilisateur
-	@ManyToOne
-	@JoinColumn(name="user_id")
-	@XmlTransient
-	private Utilisateur utilisateur;
-
-	//bi-directional many-to-one association to GarantieCredit
+	/***
+	 * GARANTIE DEMANDE
+	 * ****/
+	//bi-directional one-to-many association to GarantieCredit
 	@OneToMany(mappedBy="demandeCredit")
 	@XmlTransient
 	private List<GarantieCredit> garantieCredits;
 
-	//bi-directional many-to-one association to RembMontant
+	
+	/***
+	 * REMBMONT
+	 * ***/
+	//bi-directional one-to-many association to RembMontant
 	@OneToMany(mappedBy="demandeCredit")
 	@XmlTransient
 	private List<RembMontant> rembMontants;
 
-	//bi-directional many-to-one association to Remboursement
-	@OneToMany(mappedBy="demandeCredit")
+	
+	/***
+	 * REMBOURSEMET CREDIT
+	 * ***/
+	//bi-directional one-to-many association to Remboursement
+	@OneToMany(mappedBy="demandeCredit",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<Remboursement> remboursements;
 
-	//bi-directional many-to-one association to Calapresdebl
-	@OneToMany(mappedBy="demandeCredit")
+	/***
+	 * CALENDRIER GENERER AU DEBLOCAGE
+	 * ***/
+	//bi-directional one-to-many association to Calapresdebl
+	@OneToMany(mappedBy="demandeCredit",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<Calapresdebl> calapresdebls;
 
+	
+	
+	/**************************************************************************************************************************************/
+							/***************************RELATION MANY TO ONE***************************************/
+	/**************************************************************************************************************************************/
+	
+	/***
+	 *GROUPE 
+	 ***/
+	
+	//bi-directional many-to-one association to Groupe
+	@ManyToOne
+	@JoinColumn(name="codeGrp")
+	private Groupe groupe;
+
+	/***
+	 * INDIVIDUEL
+	 * ***/
+	
+	//bi-directional many-to-one association to Individuel
+	@ManyToOne
+	@JoinColumn(name="codeInd")
+	private Individuel individuel;
+
+	
+	/***
+	 * PRODUIT CREDIT
+	 * ***/
+	
+	//bi-directional many-to-one association to ProduitCredit
+	@ManyToOne
+	@JoinColumn(name="produitCredit_id")
+	private ProduitCredit produitCredit;
+
+	/***
+	 * UTILISATEUR
+	 * ***/
+	//bi-directional many-to-one association to Utilisateur
+	@ManyToOne
+	@JoinColumn(name="user_id")
+	private Utilisateur utilisateur;
+
+	/************************************************************************************************************************************/
+	/************************************************************************************************************************************/
+	/************************************************************************************************************************************/
+	/************************************************************************************************************************************/
+	
+	
 	public DemandeCredit() {
 	}
 
+
+	public DemandeCredit(String dateDemande, double montantDemande,
+			String butCredit, String agentName) {
+		super();
+		this.dateDemande = dateDemande;
+		this.montantDemande = montantDemande;
+		this.butCredit = butCredit;
+		this.agentName = agentName;
+	}
+	
 	public String getNumCredit() {
 		return this.numCredit;
 	}
@@ -196,6 +265,36 @@ public class DemandeCredit implements Serializable {
 	public void setMontantDemande(double montantDemande) {
 		this.montantDemande = montantDemande;
 	}
+
+	public double getSolde_total() {
+		return solde_total;
+	}
+
+
+	public void setSolde_total(double solde_total) {
+		this.solde_total = solde_total;
+	}
+
+
+	public double getPrincipale_total() {
+		return principale_total;
+	}
+
+
+	public void setPrincipale_total(double principale_total) {
+		this.principale_total = principale_total;
+	}
+
+
+	public double getInteret_total() {
+		return interet_total;
+	}
+
+
+	public void setInteret_total(double interet_total) {
+		this.interet_total = interet_total;
+	}
+
 
 	public List<Calpaiementdue> getCalpaiementdues() {
 		return this.calpaiementdues;

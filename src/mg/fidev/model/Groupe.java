@@ -1,14 +1,21 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import java.util.Date;
 import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -16,7 +23,7 @@ import java.util.List;
  * 
  */
 @Entity
-@NamedQuery(name="Groupe.findAll", query="SELECT g FROM Groupe g")
+//@NamedQuery(name="Groupe.findAll", query="SELECT g FROM Groupe g")
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Groupe implements Serializable {
@@ -25,15 +32,25 @@ public class Groupe implements Serializable {
 	@Id
 	private String codeGrp;
 
+	private String nomGroupe;
+
 	@Temporal(TemporalType.DATE)
 	private Date dateInscription;
 
 	private String email;
-
-	private String nomGroupe;
-
+	
 	private String numeroMobile;
 
+	private String numReference;
+	
+	private String NumStat;
+	
+	private String president;
+	
+	private String secretaire;
+	
+	private String tresorier;
+	
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="groupe")
 	@XmlTransient
@@ -45,15 +62,23 @@ public class Groupe implements Serializable {
 	private List<DemandeCredit> demandeCredits;
 
 	//bi-directional many-to-one association to Adresse
-	@ManyToOne
+	@ManyToOne(cascade= CascadeType.ALL)
 	@JoinColumn(name="idAdresse")
 	@XmlTransient
 	private Adresse adresse;
 
 	//bi-directional many-to-one association to Individuel
-	@OneToMany(mappedBy="groupe")
+	@OneToMany(mappedBy="groupe",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<Individuel> individuels;
+	
+	@OneToMany(mappedBy="groupe")
+	@XmlTransient
+	private List<Grandlivre> grandLivre;
+	
+	@OneToMany(mappedBy="groupe", cascade = CascadeType.ALL)
+	@XmlTransient
+	private List<ListeRouge> listeRouge;
 
 	public Groupe() {
 	}
@@ -96,6 +121,46 @@ public class Groupe implements Serializable {
 
 	public void setNumeroMobile(String numeroMobile) {
 		this.numeroMobile = numeroMobile;
+	}
+
+	public String getNumReference() {
+		return numReference;
+	}
+
+	public void setNumReference(String numReference) {
+		this.numReference = numReference;
+	}
+
+	public String getNumStat() {
+		return NumStat;
+	}
+
+	public void setNumStat(String numStat) {
+		NumStat = numStat;
+	}
+
+	public String getPresident() {
+		return president;
+	}
+
+	public void setPresident(String president) {
+		this.president = president;
+	}
+
+	public String getSecretaire() {
+		return secretaire;
+	}
+
+	public void setSecretaire(String secretaire) {
+		this.secretaire = secretaire;
+	}
+
+	public String getTresorier() {
+		return tresorier;
+	}
+
+	public void setTresorier(String tresorier) {
+		this.tresorier = tresorier;
 	}
 
 	public List<CompteEpargne> getCompteEpargnes() {
@@ -170,6 +235,14 @@ public class Groupe implements Serializable {
 		individuel.setGroupe(null);
 
 		return individuel;
+	}
+
+	public List<Grandlivre> getGrandLivre() {
+		return grandLivre;
+	}
+
+	public void setGrandLivre(List<Grandlivre> grandLivre) {
+		this.grandLivre = grandLivre;
 	}
 
 }

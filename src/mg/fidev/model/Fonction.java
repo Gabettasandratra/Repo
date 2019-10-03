@@ -22,15 +22,8 @@ public class Fonction implements Serializable {
 
 	//bi-directional many-to-many association to Acces
 	@ManyToMany
-	@JoinTable(
-		name="fonction_acces"
-		, joinColumns={
-			@JoinColumn(name="FonctionidFonction")
-			}
-		, inverseJoinColumns={
-			@JoinColumn(name="AccesidAcces")
-			}
-		)
+	@JoinTable(name="fonction_acces", joinColumns={@JoinColumn(name="FonctionidFonction")}
+		, inverseJoinColumns={@JoinColumn(name="AccesidAcces")})
 	private List<Acces> acces;
 
 	//bi-directional many-to-one association to Utilisateur

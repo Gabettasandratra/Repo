@@ -1,15 +1,22 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import java.util.Date;
-import java.util.List;
 
 
 /**
@@ -101,6 +108,14 @@ public class Individuel implements Serializable {
 	@JoinColumn(name="codeGrp")
 	@XmlTransient
 	private Groupe groupe;
+	
+	@OneToMany(mappedBy="codeInd")
+	@XmlTransient
+	private List<Grandlivre> grandLivre;
+	
+	@OneToMany(mappedBy="individuel",cascade = CascadeType.ALL)
+	@XmlTransient
+	private List<ListeRouge> listeRouge;
 
 	public Individuel() {
 	}
@@ -387,4 +402,11 @@ public class Individuel implements Serializable {
 		this.groupe = groupe;
 	}
 
+	public List<Grandlivre> getGrandLivre() {
+		return grandLivre;
+	}
+
+	public void setGrandLivre(List<Grandlivre> grandLivre) {
+		this.grandLivre = grandLivre;
+	}
 }

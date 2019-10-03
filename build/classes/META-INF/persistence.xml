@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 	<persistence-unit name="FIDEV-Repository" transaction-type="RESOURCE_LOCAL">
+	<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 		<class>mg.fidev.model.Acces</class>
 		<class>mg.fidev.model.Account</class>
 		<class>mg.fidev.model.Adresse</class>
@@ -45,11 +46,23 @@
 		<class>mg.fidev.model.TypeEpargne</class>
 		<class>mg.fidev.model.Utilisateur</class>
 		<class>mg.fidev.model.Virement</class>
+		<class>mg.fidev.model.ConfigCreditGroup</class>
+		<class>mg.fidev.model.DroitInscription</class>
+		<class>mg.fidev.model.ListeRouge</class>
+		<class>mg.fidev.model.ConfigFraisCreditGroupe</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/microfinance_v1"/>
 			<property name="javax.persistence.jdbc.user" value="root"/>
 			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
 			<property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
+
+			<!-- <property name="eclipselink.ddlgeneration.output-mode" value="database" />
+			<property name="eclipselink.ddl-generation" 	value="create-or-extend-tables"/>  -->
+			
+			<!-- <property name="eclipselink.ddl-generation" 	value="create-tables"/> -->
+		
+			<!-- <property name="eclipselink.ddl-generation" 	value="create-tables" />
+				<property name="eclipselink.ddl-generation" 	value="drop-and-create-tables"/>  -->
 		</properties>
 	</persistence-unit>
 </persistence>

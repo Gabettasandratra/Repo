@@ -15,7 +15,9 @@ import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Adresse;
 import mg.fidev.model.Docidentite;
+import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
+import mg.fidev.model.ListeRouge;
 import mg.fidev.service.IndividuelService;
 import mg.fidev.utils.CodeIncrement;
 import mg.fidev.xmlRequest.AdresseXml;
@@ -28,7 +30,11 @@ public class IndividuelServiceImpl implements IndividuelService {
 	private static EntityManager em = Persistence.createEntityManagerFactory(
 			PERSISTENCE_UNIT_NAME).createEntityManager();
 	private static EntityTransaction transaction = em.getTransaction();
-
+	
+	/****
+	 * ENREGISTREMENT CLIENT INDIVIDUEL
+	 * **/
+	//Methode pour Enregister un Client individuel
 	@Override
 	public String saveIndividuel(IndividuelXml request, String codeAgence) {
 		/* CETTE OPERATION CONSISTE A TRANSFORMER L'OBJET REQUEST EN PERSISTENCE */
@@ -102,72 +108,40 @@ public class IndividuelServiceImpl implements IndividuelService {
 		return "Okay";
 	}
 
+	
+	/***
+	 * LISTE DES CLIENTS INDIVIDUELS 
+	 * ***/
 	@Override
-	public List<IndividuelXml> getAllIndividuel() {
+	public List<Individuel> getAllIndividuel() {
 		TypedQuery<Individuel> q1 = em
 				.createQuery(
 						"select i from Individuel i where i.estClientIndividuel = :individuel",
 						Individuel.class);
 		q1.setParameter("individuel", true);
 		List<Individuel> results = q1.getResultList();
-
-		// on converte en IndividuelXml
-		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
-		for (Individuel i : results) {
-			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setCodeClient(i.getCodeInd());
-			individuXml.setNomClient(i.getNomClient());
-			individuXml.setPrenomClient(i.getPrenomClient());
-			individuXml.setSexe(i.getSexe());
-			individuXml.setEmail(i.getEmail());
-			individuXml.setNumeroMobile(i.getNumeroMobile());
-			individuXml.setDateInscription(i.getDateInscription());
-			individuXml.setDateNaissance(i.getDateNaissance());
-			//individuXml.setCodeAgence(i.getCodeAgence());
-			individuXml.setTitre(i.getTitre());
-
-			individuXml.setEstMembreGroupe(i.getEstMembreGroupe());
-
-			individuels.add(individuXml);
-		}
-
-		return individuels;
+		
+		return results;
 	}
 
-	public List<IndividuelXml> getAllIndividuelByDate(Date startDate,
+	/***
+	 * AFFICHER LES LISTES DES CLIENTS INDIVIDUELS INSCRIT DANS UNE CERTAINE PERIODE
+	 * ***/
+	public List<Individuel> getAllIndividuelByDate(Date startDate,
 			Date endDate) {
 		TypedQuery<Individuel> q1 = em
 				.createQuery(
-						"select i from Individuel i where i.dateInscription between :startDate and :endDate order by i.dateInscription",
-						Individuel.class);
+		"select i from Individuel i where i.dateInscription between :startDate and :endDate order by i.dateInscription",
+		Individuel.class);
 		q1.setParameter("startDate", startDate, TemporalType.DATE);
 		q1.setParameter("endDate", endDate,  TemporalType.DATE);
 		List<Individuel> results = q1.getResultList();
-		
-		// on converte en IndividuelXml
-		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
-		for (Individuel i : results) {
-			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setCodeClient(i.getCodeInd());
-			individuXml.setNomClient(i.getNomClient());
-			individuXml.setPrenomClient(i.getPrenomClient());
-			individuXml.setSexe(i.getSexe());
-			individuXml.setEmail(i.getEmail());
-			individuXml.setNumeroMobile(i.getNumeroMobile());
-			individuXml.setDateInscription(i.getDateInscription());
-			individuXml.setDateNaissance(i.getDateNaissance());
-			//individuXml.setCodeAgence(i.getCodeAgence());
-			individuXml.setTitre(i.getTitre());
 
-			individuXml.setEstMembreGroupe(i.getEstMembreGroupe());
-
-			individuels.add(individuXml);
-		}
-
-		return individuels;
+		return results;
 	}
 
 	@Override
+	///	Inutile
 	public boolean testMoxy(Individuel individu) {
 		// TODO Auto-generated method stub
 		return false;
@@ -184,10 +158,14 @@ public class IndividuelServiceImpl implements IndividuelService {
 		return "Jereo ny base";
 	}
 
+	/***
+	 * ENREGISTREMENT INDIVIDUEL
+	 * ***/
 	@Override
 	public String insertIndividuel(Individuel individuel, String codeAgence,
 			Docidentite docIdentite, Adresse adresse) {
 		individuel.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
+		individuel.setEstClientIndividuel(true);
 		individuel.setAdresse(adresse);
 		docIdentite.setIndividuel(individuel);
 		try {
@@ -205,6 +183,9 @@ public class IndividuelServiceImpl implements IndividuelService {
 		}
 	}
 
+	/***
+	 * ENREGISTREMENT DE NOUVEAU GARANT
+	 * ***/
 	@Override
 	public String saveGarant(Individuel individuel, Adresse adresse, Docidentite docId, String codeAgence) {
 		individuel.setEstGarant(true);
@@ -228,5 +209,45 @@ public class IndividuelServiceImpl implements IndividuelService {
 		} catch (Exception e) {
 			return "Insertion garant failed "+e.getMessage();
 		}
+	}
+	
+	/***
+	 * AJOUTER AU LISTE ROUGE
+	 * ***/
+
+	@Override
+	public String addListeRouge(ListeRouge listerouge, String codeInd,
+			String codeGroupe) {
+
+		Individuel ind = em.find(Individuel.class, codeInd);
+		Groupe grp = em.find(Groupe.class, codeGroupe);
+		String result = "";
+		try {
+			
+			if(ind!=null){
+				listerouge.setIndividuel(ind);
+			}else if(grp != null){
+				listerouge.setGroupe(grp);
+			}
+			transaction.begin();
+			em.persist(listerouge);
+			transaction.commit();
+			result = "Enregistrement reussit!!!";
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
+
+	/***
+	 * AFFICHAGE DES INDIVIDUELS AU LISTE ROUGE
+	 * ***/
+	@Override
+	public List<ListeRouge> afficheListeRouge() {
+		TypedQuery<ListeRouge> query = em.createQuery("SELECT l FROM ListeRouge l", ListeRouge.class);
+		List<ListeRouge> listRouge = query.getResultList();
+		return listRouge;
 	}
 }

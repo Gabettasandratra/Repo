@@ -30,7 +30,6 @@ public class CompteCaisse implements Serializable {
 	//bi-directional many-to-one association to Account
 	@ManyToOne
 	@JoinColumn(name="Plan_comptablenum_plan_comptable")
-	@XmlTransient
 	private Account account;
 
 	//bi-directional many-to-one association to TransactionEpargne

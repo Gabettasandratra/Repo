@@ -1,6 +1,5 @@
 package mg.fidev.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.jws.WebService;
@@ -14,9 +13,6 @@ import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
 import mg.fidev.service.GroupeService;
 import mg.fidev.utils.CodeIncrement;
-import mg.fidev.xmlRequest.AdresseXml;
-import mg.fidev.xmlRequest.GroupeXml;
-import mg.fidev.xmlRequest.IndividuelXml;
 
 @WebService(name = "groupeService", targetNamespace = "http://individuel.fidev.com/", serviceName = "groupeService", portName = "groupeServicePort", endpointInterface = "mg.fidev.service.GroupeService")
 public class GroupeServiceImpl implements GroupeService {
@@ -25,6 +21,9 @@ public class GroupeServiceImpl implements GroupeService {
 			PERSISTENCE_UNIT_NAME).createEntityManager();
 	private static EntityTransaction transaction = em.getTransaction();
 
+	/***
+	 * AJOUT MEMBRE GROUPE
+	 * ***/
 	@Override
 	public boolean addMembreGroupe(String nomGroupe, String codeInd) {
 		// Recupere le groupe
@@ -37,97 +36,96 @@ public class GroupeServiceImpl implements GroupeService {
 		// Recupere l'individuel
 		TypedQuery<Individuel> q2 = em
 				.createQuery(
-						"select i from Individuel i where i.codeClient = :codeInd",
+						"select i from Individuel i where i.codeInd = :codeInd",
 						Individuel.class);
 		q2.setParameter("codeInd", codeInd);
 		Individuel individuel = q2.getSingleResult();
-
-		// on ajoute dans le groupe
-		transaction.begin();
-		groupe.addIndividuel(individuel);
-		individuel.setEstMembreGroupe(true);
-		em.flush();
-		em.flush();
-		transaction.commit();
-		return true;
+		try {
+			// on ajoute dans le groupe
+			transaction.begin();
+			groupe.addIndividuel(individuel);
+			individuel.setEstMembreGroupe(true);
+			em.flush();
+			em.flush();
+			transaction.commit();
+			return true;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		
 	}
-
+	/***
+	 * AFFICHER TOUT LES GROUPES
+	 * ***/
 	@Override
-	public List<GroupeXml> getAllGroupe() {
-		TypedQuery<Groupe> q1 = em.createQuery("select g from Groupe g",
+	public List<Groupe> getAllGroupe() {
+		TypedQuery<Groupe> q1 = em.createQuery("select g from Groupe g order by g.nomGroupe asc",
 				Groupe.class);
-		List<Groupe> results = q1.getResultList();
-		List<GroupeXml> groups = new ArrayList<GroupeXml>();
-		for (Groupe g : results) {
-			GroupeXml groupe = new GroupeXml();
-			groupe.setCodeClient(g.getCodeGrp());
-			//groupe.setCodeAgence(g.getCodeAgence());
-			groupe.setNomGroupe(g.getNomGroupe());
-			groupe.setNumeroMobile(g.getNumeroMobile());
-			groupe.setEmail(g.getEmail());
-			groupe.setDateInscription(g.getDateInscription());
-			groups.add(groupe);
-		}
-		return groups;
+		List<Groupe> results = q1.getResultList();	
+		return results;
 	}
+	
+	/***
+	 * CHERCHER GROUPE PAR SON CODE
+	 * ***/
+	@Override
+	public Groupe findOneGroupe(String codeCode) {
+		Groupe groupe = em.find(Groupe.class, codeCode);
+		if(groupe!=null){
+			return groupe;
+		}else{
+			return null;			
+		}
+	}
+	
+	
+	/***
+	 * ENREGISTREMENT DE NOUVEAU GROUPE
+	 * ***/
 
 	@Override
-	public String saveGroupe(GroupeXml request, String codeAgence) {
-		Groupe groupe = new Groupe();
-		//groupe.setCodeAgence(request.getCodeAgence());
+	public String saveGroupe(Groupe groupe,Adresse adresse, String codeAgence) {
+
+		Individuel ind = new Individuel();
+		String result = "";
 		groupe.setCodeGrp(CodeIncrement.getCodeGrp(em, codeAgence));
-		groupe.setNomGroupe(request.getNomGroupe());
-		groupe.setNumeroMobile(request.getNumeroMobile());
-		groupe.setEmail(request.getEmail());
-		groupe.setDateInscription(request.getDateInscription());
-
-		// L'adresse qui est optional
-		if (request.getAdresse() != null) {
-			AdresseXml adresseRequest = request.getAdresse();
-			Adresse adresse = new Adresse();
-			adresse.setAdresseRegion(adresseRequest.getAdresseRegion());
-			adresse.setAdresseVille(adresseRequest.getAdresseVille());
-			adresse.setAdresseDistrict(adresseRequest.getAdresseDistrict());
-			adresse.setAdresseCommune(adresseRequest.getAdresseCommune());
-			adresse.setAdressePhysique(adresseRequest.getAdressePhysique());
-			adresse.setDistanceAgence(adresseRequest.getDistanceAgence());
-			adresse.setCodeRegion(adresseRequest.getCodeRegion());
-			groupe.setAdresse(adresse);
+		groupe.setAdresse(adresse);
+		if(groupe.getIndividuels() != null){
+			ind.setGroupe(groupe);
 		}
 
-		transaction.begin();
-		em.persist(groupe);
-		transaction.commit();
-		em.refresh(groupe);
-		return "Verifier la base de donnée";
+		try {
+			transaction.begin();
+			em.persist(adresse);			
+			transaction.commit();
+			transaction.begin();
+			em.persist(groupe);
+			//em.merge(ind);
+			transaction.commit();
+			result = "success";
+			//em.refresh(groupe);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = "erreur";
+		}
+		return result;
 	}
 
 	@Override
-	public List<IndividuelXml> getListeMembreGroupe(String nomGroupe) {
+	public List<Individuel> getListeMembreGroupe(String nomGroupe) {
 		TypedQuery<Groupe> q1 = em.createQuery(
 				"select g from Groupe g where g.nomGroupe = :groupe",
 				Groupe.class);
 		q1.setParameter("groupe", nomGroupe);
 		Groupe groupe = q1.getSingleResult();
 		List<Individuel> membre = groupe.getIndividuels();
-		// on converte en IndividuelXml
-		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
-		for (Individuel i : membre) {
-			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setCodeClient(i.getCodeInd());
-			individuXml.setNomClient(i.getNomClient());
-			individuXml.setPrenomClient(i.getPrenomClient());
-			individuXml.setEmail(i.getEmail());
-			individuXml.setNumeroMobile(i.getNumeroMobile());
-			individuXml.setDateInscription(i.getDateInscription());
-
-			individuels.add(individuXml);
-		}
-		return individuels;
+		return membre;
 	}
 
 	@Override
-	public List<IndividuelXml> getListeNonMembre() {
+	public List<Individuel> getListeNonMembre() {
 		TypedQuery<Individuel> q1 = em
 				.createQuery(
 						"select i from Individuel i where i.estMembreGroupe = :value",
@@ -135,24 +133,90 @@ public class GroupeServiceImpl implements GroupeService {
 		q1.setParameter("value", false);
 		List<Individuel> results = q1.getResultList();
 
-		// on converte en IndividuelXml
-		List<IndividuelXml> individuels = new ArrayList<IndividuelXml>();
-		for (Individuel i : results) {
-			IndividuelXml individuXml = new IndividuelXml();
-			individuXml.setCodeClient(i.getCodeInd());
-			individuXml.setNomClient(i.getNomClient());
-			individuXml.setPrenomClient(i.getPrenomClient());
-			individuXml.setSexe(i.getSexe());
-			individuXml.setEmail(i.getEmail());
-			individuXml.setNumeroMobile(i.getNumeroMobile());
-			individuXml.setDateInscription(i.getDateInscription());
-			individuXml.setDateNaissance(i.getDateNaissance());
-			//individuXml.setCodeAgence(i.getCodeAgence());
-			individuXml.setTitre(i.getTitre());
-			individuels.add(individuXml);
-		}
-
-		return individuels;
+		return results;
 	}
 
+	/***
+	 * AJOUT CONSEIL ADMIN GROUPE
+	 * ***/
+	@Override
+	public void addConseil(String codeGroupe, String president,
+			String secretaire, String tresorier) {
+		Groupe groupe = em.find(Groupe.class, codeGroupe);
+		
+		Individuel pres = em.find(Individuel.class, president);
+		
+		Individuel sec = em.find(Individuel.class, secretaire);
+		
+		Individuel tres = em.find(Individuel.class, tresorier);
+		
+		groupe.setPresident(pres.getNomClient());
+		groupe.setSecretaire(sec.getNomClient());
+		groupe.setTresorier(tres.getNomClient());
+		
+		try {		
+			transaction.begin();
+			em.flush();
+			transaction.commit();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	/***
+	 * TRANSFERER MEMBRE
+	 * ***/
+	@Override
+	public void transferMembre(String codeGrp1, String codeGrp2, String codeInd) {
+		Groupe groupe = em.find(Groupe.class, codeGrp1);
+		Groupe trasfers = em.find(Groupe.class, codeGrp2);
+				
+		TypedQuery<Individuel> query = em.createQuery("SELECT i FROM Individuel i JOIN i.groupe g WHERE g.codeGrp = :codeGroupes",Individuel.class);
+		query.setParameter("codeGroupes", "" +codeGrp1+ "");
+		List<Individuel> listInd = query.getResultList();
+		
+		for (Individuel individuel : listInd) {
+			if(individuel.getCodeInd().equals(codeInd)){
+				
+				if(trasfers != null){
+					individuel.setGroupe(trasfers);
+					try {	
+						
+							if(groupe.getPresident().equalsIgnoreCase(individuel.getNomClient())){
+								groupe.setPresident("");
+								transaction.begin();
+								em.merge(groupe);							
+								transaction.commit();
+							}
+							
+							if(groupe.getSecretaire().equalsIgnoreCase(individuel.getNomClient())){
+								groupe.setSecretaire("");
+								transaction.begin();
+								em.merge(groupe);							
+								transaction.commit();
+							}
+							
+							if(groupe.getTresorier().equalsIgnoreCase(individuel.getNomClient())){
+								groupe.setTresorier("");
+								transaction.begin();
+								em.merge(groupe);							
+								transaction.commit();
+							}
+							transaction.begin();
+							em.merge(individuel);							
+							transaction.commit();
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+				}
+			}
+		}
+		
+		
+	}
+	
 }

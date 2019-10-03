@@ -17,9 +17,9 @@ import java.util.List;
  */
 @Entity
 @Table(name="produit_credit")
-@NamedQuery(name="ProduitCredit.findAll", query="SELECT p FROM ProduitCredit p")
-@XmlRootElement
+//@NamedQuery(name="ProduitCredit.findAll", query="SELECT p FROM ProduitCredit p")
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement
 public class ProduitCredit implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -32,48 +32,107 @@ public class ProduitCredit implements Serializable {
 	@Column(name="nom_prod_credit")
 	private String nomProdCredit;
 
-	//bi-directional many-to-one association to DemandeCredit
+	/***
+	 * DEMANDE CREDIT
+	 * ***/
+	//bi-directional many-to-one association to DemandeCredit	
 	@OneToMany(mappedBy="produitCredit")
 	@XmlTransient
 	private List<DemandeCredit> demandeCredits;
 
+	
+	/***
+	 * CONFIG CREDIT INDIVIDUEL
+	 * ***/
 	//bi-directional many-to-one association to ConfigCreditIndividuel
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configCreditInd_id")
-	@XmlTransient
 	private ConfigCreditIndividuel configCreditIndividuel;
-
-	//bi-directional many-to-one association to ConfigFraisCredit
-	@ManyToOne
-	@JoinColumn(name="configFrais_id")
+	
+	
+	/***
+	 * CONFIG POUR TOUT CREDIT
+	 * ***/
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="config_id")
 	@XmlTransient
+	private ConfigCredit configCredit;
+	
+	/**
+	 * CONFIG CREDIT GROUPE
+	 * **/
+	
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configCreditGroup_id")
+	@XmlTransient
+	private ConfigCreditGroup configCreditGroupe;
+	
+	
+	/***
+	 * CONFIG FRAIS INDIVIDUEL
+	 * ***/
+	//bi-directional many-to-one association to ConfigFraisCredit
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configFrais_id")
 	private ConfigFraisCredit configFraisCredit;
 
+	/***
+	 * CONFIG FRAIS GROUPE
+	 * ***/
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configFraisGroupe_id")
+	@XmlTransient
+	private ConfigFraisCreditGroupe confFraisGroupe;
+	
+	/***
+	 * CONFIG GARANTIE
+	 * ***/
 	//bi-directional many-to-one association to ConfigGarantieCredit
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configGarantie_id")
 	@XmlTransient
 	private ConfigGarantieCredit configGarantieCredit;
 
+	/***
+	 * CONFIG GENERAL
+	 * ***/
+	
 	//bi-directional many-to-one association to ConfigGeneralCredit
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configGeneral_id")
 	@XmlTransient
 	private ConfigGeneralCredit configGeneralCredit;
 
+	
+	/***
+	 * CONFIG GL
+	 * ***/
 	//bi-directional many-to-one association to ConfigGlCredit
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configGLcredId")
-	@XmlTransient
 	private ConfigGlCredit configGlCredit;
 
+	/***
+	 * CONFIG PENALITE
+	 * ***/
 	//bi-directional many-to-one association to ConfigPenaliteCredit
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configPenaliteId")
 	@XmlTransient
 	private ConfigPenaliteCredit configPenaliteCredit;
+	
+	
 
+	/**
+	 * Constructeurs
+	 * **/
 	public ProduitCredit() {
+	}
+	
+	public ProduitCredit(boolean etat, String nomProdCredit) {
+		super();
+		this.etat = etat;
+		this.nomProdCredit = nomProdCredit;
 	}
 
 	public String getIdProdCredit() {
@@ -120,6 +179,14 @@ public class ProduitCredit implements Serializable {
 		demandeCredit.setProduitCredit(null);
 
 		return demandeCredit;
+	}
+
+	public ConfigCredit getConfigCredit() {
+		return configCredit;
+	}
+
+	public void setConfigCredit(ConfigCredit configCredit) {
+		this.configCredit = configCredit;
 	}
 
 	public ConfigCreditIndividuel getConfigCreditIndividuel() {
@@ -170,4 +237,20 @@ public class ProduitCredit implements Serializable {
 		this.configPenaliteCredit = configPenaliteCredit;
 	}
 
+	public ConfigCreditGroup getConfigCreditGroupe() {
+		return configCreditGroupe;
+	}
+
+	public void setConfigCreditGroupe(ConfigCreditGroup configCreditGroupe) {
+		this.configCreditGroupe = configCreditGroupe;
+	}
+
+	public ConfigFraisCreditGroupe getConfFraisGroupe() {
+		return confFraisGroupe;
+	}
+
+	public void setConfFraisGroupe(ConfigFraisCreditGroupe confFraisGroupe) {
+		this.confFraisGroupe = confFraisGroupe;
+	}
+	
 }

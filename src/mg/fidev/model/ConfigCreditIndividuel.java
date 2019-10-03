@@ -53,7 +53,7 @@ public class ConfigCreditIndividuel implements Serializable {
 	@Column(name="montant_credit")
 	private double montantCredit;
 
-	private int montantMaxCredit;
+	private double montantMaxCredit;
 
 	private double montantMinCredit;
 
@@ -185,11 +185,11 @@ public class ConfigCreditIndividuel implements Serializable {
 		this.montantCredit = montantCredit;
 	}
 
-	public int getMontantMaxCredit() {
+	public double getMontantMaxCredit() {
 		return this.montantMaxCredit;
 	}
 
-	public void setMontantMaxCredit(int montantMaxCredit) {
+	public void setMontantMaxCredit(double montantMaxCredit) {
 		this.montantMaxCredit = montantMaxCredit;
 	}
 

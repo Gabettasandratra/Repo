@@ -57,7 +57,7 @@ public class ConfigGeneralCredit implements Serializable {
 
 	private String recalcDateEcheanceAuDecais;
 
-	private String recalcINtRembAmortDegr;
+	private boolean recalcINtRembAmortDegr;
 
 	private boolean tauxIntVarSoldeDegr;
 
@@ -197,11 +197,11 @@ public class ConfigGeneralCredit implements Serializable {
 		this.recalcDateEcheanceAuDecais = recalcDateEcheanceAuDecais;
 	}
 
-	public String getRecalcINtRembAmortDegr() {
+	public boolean getRecalcINtRembAmortDegr() {
 		return this.recalcINtRembAmortDegr;
 	}
 
-	public void setRecalcINtRembAmortDegr(String recalcINtRembAmortDegr) {
+	public void setRecalcINtRembAmortDegr(boolean recalcINtRembAmortDegr) {
 		this.recalcINtRembAmortDegr = recalcINtRembAmortDegr;
 	}
 

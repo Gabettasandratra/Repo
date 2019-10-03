@@ -32,14 +32,19 @@ public class CommissionCredit implements Serializable {
 	private String datePaie;
 
 	private double lcomm;
+	
+	private String statut_comm;
 
 	private String piece;
 
-	private float stationery;
+	private double stationery;
 
 	private float tdf;
 
 	private float totvat;
+	
+	@Column(name="cpt_caisse_num")
+	private int cptCaisseNum;
 
 	//bi-directional many-to-one association to DemandeCredit
 	@ManyToOne
@@ -56,12 +61,36 @@ public class CommissionCredit implements Serializable {
 	public CommissionCredit() {
 	}
 
+	public CommissionCredit(boolean cash, int cheqid,
+			String datePaie, double lcomm,String piece,
+			float stationery, float tdf, float totvat) {
+		super();
+		this.cash = cash;
+		this.cheqid = cheqid;
+		this.datePaie = datePaie;
+		this.lcomm = lcomm;
+		this.piece = piece;
+		this.stationery = stationery;
+		this.tdf = tdf;
+		this.totvat = totvat;
+	}
+
+
+
 	public String getTcode() {
 		return this.tcode;
 	}
 
 	public void setTcode(String tcode) {
 		this.tcode = tcode;
+	}
+	
+	public String getStatut_comm() {
+		return statut_comm;
+	}
+
+	public void setStatut_comm(String statut_comm) {
+		this.statut_comm = statut_comm;
 	}
 
 	public boolean getCash() {
@@ -104,11 +133,11 @@ public class CommissionCredit implements Serializable {
 		this.piece = piece;
 	}
 
-	public float getStationery() {
+	public double getStationery() {
 		return this.stationery;
 	}
 
-	public void setStationery(float stationery) {
+	public void setStationery(double stationery) {
 		this.stationery = stationery;
 	}
 
@@ -126,6 +155,14 @@ public class CommissionCredit implements Serializable {
 
 	public void setTotvat(float totvat) {
 		this.totvat = totvat;
+	}
+
+	public int getCptCaisseNum() {
+		return cptCaisseNum;
+	}
+
+	public void setCptCaisseNum(int cptCaisseNum) {
+		this.cptCaisseNum = cptCaisseNum;
 	}
 
 	public DemandeCredit getDemandeCredit() {

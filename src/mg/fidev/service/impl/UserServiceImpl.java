@@ -35,36 +35,41 @@ public class UserServiceImpl implements UserService {
 	
 	///	Méthode pour l'authentification d'un utilisateur
 	@Override
-	public List<Acces> authentifie(String loginUser, String mdpUser) {
+	public Utilisateur authentifie(String loginUser, String mdpUser) {
 		List<Acces> a = new ArrayList<Acces>();	//	Instance une liste d'accès pour stocker
 												//	la liste d'accès d'un utilisateur quelconque
 		
-		//	Requête pour vérifier si le login et le mote de passe sont
-		//	valides et correspondent bien
+		//	Requête pour vérifier si le login et le mote de passe sont	valides et correspondent bien
 		TypedQuery<Utilisateur> q = em.createQuery("select u from Utilisateur u where u.loginUtilisateur= :log", Utilisateur.class)
 				.setParameter("log", loginUser);
 		
-		Utilisateur ut = new Utilisateur();
+		 List<Utilisateur> ut = new ArrayList<Utilisateur>();
 		
 		//	Traitement à faire en fonction du résultat de la requête
 		//	Login et mot de passe valides ou non
+		 
 		System.out.println("Utilisateur ready !!");
-		if(!(q.getSingleResult()).equals(null)){
+		if(!(q.getResultList()).equals(null)){
 			//	Instance utilisateur correspondant à la réponse de la requête précédente
-			ut = q.getSingleResult();
-			String mdpHash = ut.getMdpUtilisateur();
-			if(BCrypt.checkpw(mdpUser, mdpHash)){
-				for(Acces ac : ut.getFonction().getAcces()){
-					System.out.println(ac.getTitreAcces());
-					a.add(ac);
+			ut = q.getResultList();
+			for (Utilisateur utilisateur : ut) {
+				
+				String mdpHash = utilisateur.getMdpUtilisateur();
+				if(BCrypt.checkpw(mdpUser, mdpHash)){
+					for(Acces ac : utilisateur.getFonction().getAcces()){
+						System.out.println(ac.getTitreAcces());
+						a.add(ac);
+					}
+					System.out.println("Connexion réussie");
+					return utilisateur;
 				}
-				System.out.println("Connexion réussie");
-				return a;
+				else{
+					System.err.println("Mot de passe incorrect");
+					return null;
+				}
 			}
-			else{
-				System.err.println("Mot de passe incorrect");
-				return null;
-			}
+			
+			
 		}
 		else
 			System.err.println("Utilisateur null !!");
@@ -179,15 +184,17 @@ public class UserServiceImpl implements UserService {
 		TransactionEpargne trans = new TransactionEpargne();
 		
 		///	pour incrémenter le tcode dans la table grandlivre
-				String indexTcode = CodeIncrement.genTcode(em);
+		String indexTcode = CodeIncrement.genTcode(em);
 		
 		//	Mouvement comptabilité
 		Grandlivre lDebit = new Grandlivre();
 		Grandlivre lCredit = new Grandlivre();
 		lDebit.setPiece(pieceCompta);
 		lDebit.setTcode(indexTcode);
+		lDebit.setDate(dateTransac);
 		lCredit.setPiece(pieceCompta);
 		lCredit.setTcode(indexTcode);
+		lCredit.setDate(dateTransac);
 		
 		//	Initialisation des informations sur la transaction
 		trans.setDateTransaction(dateTransac);
@@ -219,10 +226,6 @@ public class UserServiceImpl implements UserService {
 					transaction.commit();
 					em.refresh(trans);
 					transaction.begin();
-					lDebit.setTcode(String.valueOf(trans.getIdTransactionEp()));
-					lDebit.setDate(trans.getDateTransaction());
-					lCredit.setTcode(String.valueOf(trans.getIdTransactionEp()));
-					lCredit.setDate(trans.getDateTransaction());
 					em.persist(lCredit);
 					em.persist(lDebit);
 					transaction.commit();
@@ -242,10 +245,6 @@ public class UserServiceImpl implements UserService {
 					transaction.commit();
 					em.refresh(trans);
 					transaction.begin();
-					lDebit.setTcode(String.valueOf(trans.getIdTransactionEp()));
-					lDebit.setDate(trans.getDateTransaction());
-					lCredit.setTcode(String.valueOf(trans.getIdTransactionEp()));
-					lCredit.setDate(trans.getDateTransaction());
 					em.persist(lDebit);
 					em.persist(lCredit);
 					transaction.commit();
@@ -292,7 +291,7 @@ public class UserServiceImpl implements UserService {
 	
 	//	Méthode à appeler pour lors d'un mouvement compta
 	static void mvtCompta(){
-		//RESTClient client = new RESTClient();
+		//	RESTClient client = new RESTClient();
 		/*String url = "http://192.168.123.4:8080/HelloRestfull/rest/journal",
 			   description = "Depot via REST",
 			   piece = "PIECE N°3",
@@ -307,7 +306,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean ajoutCptCaisse(CompteCaisse cptCaisse, String numCptCompta) {
+	public boolean ajoutCptCaisse(CompteCaisse cptCaisse, int numCptCompta) {
 		Account cptGL = em.find(Account.class, numCptCompta);
 		cptCaisse.setAccount(cptGL);
 		System.out.println("Nouveau compte caisse");

@@ -1,11 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -65,6 +67,10 @@ public class ConfigCredit implements Serializable {
 	private boolean tauxIntDiffMbrGrp;
 
 	private boolean totalCapIntPenComm;
+	
+	@OneToMany(mappedBy="configCredit")
+	@XmlTransient
+	private List<ProduitCredit> produits;
 
 	public ConfigCredit() {
 	}

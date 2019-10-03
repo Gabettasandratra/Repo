@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlElement;
 import mg.fidev.model.Adresse;
 import mg.fidev.model.Docidentite;
 import mg.fidev.model.Individuel;
+import mg.fidev.model.ListeRouge;
 import mg.fidev.xmlRequest.IndividuelXml;
 
 @WebService(name = "individuelService", targetNamespace = "http://individuel.fidev.com/", serviceName = "individuelService", portName = "individuelServicePort")
@@ -40,11 +41,11 @@ public interface IndividuelService {
 	
 	@WebMethod
 	@WebResult(name = "resultat")
-	public List<IndividuelXml> getAllIndividuel();
+	public List<Individuel> getAllIndividuel();
 	
 	@WebMethod
 	@WebResult(name = "resultat")
-	public List<IndividuelXml> getAllIndividuelByDate(
+	public List<Individuel> getAllIndividuelByDate(
 			@WebParam(name = "startDate") @XmlElement(required = true)Date startDate, 
 			@WebParam(name = "endDate") @XmlElement(required = true) Date endDate);
 
@@ -55,5 +56,21 @@ public interface IndividuelService {
 	@WebMethod
 	@WebResult(name = "resultat")
 	public String saveIndividuelByEntity(@WebParam(name = "individuel")@XmlElement(required = true) Individuel request);
+	
+	/***
+	 * AJOUTER AU LISTE ROUGE
+	 * ***/
+	@WebMethod
+	@WebResult(name="resultat")
+	public String addListeRouge(@WebParam(name = "formulaire")@XmlElement(required = true) ListeRouge listerouge,
+			@WebParam(name = "codeInd")@XmlElement(required = false) String codeInd,
+			@WebParam(name = "codeGrp")@XmlElement(required = false) String codeGroupe);
+	
+	/***
+	 * AFFICHE LISTE ROUGE
+	 * ***/
+	@WebMethod
+	@WebResult(name="liste_rouges")
+	public List<ListeRouge> afficheListeRouge();
 	
 }

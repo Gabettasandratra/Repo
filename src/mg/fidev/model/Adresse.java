@@ -41,17 +41,17 @@ public class Adresse implements Serializable {
 	private int distanceAgence;
 
 	//bi-directional many-to-one association to Entreprise
-	@OneToMany(mappedBy="adresse")
+	@OneToMany(mappedBy="adresse",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<Entreprise> entreprises;
 
 	//bi-directional many-to-one association to Groupe
-	@OneToMany(mappedBy="adresse")
+	@OneToMany(mappedBy="adresse",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<Groupe> groupes;
 
 	//bi-directional many-to-one association to Individuel
-	@OneToMany(mappedBy="adresse")
+	@OneToMany(mappedBy="adresse",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<Individuel> individuels;
 

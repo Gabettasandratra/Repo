@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -24,8 +25,10 @@ public class Acces implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@XmlElement
 	private int idAcces;
 
+	@XmlElement
 	private String titreAcces;
 
 	//bi-directional many-to-many association to Fonction

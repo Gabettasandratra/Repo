@@ -2,13 +2,17 @@ package mg.fidev.model;
 
 import java.io.Serializable;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import java.util.Date;
 
 
 /**
@@ -16,34 +20,43 @@ import java.util.Date;
  * 
  */
 @Entity
+@Table(name="remboursement")
 @NamedQuery(name="Remboursement.findAll", query="SELECT r FROM Remboursement r")
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Remboursement implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	//@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private int tcode;
+	private String tcode;
 
-	private byte cash;
+	private boolean cash;
 
 	private float cheqcomm;
 
 	private int cheqid;
 
 	@Column(name="cpt_caisse_num")
-	private int cptCaisseNum;
+	private String cptCaisseNum;
 
-	@Temporal(TemporalType.TIMESTAMP)
+	//@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="date_remb")
-	private Date dateRemb;
+	private String dateRemb;
 
 	private float overpay;
 
 	private String piece;
 
 	private float stationery;
+	
+	private double restaPaie;
+	
+	private double montant_paye;
+	
+	private double principal;
+	
+	private double interet;
 
 	//bi-directional many-to-one association to DemandeCredit
 	@ManyToOne
@@ -60,20 +73,20 @@ public class Remboursement implements Serializable {
 	public Remboursement() {
 	}
 
-	public int getTcode() {
+	public String getTcode() {
 		return this.tcode;
 	}
 
-	public void setTcode(int tcode) {
+	public void setTcode(String tcode) {
 		this.tcode = tcode;
 	}
 
-	public byte getCash() {
-		return this.cash;
+	public double getRestaPaie() {
+		return restaPaie;
 	}
 
-	public void setCash(byte cash) {
-		this.cash = cash;
+	public void setRestaPaie(double restaPaie) {
+		this.restaPaie = restaPaie;
 	}
 
 	public float getCheqcomm() {
@@ -92,20 +105,12 @@ public class Remboursement implements Serializable {
 		this.cheqid = cheqid;
 	}
 
-	public int getCptCaisseNum() {
+	public String getCptCaisseNum() {
 		return this.cptCaisseNum;
 	}
 
-	public void setCptCaisseNum(int cptCaisseNum) {
+	public void setCptCaisseNum(String cptCaisseNum) {
 		this.cptCaisseNum = cptCaisseNum;
-	}
-
-	public Date getDateRemb() {
-		return this.dateRemb;
-	}
-
-	public void setDateRemb(Date dateRemb) {
-		this.dateRemb = dateRemb;
 	}
 
 	public float getOverpay() {
@@ -130,6 +135,46 @@ public class Remboursement implements Serializable {
 
 	public void setStationery(float stationery) {
 		this.stationery = stationery;
+	}
+	
+	public boolean getCash() {
+		return cash;
+	}
+
+	public void setCash(boolean cash) {
+		this.cash = cash;
+	}
+
+	public String getDateRemb() {
+		return dateRemb;
+	}
+
+	public void setDateRemb(String dateRemb) {
+		this.dateRemb = dateRemb;
+	}
+
+	public double getMontant_paye() {
+		return montant_paye;
+	}
+
+	public void setMontant_paye(double montant_paye) {
+		this.montant_paye = montant_paye;
+	}
+
+	public double getPrincipal() {
+		return principal;
+	}
+
+	public void setPrincipal(double principal) {
+		this.principal = principal;
+	}
+
+	public double getInteret() {
+		return interet;
+	}
+
+	public void setInteret(double interet) {
+		this.interet = interet;
 	}
 
 	public DemandeCredit getDemandeCredit() {

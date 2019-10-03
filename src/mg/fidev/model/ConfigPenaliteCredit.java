@@ -37,6 +37,9 @@ public class ConfigPenaliteCredit implements Serializable {
 
 	private boolean penalJrFerie;
 
+	/***
+	 * PRODUITS CREDIT
+	 * ***/
 	//bi-directional many-to-one association to ProduitCredit
 	@OneToMany(mappedBy="configPenaliteCredit")
 	@XmlTransient

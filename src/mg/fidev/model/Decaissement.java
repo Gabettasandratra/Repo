@@ -2,13 +2,16 @@ package mg.fidev.model;
 
 import java.io.Serializable;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import java.util.Date;
 
 
 /**
@@ -29,9 +32,8 @@ public class Decaissement implements Serializable {
 
 	private float commission;
 
-	@Temporal(TemporalType.DATE)
 	@Column(name="date_dec")
-	private Date dateDec;
+	private String dateDec;
 
 	@Column(name="montant_dec")
 	private double montantDec;
@@ -45,6 +47,9 @@ public class Decaissement implements Serializable {
 	private float tdf;
 
 	private float totvat;
+	
+	@Column(name="cpt_caisse_num")
+	private String cptCaisseNum;
 
 	//bi-directional many-to-one association to DemandeCredit
 	@ManyToOne
@@ -59,6 +64,20 @@ public class Decaissement implements Serializable {
 	private Utilisateur utilisateur;
 
 	public Decaissement() {
+	}
+	
+	public Decaissement(boolean cash, float commission, String dateDec,
+			String piece, float pocFee, float stationnary,
+			float tdf, float totvat) {
+		super();
+		this.cash = cash;
+		this.commission = commission;
+		this.dateDec = dateDec;
+		this.piece = piece;
+		this.pocFee = pocFee;
+		this.stationnary = stationnary;
+		this.tdf = tdf;
+		this.totvat = totvat;
 	}
 
 	public String getTcode() {
@@ -85,11 +104,11 @@ public class Decaissement implements Serializable {
 		this.commission = commission;
 	}
 
-	public Date getDateDec() {
+	public String getDateDec() {
 		return this.dateDec;
 	}
 
-	public void setDateDec(Date dateDec) {
+	public void setDateDec(String dateDec) {
 		this.dateDec = dateDec;
 	}
 
@@ -139,6 +158,14 @@ public class Decaissement implements Serializable {
 
 	public void setTotvat(float totvat) {
 		this.totvat = totvat;
+	}
+
+	public String getCptCaisseNum() {
+		return cptCaisseNum;
+	}
+
+	public void setCptCaisseNum(String cptCaisseNum) {
+		this.cptCaisseNum = cptCaisseNum;
 	}
 
 	public DemandeCredit getDemandeCredit() {

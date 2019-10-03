@@ -35,6 +35,8 @@ public class ConfigFraisCredit implements Serializable {
 	private int fraisRefinancement;
 
 	private double papeterie;
+	
+	private boolean indOuGroupe;
 
 	//bi-directional many-to-one association to ProduitCredit
 	@OneToMany(mappedBy="configFraisCredit")
@@ -50,6 +52,14 @@ public class ConfigFraisCredit implements Serializable {
 
 	public void setRowId(int rowId) {
 		this.rowId = rowId;
+	}
+
+	public boolean isIndOuGroupe() {
+		return indOuGroupe;
+	}
+
+	public void setIndOuGroupe(boolean indOuGroupe) {
+		this.indOuGroupe = indOuGroupe;
 	}
 
 	public double getCommission() {
