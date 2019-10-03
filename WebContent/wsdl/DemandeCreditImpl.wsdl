@@ -1,0 +1,898 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://impl.service.fidev.mg" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://impl.service.fidev.mg" xmlns:intf="http://impl.service.fidev.mg" xmlns:tns1="http://model.fidev.mg" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema elementFormDefault="qualified" targetNamespace="http://impl.service.fidev.mg" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://model.fidev.mg"/>
+   <import namespace="http://xml.apache.org/xml-soap"/>
+   <element name="demandeCredit">
+    <complexType>
+     <sequence>
+      <element name="date" type="xsd:string"/>
+      <element name="montant" type="xsd:double"/>
+      <element name="but" type="xsd:string"/>
+      <element name="agentName" type="xsd:string"/>
+      <element name="idProduit" type="xsd:string"/>
+      <element name="codeInd" type="xsd:string"/>
+      <element name="codeGrp" type="xsd:string"/>
+      <element name="userId" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="demandeCreditResponse">
+    <complexType/>
+   </element>
+   <element name="decaisser">
+    <complexType>
+     <sequence>
+      <element name="decaissement" type="tns1:Decaissement"/>
+      <element name="numCredit" type="xsd:string"/>
+      <element name="userId" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="ArrayOf_xsd_anyType">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="xsd:anyType"/>
+    </sequence>
+   </complexType>
+   <element name="decaisserResponse">
+    <complexType>
+     <sequence>
+      <element name="decaisserReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="rembourser">
+    <complexType>
+     <sequence>
+      <element name="numCredit" type="xsd:string"/>
+      <element name="userId" type="xsd:int"/>
+      <element name="remb" type="tns1:Remboursement"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="rembourserResponse">
+    <complexType>
+     <sequence>
+      <element name="rembourserReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="updateDemandeCredit">
+    <complexType>
+     <sequence>
+      <element name="numCredit" type="xsd:string"/>
+      <element name="dmd" type="tns1:DemandeCredit"/>
+      <element name="idProduit" type="xsd:string"/>
+      <element name="userId" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="updateDemandeCreditResponse">
+    <complexType>
+     <sequence>
+      <element name="updateDemandeCreditReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="paiementCommission">
+    <complexType>
+     <sequence>
+      <element name="comm" type="tns1:CommissionCredit"/>
+      <element name="numCredit" type="xsd:string"/>
+      <element name="userId" type="xsd:int"/>
+      <element name="nomCptCaisse" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="paiementCommissionResponse">
+    <complexType>
+     <sequence>
+      <element name="paiementCommissionReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="approbationCredit">
+    <complexType>
+     <sequence>
+      <element name="numCredit" type="xsd:string"/>
+      <element name="Appby" type="xsd:string"/>
+      <element name="dateApp" type="xsd:string"/>
+      <element name="descApp" type="xsd:string"/>
+      <element name="montantApp" type="xsd:double"/>
+      <element name="stat_demande" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="approbationCreditResponse">
+    <complexType>
+     <sequence>
+      <element name="approbationCreditReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+  </schema>
+  <schema elementFormDefault="qualified" targetNamespace="http://xml.apache.org/xml-soap" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://model.fidev.mg"/>
+   <import namespace="http://impl.service.fidev.mg"/>
+   <complexType name="Vector">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="xsd:anyType"/>
+    </sequence>
+   </complexType>
+  </schema>
+  <schema elementFormDefault="qualified" targetNamespace="http://model.fidev.mg" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://xml.apache.org/xml-soap"/>
+   <import namespace="http://impl.service.fidev.mg"/>
+   <complexType name="Adresse">
+    <sequence>
+     <element name="adresseCommune" nillable="true" type="xsd:string"/>
+     <element name="adresseDistrict" nillable="true" type="xsd:string"/>
+     <element name="adressePhysique" nillable="true" type="xsd:string"/>
+     <element name="adresseRegion" nillable="true" type="xsd:string"/>
+     <element name="adresseVille" nillable="true" type="xsd:string"/>
+     <element name="codeRegion" type="xsd:int"/>
+     <element name="distanceAgence" type="xsd:int"/>
+     <element name="entreprises" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="groupes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="idAdresse" type="xsd:int"/>
+     <element name="individuels" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+    </sequence>
+   </complexType>
+   <complexType name="Groupe">
+    <sequence>
+     <element name="adresse" nillable="true" type="tns1:Adresse"/>
+     <element name="codeGrp" nillable="true" type="xsd:string"/>
+     <element name="compteEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="dateInscription" nillable="true" type="xsd:dateTime"/>
+     <element name="demandeCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="email" nillable="true" type="xsd:string"/>
+     <element name="grandLivre" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="individuels" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="nomGroupe" nillable="true" type="xsd:string"/>
+     <element name="numeroMobile" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="Individuel">
+    <sequence>
+     <element name="adresse" nillable="true" type="tns1:Adresse"/>
+     <element name="codeInd" nillable="true" type="xsd:string"/>
+     <element name="compteEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="dateInscription" nillable="true" type="xsd:string"/>
+     <element name="dateNaissance" nillable="true" type="xsd:string"/>
+     <element name="dateSortie" nillable="true" type="xsd:dateTime"/>
+     <element name="demandeCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="docidentites" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="email" nillable="true" type="xsd:string"/>
+     <element name="estClientIndividuel" type="xsd:boolean"/>
+     <element name="estGarant" type="xsd:boolean"/>
+     <element name="estMembreGroupe" type="xsd:boolean"/>
+     <element name="etatCivil" nillable="true" type="xsd:string"/>
+     <element name="grandLivre" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="groupe" nillable="true" type="tns1:Groupe"/>
+     <element name="langue" nillable="true" type="xsd:string"/>
+     <element name="lieuNaissance" nillable="true" type="xsd:string"/>
+     <element name="nbEnfant" type="xsd:int"/>
+     <element name="nbPersCharge" type="xsd:int"/>
+     <element name="niveauEtude" nillable="true" type="xsd:string"/>
+     <element name="nomClient" nillable="true" type="xsd:string"/>
+     <element name="nomConjoint" nillable="true" type="xsd:string"/>
+     <element name="numDmdCrdtAGarantir" nillable="true" type="xsd:string"/>
+     <element name="numeroMobile" nillable="true" type="xsd:string"/>
+     <element name="parentAdresse" nillable="true" type="xsd:string"/>
+     <element name="parentNom" nillable="true" type="xsd:string"/>
+     <element name="prenomClient" nillable="true" type="xsd:string"/>
+     <element name="profession" nillable="true" type="xsd:string"/>
+     <element name="raisonSortie" nillable="true" type="xsd:string"/>
+     <element name="sexe" nillable="true" type="xsd:string"/>
+     <element name="titre" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigCredit">
+    <sequence>
+     <element name="autorSurpaieCredit" type="xsd:boolean"/>
+     <element name="autoriseCreditPasArriere" type="xsd:boolean"/>
+     <element name="aviseUserPenalNonCalcule" type="xsd:boolean"/>
+     <element name="calcRembModifByAgent" type="xsd:boolean"/>
+     <element name="consCreditEcheantEntantArriere" type="xsd:boolean"/>
+     <element name="cycleModifiableAuDecaiss" type="xsd:boolean"/>
+     <element name="decaissementDefault" nillable="true" type="xsd:string"/>
+     <element name="exclureRembAnticipatif" type="xsd:boolean"/>
+     <element name="garantAvalPlusCredit" type="xsd:boolean"/>
+     <element name="imprimContratAuDecais" type="xsd:boolean"/>
+     <element name="imprimRecuAuDecais" type="xsd:boolean"/>
+     <element name="maxNbrJrTrancheApresDecais" type="xsd:int"/>
+     <element name="numCreditModifiable" type="xsd:boolean"/>
+     <element name="paieTrancheEnAvance" type="xsd:boolean"/>
+     <element name="peutRecevoirCreditParallele" type="xsd:boolean"/>
+     <element name="rembDefault" nillable="true" type="xsd:string"/>
+     <element name="reportDateEcheance" type="xsd:boolean"/>
+     <element name="rowId" type="xsd:int"/>
+     <element name="solliciteCreditParallele" type="xsd:boolean"/>
+     <element name="suiviCreditGrpMbr" type="xsd:boolean"/>
+     <element name="tauxIntDiffMbrGrp" type="xsd:boolean"/>
+     <element name="totalCapIntPenComm" type="xsd:boolean"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigCreditGroup">
+    <sequence>
+     <element name="adhesionMinGroup" type="xsd:int"/>
+     <element name="adhesionMinMembre" type="xsd:int"/>
+     <element name="calculIntDiff" type="xsd:boolean"/>
+     <element name="calculIntJours" type="xsd:boolean"/>
+     <element name="calculeInteret" nillable="true" type="xsd:string"/>
+     <element name="commissionCredit" type="xsd:double"/>
+     <element name="delaiMax" type="xsd:int"/>
+     <element name="diffPaiement" type="xsd:int"/>
+     <element name="forfaitPaieInt" type="xsd:boolean"/>
+     <element name="garantieVerifieMembre" type="xsd:boolean"/>
+     <element name="intDeduitauDecais" type="xsd:boolean"/>
+     <element name="intDiffPaieCapital" type="xsd:boolean"/>
+     <element name="intPaieDiff" type="xsd:boolean"/>
+     <element name="interetAnnuel" type="xsd:double"/>
+     <element name="montanMinParMembre" type="xsd:double"/>
+     <element name="montantCredit" type="xsd:double"/>
+     <element name="montantCreditMembre" type="xsd:double"/>
+     <element name="montantMaxParMembre" type="xsd:double"/>
+     <element name="numCycleMembre" type="xsd:int"/>
+     <element name="paiePrealableInt" type="xsd:boolean"/>
+     <element name="periodeMaxCredit" type="xsd:int"/>
+     <element name="periodeMinCredit" type="xsd:int"/>
+     <element name="produits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="rowId" type="xsd:int"/>
+     <element name="secteurActiv" nillable="true" type="xsd:string"/>
+     <element name="tranche" type="xsd:int"/>
+     <element name="trancheDistIntPeriode" type="xsd:boolean"/>
+     <element name="typeTranche" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigCreditIndividuel">
+    <sequence>
+     <element name="adhesionMinAvantDecais" type="xsd:int"/>
+     <element name="calculIntDiff" type="xsd:boolean"/>
+     <element name="calculIntEnJours" type="xsd:boolean"/>
+     <element name="commission_crédit" type="xsd:float"/>
+     <element name="delaisGraceMax" type="xsd:int"/>
+     <element name="differePaiement" type="xsd:int"/>
+     <element name="forfaitPaiePrealableInt" type="xsd:boolean"/>
+     <element name="intDeduitAuDecaissement" type="xsd:boolean"/>
+     <element name="intPendantDiffere" type="xsd:boolean"/>
+     <element name="intSurDiffCapitalise" type="xsd:boolean"/>
+     <element name="modeCalculInteret" nillable="true" type="xsd:string"/>
+     <element name="montantCredit" type="xsd:double"/>
+     <element name="montantMaxCredit" type="xsd:double"/>
+     <element name="montantMinCredit" type="xsd:double"/>
+     <element name="pariementPrealableInt" type="xsd:boolean"/>
+     <element name="periodeMaxCredit" type="xsd:int"/>
+     <element name="periodeMinCredit" type="xsd:int"/>
+     <element name="produitCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="rowId" type="xsd:int"/>
+     <element name="tauxInteretAnnuel" type="xsd:float"/>
+     <element name="trancheDistIntPeriodeDiff" type="xsd:boolean"/>
+     <element name="tranches" type="xsd:int"/>
+     <element name="typeTranche" nillable="true" type="xsd:string"/>
+     <element name="validationMontantCreditParCycle" type="xsd:boolean"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigFraisCredit">
+    <sequence>
+     <element name="commission" type="xsd:double"/>
+     <element name="fraisDemandeOuDecais" type="xsd:boolean"/>
+     <element name="fraisDeveloppement" type="xsd:double"/>
+     <element name="fraisRefinancement" type="xsd:int"/>
+     <element name="indOuGroupe" type="xsd:boolean"/>
+     <element name="papeterie" type="xsd:double"/>
+     <element name="produitCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="rowId" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigGlEpargne">
+    <sequence>
+     <element name="chargeIntNegGrp" nillable="true" type="xsd:string"/>
+     <element name="chargeIntNegInd" nillable="true" type="xsd:string"/>
+     <element name="chargeSMScpt" nillable="true" type="xsd:string"/>
+     <element name="clotureCptEp" nillable="true" type="xsd:string"/>
+     <element name="commChequeRejete" nillable="true" type="xsd:string"/>
+     <element name="commEpargne" nillable="true" type="xsd:string"/>
+     <element name="commSurDecouverts" nillable="true" type="xsd:string"/>
+     <element name="coutIntAPayerGrp" nillable="true" type="xsd:string"/>
+     <element name="coutIntAPayerInd" nillable="true" type="xsd:string"/>
+     <element name="cptAttente" nillable="true" type="xsd:string"/>
+     <element name="cptChargeRelCpt" nillable="true" type="xsd:string"/>
+     <element name="cptCheque" nillable="true" type="xsd:string"/>
+     <element name="cptPapeterieEp" nillable="true" type="xsd:string"/>
+     <element name="cptVireCheque" nillable="true" type="xsd:string"/>
+     <element name="epargneGrp" nillable="true" type="xsd:string"/>
+     <element name="epargneInd" nillable="true" type="xsd:string"/>
+     <element name="intComptAvGrp" nillable="true" type="xsd:string"/>
+     <element name="intComptAvInd" nillable="true" type="xsd:string"/>
+     <element name="intDecApresExpGrp" nillable="true" type="xsd:string"/>
+     <element name="intDecApresExpInd" nillable="true" type="xsd:string"/>
+     <element name="intPayeGrp" nillable="true" type="xsd:string"/>
+     <element name="intPayeInd" nillable="true" type="xsd:string"/>
+     <element name="penalEpargne" nillable="true" type="xsd:string"/>
+     <element name="produitEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="retenuTaxe" nillable="true" type="xsd:string"/>
+     <element name="rowId" type="xsd:int"/>
+     <element name="virePermCptTit" nillable="true" type="xsd:string"/>
+     <element name="virePermFraisBan" nillable="true" type="xsd:string"/>
+     <element name="virePermPenalCpt" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigInteretProdEp">
+    <sequence>
+     <element name="dateCalcul" nillable="true" type="xsd:string"/>
+     <element name="interetMinGrp" type="xsd:double"/>
+     <element name="interetMinInd" type="xsd:double"/>
+     <element name="modeCalcul" nillable="true" type="xsd:string"/>
+     <element name="nbrJrInt" type="xsd:int"/>
+     <element name="nbrSemaineInt" type="xsd:int"/>
+     <element name="periodeInteret" type="xsd:int"/>
+     <element name="produitEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="rowId" type="xsd:int"/>
+     <element name="soldeMinGrp" type="xsd:double"/>
+     <element name="soldeMinInd" type="xsd:double"/>
+     <element name="tauxInteret" type="xsd:float"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigProdEp">
+    <sequence>
+     <element name="ageMinCpt" type="xsd:int"/>
+     <element name="fraisTenuCpt" type="xsd:float"/>
+     <element name="nbrJrIn" type="xsd:int"/>
+     <element name="nbrJrMaxDep" type="xsd:int"/>
+     <element name="nbrJrMinRet" type="xsd:int"/>
+     <element name="produitEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="rowId" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="CatEpargne">
+    <sequence>
+     <element name="descrCatEpargne" nillable="true" type="xsd:string"/>
+     <element name="nomCatEpargne" nillable="true" type="xsd:string"/>
+     <element name="typeEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+    </sequence>
+   </complexType>
+   <complexType name="TypeEpargne">
+    <sequence>
+     <element name="catEpargne" nillable="true" type="tns1:CatEpargne"/>
+     <element name="descrTypeEpargne" nillable="true" type="xsd:string"/>
+     <element name="nomTypeEpargne" nillable="true" type="xsd:string"/>
+     <element name="produitEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+    </sequence>
+   </complexType>
+   <complexType name="ProduitEpargne">
+    <sequence>
+     <element name="compteEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="configGarantieCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="configGlEpargne" nillable="true" type="tns1:ConfigGlEpargne"/>
+     <element name="configInteretProdEp" nillable="true" type="tns1:ConfigInteretProdEp"/>
+     <element name="configProdEp" nillable="true" type="tns1:ConfigProdEp"/>
+     <element name="etat" type="xsd:boolean"/>
+     <element name="idProdEpargne" nillable="true" type="xsd:string"/>
+     <element name="nomProdEpargne" nillable="true" type="xsd:string"/>
+     <element name="typeEpargne" nillable="true" type="tns1:TypeEpargne"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigGarantieCredit">
+    <sequence>
+     <element name="garantIndOblig" type="xsd:boolean"/>
+     <element name="garantieBaseClasse" type="xsd:boolean"/>
+     <element name="garantieBaseMontantCredit" type="xsd:boolean"/>
+     <element name="garantieGrpDecaiss" type="xsd:boolean"/>
+     <element name="garantieGrpOblig" type="xsd:boolean"/>
+     <element name="garantieIndDecaiss" type="xsd:boolean"/>
+     <element name="garantieIndOblig" type="xsd:boolean"/>
+     <element name="montantExigeDemande" type="xsd:boolean"/>
+     <element name="percentMontantEnCoursGrp" type="xsd:float"/>
+     <element name="percentMontantEnCoursInd" type="xsd:float"/>
+     <element name="percentMontantGrp" type="xsd:float"/>
+     <element name="percentMontantInd" type="xsd:float"/>
+     <element name="produitCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="produitEpargne" nillable="true" type="tns1:ProduitEpargne"/>
+     <element name="rowId" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigGeneralCredit">
+    <sequence>
+     <element name="activePrioriteRembCreditDeclassse" type="xsd:boolean"/>
+     <element name="activeRegleDuplum" type="xsd:boolean"/>
+     <element name="autoriseDecaisPartiel" type="xsd:boolean"/>
+     <element name="devise" nillable="true" type="xsd:string"/>
+     <element name="enregPbliPostDemndCredit" type="xsd:int"/>
+     <element name="enregPubliPostDecaiss" type="xsd:int"/>
+     <element name="exclurePrdtLimitation" type="xsd:boolean"/>
+     <element name="methodeDegressifCompose" type="xsd:boolean"/>
+     <element name="nbrJrInt" type="xsd:int"/>
+     <element name="nbrSemaine" type="xsd:int"/>
+     <element name="nePasReinitialiserIntImpayeSoldeDegr" type="xsd:boolean"/>
+     <element name="peutChangerCptGLSurpaie" type="xsd:boolean"/>
+     <element name="privilegeRembCapitalCreanceDouteuse" type="xsd:boolean"/>
+     <element name="produitCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="produitLieEpargne" type="xsd:boolean"/>
+     <element name="recalcDateEcheanceAuDecais" nillable="true" type="xsd:string"/>
+     <element name="recalcINtRembAmortDegr" type="xsd:boolean"/>
+     <element name="rowId" type="xsd:int"/>
+     <element name="tauxIntVarSoldeDegr" type="xsd:boolean"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigGlCredit">
+    <sequence>
+     <element name="commDec" nillable="true" type="xsd:string"/>
+     <element name="commDem" nillable="true" type="xsd:string"/>
+     <element name="cptCheque" nillable="true" type="xsd:string"/>
+     <element name="cptComAccGagneGrp" nillable="true" type="xsd:string"/>
+     <element name="cptComAccGagneInd" nillable="true" type="xsd:string"/>
+     <element name="cptComEchuAccGrp" nillable="true" type="xsd:string"/>
+     <element name="cptComEchuAccInd" nillable="true" type="xsd:string"/>
+     <element name="cptCommCredit" nillable="true" type="xsd:string"/>
+     <element name="cptCredPasseEnPerteGrp" nillable="true" type="xsd:string"/>
+     <element name="cptCredPasseEnPerteInd" nillable="true" type="xsd:string"/>
+     <element name="cptIntEchuARecGrp" nillable="true" type="xsd:string"/>
+     <element name="cptIntEchuARecInd" nillable="true" type="xsd:string"/>
+     <element name="cptIntEchuGrp" nillable="true" type="xsd:string"/>
+     <element name="cptIntEchuInd" nillable="true" type="xsd:string"/>
+     <element name="cptIntRecCrdtGrp" nillable="true" type="xsd:string"/>
+     <element name="cptIntRecCrdtInd" nillable="true" type="xsd:string"/>
+     <element name="cptPapeterie" nillable="true" type="xsd:string"/>
+     <element name="cptPenalCptblsAvaGrp" nillable="true" type="xsd:string"/>
+     <element name="cptPenalCptblsAvaInd" nillable="true" type="xsd:string"/>
+     <element name="cptPenalCredit" nillable="true" type="xsd:string"/>
+     <element name="cptPrincEnCoursGrp" nillable="true" type="xsd:string"/>
+     <element name="cptPrincEnCoursInd" nillable="true" type="xsd:string"/>
+     <element name="cptProvCoutMauvCreanceGrp" nillable="true" type="xsd:string"/>
+     <element name="cptProvCoutMauvCreanceInd" nillable="true" type="xsd:string"/>
+     <element name="cptProvMauvCreanceGrp" nillable="true" type="xsd:string"/>
+     <element name="cptProvMauvCreanceInd" nillable="true" type="xsd:string"/>
+     <element name="cptRecCreanDouteuse" nillable="true" type="xsd:string"/>
+     <element name="cptRevPenalGrp" nillable="true" type="xsd:string"/>
+     <element name="cptRevPenalInd" nillable="true" type="xsd:string"/>
+     <element name="cptSurpaiement" nillable="true" type="xsd:string"/>
+     <element name="diffMonnaie" nillable="true" type="xsd:string"/>
+     <element name="fraisDevDec" nillable="true" type="xsd:string"/>
+     <element name="fraisDevDem" nillable="true" type="xsd:string"/>
+     <element name="majorationDec" nillable="true" type="xsd:string"/>
+     <element name="papeterieDec" nillable="true" type="xsd:string"/>
+     <element name="papeterieDem" nillable="true" type="xsd:string"/>
+     <element name="procFeeDec" nillable="true" type="xsd:string"/>
+     <element name="produitCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="refinFeeDem" nillable="true" type="xsd:string"/>
+     <element name="rowId" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="ConfigPenaliteCredit">
+    <sequence>
+     <element name="differePaiement" type="xsd:int"/>
+     <element name="limiteExpirationPenal" type="xsd:int"/>
+     <element name="modeCalcul" nillable="true" type="xsd:string"/>
+     <element name="montantPenalPeriod" type="xsd:double"/>
+     <element name="penalJrFerie" type="xsd:boolean"/>
+     <element name="produitCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="rowId" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="ProduitCredit">
+    <sequence>
+     <element name="configCredit" nillable="true" type="tns1:ConfigCredit"/>
+     <element name="configCreditGroupe" nillable="true" type="tns1:ConfigCreditGroup"/>
+     <element name="configCreditIndividuel" nillable="true" type="tns1:ConfigCreditIndividuel"/>
+     <element name="configFraisCredit" nillable="true" type="tns1:ConfigFraisCredit"/>
+     <element name="configGarantieCredit" nillable="true" type="tns1:ConfigGarantieCredit"/>
+     <element name="configGeneralCredit" nillable="true" type="tns1:ConfigGeneralCredit"/>
+     <element name="configGlCredit" nillable="true" type="tns1:ConfigGlCredit"/>
+     <element name="configPenaliteCredit" nillable="true" type="tns1:ConfigPenaliteCredit"/>
+     <element name="demandeCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="etat" type="xsd:boolean"/>
+     <element name="idProdCredit" nillable="true" type="xsd:string"/>
+     <element name="nomProdCredit" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="Fonction">
+    <sequence>
+     <element name="acces" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="idFonction" type="xsd:int"/>
+     <element name="libelleFonction" nillable="true" type="xsd:string"/>
+     <element name="utilisateurs" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+    </sequence>
+   </complexType>
+   <complexType name="Utilisateur">
+    <sequence>
+     <element name="agences" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="commissionCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="compteCaisses" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="compteEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="decaissements" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="demandeCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="fonction" nillable="true" type="tns1:Fonction"/>
+     <element name="genreUser" nillable="true" type="xsd:string"/>
+     <element name="idUtilisateur" type="xsd:int"/>
+     <element name="loginUtilisateur" nillable="true" type="xsd:string"/>
+     <element name="mdpUtilisateur" nillable="true" type="xsd:string"/>
+     <element name="nomUtilisateur" nillable="true" type="xsd:string"/>
+     <element name="remboursements" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="telUser" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="DemandeCredit">
+    <sequence>
+     <element name="agentName" nillable="true" type="xsd:string"/>
+     <element name="appBy" nillable="true" type="xsd:string"/>
+     <element name="approbationStatut" nillable="true" type="xsd:string"/>
+     <element name="butCredit" nillable="true" type="xsd:string"/>
+     <element name="calapresdebls" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="calpaiementdues" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="commissionCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="dateApprobation" nillable="true" type="xsd:string"/>
+     <element name="dateDemande" nillable="true" type="xsd:string"/>
+     <element name="decaissements" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="descrApprobation" nillable="true" type="xsd:string"/>
+     <element name="garantieCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="groupe" nillable="true" type="tns1:Groupe"/>
+     <element name="individuel" nillable="true" type="tns1:Individuel"/>
+     <element name="interet_total" type="xsd:double"/>
+     <element name="montantApproved" type="xsd:double"/>
+     <element name="montantDemande" type="xsd:double"/>
+     <element name="numCredit" nillable="true" type="xsd:string"/>
+     <element name="principale_total" type="xsd:double"/>
+     <element name="produitCredit" nillable="true" type="tns1:ProduitCredit"/>
+     <element name="rembMontants" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="remboursements" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="solde_total" type="xsd:double"/>
+     <element name="utilisateur" nillable="true" type="tns1:Utilisateur"/>
+    </sequence>
+   </complexType>
+   <complexType name="Decaissement">
+    <sequence>
+     <element name="cash" type="xsd:boolean"/>
+     <element name="commission" type="xsd:float"/>
+     <element name="cptCaisseNum" nillable="true" type="xsd:string"/>
+     <element name="dateDec" nillable="true" type="xsd:string"/>
+     <element name="demandeCredit" nillable="true" type="tns1:DemandeCredit"/>
+     <element name="montantDec" type="xsd:double"/>
+     <element name="piece" nillable="true" type="xsd:string"/>
+     <element name="pocFee" type="xsd:float"/>
+     <element name="stationnary" type="xsd:float"/>
+     <element name="tcode" nillable="true" type="xsd:string"/>
+     <element name="tdf" type="xsd:float"/>
+     <element name="totvat" type="xsd:float"/>
+     <element name="utilisateur" nillable="true" type="tns1:Utilisateur"/>
+    </sequence>
+   </complexType>
+   <complexType name="Remboursement">
+    <sequence>
+     <element name="cash" type="xsd:boolean"/>
+     <element name="cheqcomm" type="xsd:float"/>
+     <element name="cheqid" type="xsd:int"/>
+     <element name="cptCaisseNum" nillable="true" type="xsd:string"/>
+     <element name="dateRemb" nillable="true" type="xsd:string"/>
+     <element name="demandeCredit" nillable="true" type="tns1:DemandeCredit"/>
+     <element name="interet" type="xsd:double"/>
+     <element name="montant_paye" type="xsd:double"/>
+     <element name="overpay" type="xsd:float"/>
+     <element name="piece" nillable="true" type="xsd:string"/>
+     <element name="principal" type="xsd:double"/>
+     <element name="restaPaie" type="xsd:double"/>
+     <element name="stationery" type="xsd:float"/>
+     <element name="tcode" nillable="true" type="xsd:string"/>
+     <element name="utilisateur" nillable="true" type="tns1:Utilisateur"/>
+    </sequence>
+   </complexType>
+   <complexType name="CommissionCredit">
+    <sequence>
+     <element name="cash" type="xsd:boolean"/>
+     <element name="cheqid" type="xsd:int"/>
+     <element name="cptCaisseNum" type="xsd:int"/>
+     <element name="datePaie" nillable="true" type="xsd:string"/>
+     <element name="demandeCredit" nillable="true" type="tns1:DemandeCredit"/>
+     <element name="lcomm" type="xsd:double"/>
+     <element name="piece" nillable="true" type="xsd:string"/>
+     <element name="stationery" type="xsd:double"/>
+     <element name="statut_comm" nillable="true" type="xsd:string"/>
+     <element name="tcode" nillable="true" type="xsd:string"/>
+     <element name="tdf" type="xsd:float"/>
+     <element name="totvat" type="xsd:float"/>
+     <element name="utilisateur" nillable="true" type="tns1:Utilisateur"/>
+    </sequence>
+   </complexType>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="paiementCommissionRequest">
+
+      <wsdl:part element="impl:paiementCommission" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="rembourserResponse">
+
+      <wsdl:part element="impl:rembourserResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="decaisserRequest">
+
+      <wsdl:part element="impl:decaisser" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="rembourserRequest">
+
+      <wsdl:part element="impl:rembourser" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateDemandeCreditRequest">
+
+      <wsdl:part element="impl:updateDemandeCredit" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateDemandeCreditResponse">
+
+      <wsdl:part element="impl:updateDemandeCreditResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="approbationCreditRequest">
+
+      <wsdl:part element="impl:approbationCredit" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="approbationCreditResponse">
+
+      <wsdl:part element="impl:approbationCreditResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="paiementCommissionResponse">
+
+      <wsdl:part element="impl:paiementCommissionResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="demandeCreditRequest">
+
+      <wsdl:part element="impl:demandeCredit" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="demandeCreditResponse">
+
+      <wsdl:part element="impl:demandeCreditResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="decaisserResponse">
+
+      <wsdl:part element="impl:decaisserResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:portType name="DemandeCreditImpl">
+
+      <wsdl:operation name="demandeCredit">
+
+         <wsdl:input message="impl:demandeCreditRequest" name="demandeCreditRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:demandeCreditResponse" name="demandeCreditResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="decaisser">
+
+         <wsdl:input message="impl:decaisserRequest" name="decaisserRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:decaisserResponse" name="decaisserResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="rembourser">
+
+         <wsdl:input message="impl:rembourserRequest" name="rembourserRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:rembourserResponse" name="rembourserResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateDemandeCredit">
+
+         <wsdl:input message="impl:updateDemandeCreditRequest" name="updateDemandeCreditRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:updateDemandeCreditResponse" name="updateDemandeCreditResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="paiementCommission">
+
+         <wsdl:input message="impl:paiementCommissionRequest" name="paiementCommissionRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:paiementCommissionResponse" name="paiementCommissionResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="approbationCredit">
+
+         <wsdl:input message="impl:approbationCreditRequest" name="approbationCreditRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:approbationCreditResponse" name="approbationCreditResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="DemandeCreditImplSoapBinding" type="impl:DemandeCreditImpl">
+
+      <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="demandeCredit">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="demandeCreditRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="demandeCreditResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="decaisser">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="decaisserRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="decaisserResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="rembourser">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="rembourserRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="rembourserResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateDemandeCredit">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateDemandeCreditRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateDemandeCreditResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="paiementCommission">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="paiementCommissionRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="paiementCommissionResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="approbationCredit">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="approbationCreditRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="approbationCreditResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="DemandeCreditImplService">
+
+      <wsdl:port binding="impl:DemandeCreditImplSoapBinding" name="DemandeCreditImpl">
+
+         <wsdlsoap:address location="http://localhost:8080/FIDEV-Repository/services/DemandeCreditImpl"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

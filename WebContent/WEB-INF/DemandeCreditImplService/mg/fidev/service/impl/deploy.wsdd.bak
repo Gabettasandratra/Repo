@@ -1,0 +1,361 @@
+<!-- Use this file to deploy some handlers/chains and services      -->
+<!-- Two ways to do this:                                           -->
+<!--   java org.apache.axis.client.AdminClient deploy.wsdd          -->
+<!--      after the axis server is running                          -->
+<!-- or                                                             -->
+<!--   java org.apache.axis.utils.Admin client|server deploy.wsdd   -->
+<!--      from the same directory that the Axis engine runs         -->
+
+<deployment
+    xmlns="http://xml.apache.org/axis/wsdd/"
+    xmlns:java="http://xml.apache.org/axis/wsdd/providers/java">
+
+  <!-- Services from DemandeCreditImplService WSDL service -->
+
+  <service name="DemandeCreditImpl" provider="java:RPC" style="wrapped" use="literal">
+      <parameter name="wsdlTargetNamespace" value="http://impl.service.fidev.mg"/>
+      <parameter name="wsdlServiceElement" value="DemandeCreditImplService"/>
+      <parameter name="schemaQualified" value="http://impl.service.fidev.mg,http://xml.apache.org/xml-soap,http://model.fidev.mg"/>
+      <parameter name="wsdlServicePort" value="DemandeCreditImpl"/>
+      <parameter name="className" value="mg.fidev.service.impl.DemandeCreditImplSoapBindingImpl"/>
+      <parameter name="wsdlPortType" value="DemandeCreditImpl"/>
+      <parameter name="typeMappingVersion" value="1.2"/>
+      <operation name="demandeCredit" qname="operNS:demandeCredit" xmlns:operNS="http://impl.service.fidev.mg" soapAction="" >
+        <parameter qname="pns:date" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:montant" xmlns:pns="http://impl.service.fidev.mg" type="tns:double" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:but" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:agentName" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:idProduit" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:codeInd" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:codeGrp" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:userId" xmlns:pns="http://impl.service.fidev.mg" type="tns:int" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="decaisser" qname="operNS:decaisser" xmlns:operNS="http://impl.service.fidev.mg" returnQName="retNS:decaisserReturn" xmlns:retNS="http://impl.service.fidev.mg" returnType="rtns:string" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+        <parameter qname="pns:decaissement" xmlns:pns="http://impl.service.fidev.mg" type="tns:Decaissement" xmlns:tns="http://model.fidev.mg"/>
+        <parameter qname="pns:numCredit" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:userId" xmlns:pns="http://impl.service.fidev.mg" type="tns:int" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="rembourser" qname="operNS:rembourser" xmlns:operNS="http://impl.service.fidev.mg" returnQName="retNS:rembourserReturn" xmlns:retNS="http://impl.service.fidev.mg" returnType="rtns:string" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+        <parameter qname="pns:numCredit" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:userId" xmlns:pns="http://impl.service.fidev.mg" type="tns:int" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:remb" xmlns:pns="http://impl.service.fidev.mg" type="tns:Remboursement" xmlns:tns="http://model.fidev.mg"/>
+      </operation>
+      <operation name="updateDemandeCredit" qname="operNS:updateDemandeCredit" xmlns:operNS="http://impl.service.fidev.mg" returnQName="retNS:updateDemandeCreditReturn" xmlns:retNS="http://impl.service.fidev.mg" returnType="rtns:string" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+        <parameter qname="pns:numCredit" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:dmd" xmlns:pns="http://impl.service.fidev.mg" type="tns:DemandeCredit" xmlns:tns="http://model.fidev.mg"/>
+        <parameter qname="pns:idProduit" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:userId" xmlns:pns="http://impl.service.fidev.mg" type="tns:int" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="paiementCommission" qname="operNS:paiementCommission" xmlns:operNS="http://impl.service.fidev.mg" returnQName="retNS:paiementCommissionReturn" xmlns:retNS="http://impl.service.fidev.mg" returnType="rtns:string" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+        <parameter qname="pns:comm" xmlns:pns="http://impl.service.fidev.mg" type="tns:CommissionCredit" xmlns:tns="http://model.fidev.mg"/>
+        <parameter qname="pns:numCredit" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:userId" xmlns:pns="http://impl.service.fidev.mg" type="tns:int" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:nomCptCaisse" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="approbationCredit" qname="operNS:approbationCredit" xmlns:operNS="http://impl.service.fidev.mg" returnQName="retNS:approbationCreditReturn" xmlns:retNS="http://impl.service.fidev.mg" returnType="rtns:string" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+        <parameter qname="pns:numCredit" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:Appby" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:dateApp" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:descApp" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:montantApp" xmlns:pns="http://impl.service.fidev.mg" type="tns:double" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:stat_demande" xmlns:pns="http://impl.service.fidev.mg" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <parameter name="allowedMethods" value="demandeCredit approbationCredit paiementCommission decaisser updateDemandeCredit rembourser"/>
+
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:TypeEpargne"
+        type="java:mg.fidev.model.TypeEpargne"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>paiementCommission"
+        type="java:mg.fidev.service.impl.PaiementCommission"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>updateDemandeCredit"
+        type="java:mg.fidev.service.impl.UpdateDemandeCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>paiementCommissionResponse"
+        type="java:mg.fidev.service.impl.PaiementCommissionResponse"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:Groupe"
+        type="java:mg.fidev.model.Groupe"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:CatEpargne"
+        type="java:mg.fidev.model.CatEpargne"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ProduitCredit"
+        type="java:mg.fidev.model.ProduitCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:Adresse"
+        type="java:mg.fidev.model.Adresse"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>decaisser"
+        type="java:mg.fidev.service.impl.Decaisser"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:Decaissement"
+        type="java:mg.fidev.model.Decaissement"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:Utilisateur"
+        type="java:mg.fidev.model.Utilisateur"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigFraisCredit"
+        type="java:mg.fidev.model.ConfigFraisCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigInteretProdEp"
+        type="java:mg.fidev.model.ConfigInteretProdEp"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigGlCredit"
+        type="java:mg.fidev.model.ConfigGlCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigPenaliteCredit"
+        type="java:mg.fidev.model.ConfigPenaliteCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigProdEp"
+        type="java:mg.fidev.model.ConfigProdEp"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ProduitEpargne"
+        type="java:mg.fidev.model.ProduitEpargne"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigCreditGroup"
+        type="java:mg.fidev.model.ConfigCreditGroup"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>updateDemandeCreditResponse"
+        type="java:mg.fidev.service.impl.UpdateDemandeCreditResponse"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:CommissionCredit"
+        type="java:mg.fidev.model.CommissionCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigGeneralCredit"
+        type="java:mg.fidev.model.ConfigGeneralCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigGarantieCredit"
+        type="java:mg.fidev.model.ConfigGarantieCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>approbationCreditResponse"
+        type="java:mg.fidev.service.impl.ApprobationCreditResponse"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:DemandeCredit"
+        type="java:mg.fidev.model.DemandeCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <arrayMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:ArrayOf_xsd_anyType"
+        type="java:java.lang.Object[]"
+        innerType="cmp-ns:anyType" xmlns:cmp-ns="http://www.w3.org/2001/XMLSchema"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>demandeCreditResponse"
+        type="java:mg.fidev.service.impl.DemandeCreditResponse"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigGlEpargne"
+        type="java:mg.fidev.model.ConfigGlEpargne"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>decaisserResponse"
+        type="java:mg.fidev.service.impl.DecaisserResponse"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>rembourser"
+        type="java:mg.fidev.service.impl.Rembourser"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigCreditIndividuel"
+        type="java:mg.fidev.model.ConfigCreditIndividuel"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:Individuel"
+        type="java:mg.fidev.model.Individuel"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:ConfigCredit"
+        type="java:mg.fidev.model.ConfigCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>demandeCredit"
+        type="java:mg.fidev.service.impl.DemandeCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:Fonction"
+        type="java:mg.fidev.model.Fonction"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>rembourserResponse"
+        type="java:mg.fidev.service.impl.RembourserResponse"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://model.fidev.mg"
+        qname="ns:Remboursement"
+        type="java:mg.fidev.model.Remboursement"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://impl.service.fidev.mg"
+        qname="ns:>approbationCredit"
+        type="java:mg.fidev.service.impl.ApprobationCredit"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+  </service>
+</deployment>
