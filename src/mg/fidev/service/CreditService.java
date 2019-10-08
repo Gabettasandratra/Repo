@@ -10,6 +10,7 @@ import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.ParameterStyle;
 import javax.xml.bind.annotation.XmlElement;
 
+import mg.fidev.model.Calapresdebl;
 import mg.fidev.model.Calpaiementdue;
 import mg.fidev.model.CompteCaisse;
 import mg.fidev.model.ConfigCredit;
@@ -80,7 +81,8 @@ public interface CreditService {
 	 * ***/
 	@WebMethod
 	@WebResult(name="Liste_demande")
-	public List<DemandeCredit> findDemandeByMc(@WebParam(name = "mc") String mc);
+	public List<DemandeCredit> findDemandeByMc(@WebParam(name = "mc") String mc,
+			@WebParam(name = "mc2") @XmlElement(required=false,nillable=true) String m2);
 	
 	/**
 	 * Methode pour Modifier un Produit Credit
@@ -112,7 +114,71 @@ public interface CreditService {
 			@WebParam(name="but") @XmlElement(required=false,nillable=true) String but,
 			@WebParam(name="user_id") @XmlElement(required=true,nillable=false) int user_id);
 	
+	
+	/***
+	 * COMMISSION CREDIT 
+	 * ***/
+	@WebMethod
+	@WebResult(name = "validation")
+	public boolean insertCommission(@WebParam(name="cash") @XmlElement(required=false,nillable=true)boolean cash,
+			@WebParam(name="date") @XmlElement(required=false,nillable=true) String date,
+			@WebParam(name="piece") @XmlElement(required=false,nillable=true)String piece,
+			@WebParam(name="comm") @XmlElement(required=false,nillable=true)double commission,
+			@WebParam(name="papeterie") @XmlElement(required=false,nillable=true)double papeterie,
+			@WebParam(name="numCredit") @XmlElement(required=true,nillable=false) String numCredit,
+			@WebParam(name="userId") @XmlElement(required=true,nillable=false) int userId,
+			@WebParam(name="cptCaisse") @XmlElement(required=true,nillable=false) String nomCptCaisse);
 
+	/***
+	 * APPROBATION CREDIT
+	 * ***/
+	@WebMethod
+	@WebResult(name="resultat")
+	public String saveApprobation(	@WebParam(name="num_credit") @XmlElement(required=true,nillable=false) String numCredit,
+			@WebParam(name="approuv_par") @XmlElement(required=true,nillable=false) String Appby,
+			@WebParam(name="dateApp") @XmlElement(required=true,nillable=false) String dateApp,
+			@WebParam(name="descApp") @XmlElement String descApp,
+			@WebParam(name="montantApp") @XmlElement(required=true,nillable=false) double montantApp,
+			@WebParam(name="statut") @XmlElement(required=true,nillable=false) String stat_demande);
+	
+	/***
+	 * DECAISSEMENT
+	 * ***/
+	@WebMethod
+	@WebResult(name="resultat")
+	public String saveDecaisement(@WebParam(name="date") @XmlElement(required=true,nillable=false)String date,
+			@WebParam(name="cash") @XmlElement(required=true,nillable=false)boolean cash, 
+			@WebParam(name="montant") @XmlElement(required=true,nillable=false)double montant,
+			@WebParam(name="commission") @XmlElement(required=true,nillable=false)double commission,
+			@WebParam(name="papeterie") @XmlElement(required=true,nillable=false)double papeterie, 
+			@WebParam(name="piece") @XmlElement(required=true,nillable=false)String piece,
+			@WebParam(name="comptCaisse") @XmlElement(required=true,nillable=false)String comptCaise,
+			@WebParam(name="num_credit")String numCredit,
+			@WebParam(name="id_utilisateur")int userId);
+	
+	
+	/***
+	 * REMBOURSEMENT
+	 * ***/
+	@WebMethod
+	@WebResult(name="resultat")
+	public boolean saveRemboursement(@WebParam(name="numCredit") String numCredit,
+			@WebParam(name="utilisateur") int userId ,
+			@WebParam(name="date") @XmlElement(required=true,nillable=false)String date,
+			@WebParam(name="montant") @XmlElement(required=true,nillable=false)double montant,
+			@WebParam(name="piece") @XmlElement(required=true,nillable=false)String piece,
+			@WebParam(name="cash") @XmlElement(required=true,nillable=false)boolean cash, 
+			@WebParam(name="comptCaisse") @XmlElement(required=true,nillable=false)String cmptCaisse
+			);
+	
+	
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<String> dernierRemboursement(@WebParam(name="numCredit")String numCredit);
+	
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Calapresdebl> historiqueCredit(@WebParam(name="numCredit")String numCredit);
 	
 /*************************************************** CONFIGURATION CREDITS *********************************************************************/
 	

@@ -30,7 +30,7 @@ public class Decaissement implements Serializable {
 
 	private boolean cash;
 
-	private float commission;
+	private double commission;
 
 	@Column(name="date_dec")
 	private String dateDec;
@@ -42,7 +42,7 @@ public class Decaissement implements Serializable {
 
 	private float pocFee;
 
-	private float stationnary;
+	private double stationnary;
 
 	private float tdf;
 
@@ -96,11 +96,11 @@ public class Decaissement implements Serializable {
 		this.cash = cash;
 	}
 
-	public float getCommission() {
+	public double getCommission() {
 		return this.commission;
 	}
 
-	public void setCommission(float commission) {
+	public void setCommission(double commission) {
 		this.commission = commission;
 	}
 
@@ -136,11 +136,11 @@ public class Decaissement implements Serializable {
 		this.pocFee = pocFee;
 	}
 
-	public float getStationnary() {
+	public double getStationnary() {
 		return this.stationnary;
 	}
 
-	public void setStationnary(float stationnary) {
+	public void setStationnary(double stationnary) {
 		this.stationnary = stationnary;
 	}
 

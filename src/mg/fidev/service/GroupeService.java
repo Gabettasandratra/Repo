@@ -79,7 +79,7 @@ public interface GroupeService {
 	 * ***/
 	@WebMethod
 	@WebResult(name="validation")
-	public void transferMembre(@WebParam(name = "codeGroupe1") @XmlElement(required=true,nillable=false) String codeGrp1,
+	public boolean transferMembre(@WebParam(name = "codeGroupe1") @XmlElement(required=true,nillable=false) String codeGrp1,
 			@WebParam(name = "codeGroupe2") @XmlElement(required=true,nillable=false) String codeGrp2,
 			@WebParam(name = "codeInd") @XmlElement(required=true,nillable=false) String codeInd);
 	

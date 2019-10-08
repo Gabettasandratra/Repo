@@ -2,6 +2,7 @@ package mg.fidev.publisher;
 
 import javax.xml.ws.Endpoint;
 
+import mg.fidev.service.impl.ComptabliteServiceImpl;
 import mg.fidev.service.impl.CreditServiceImpl;
 import mg.fidev.service.impl.DemandeCreditImpl;
 import mg.fidev.service.impl.GroupeServiceImpl;
@@ -18,6 +19,7 @@ public class ServicePublisher {
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/user", new UserServiceImpl());
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/produit", new ProduitEpargneServiceImpl());
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/credit", new CreditServiceImpl());
+		Endpoint.publish("http://127.0.0.1:8082/service2.0/comptabilite", new ComptabliteServiceImpl());
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/credit/demandeCredit", new DemandeCreditImpl());
 		System.out.println("-- Service Online --");
 		}

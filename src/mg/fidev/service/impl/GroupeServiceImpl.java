@@ -169,7 +169,7 @@ public class GroupeServiceImpl implements GroupeService {
 	 * TRANSFERER MEMBRE
 	 * ***/
 	@Override
-	public void transferMembre(String codeGrp1, String codeGrp2, String codeInd) {
+	public boolean transferMembre(String codeGrp1, String codeGrp2, String codeInd) { 
 		Groupe groupe = em.find(Groupe.class, codeGrp1);
 		Groupe trasfers = em.find(Groupe.class, codeGrp2);
 				
@@ -187,36 +187,45 @@ public class GroupeServiceImpl implements GroupeService {
 							if(groupe.getPresident().equalsIgnoreCase(individuel.getNomClient())){
 								groupe.setPresident("");
 								transaction.begin();
-								em.merge(groupe);							
+								em.flush();							
 								transaction.commit();
+								em.refresh(groupe);
 							}
 							
 							if(groupe.getSecretaire().equalsIgnoreCase(individuel.getNomClient())){
 								groupe.setSecretaire("");
 								transaction.begin();
-								em.merge(groupe);							
+								em.flush();							
 								transaction.commit();
+								em.refresh(groupe);
 							}
 							
 							if(groupe.getTresorier().equalsIgnoreCase(individuel.getNomClient())){
 								groupe.setTresorier("");
 								transaction.begin();
-								em.merge(groupe);							
+								em.flush();							
 								transaction.commit();
+								em.refresh(groupe);
+					
 							}
+							
 							transaction.begin();
-							em.merge(individuel);							
+							em.flush();
 							transaction.commit();
+							em.refresh(individuel);
+							System.out.println("Transfer reussit!!!");
+							return true;
 						
 					} catch (Exception e) {
 						e.printStackTrace();
+						return false;
 					}
 					
 				}
 			}
 		}
 		
-		
+		return true;
 	}
 	
 }
