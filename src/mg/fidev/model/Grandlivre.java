@@ -30,11 +30,7 @@ public class Grandlivre implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private String id;
-
-	private String analytique;
-
-	private String budget;
-
+	
 	private boolean cloture;
 
 	private String compte;
@@ -44,6 +40,9 @@ public class Grandlivre implements Serializable {
 	private String date;
 
 	private double debit;
+	
+	@Column(name="solde")
+	private double solde;
 
 	private String descr;
 
@@ -57,16 +56,91 @@ public class Grandlivre implements Serializable {
 	private String userId;
 	
 	@ManyToOne
+	@JoinColumn(name="utilisateur")
+	private Utilisateur utilisateur;
+	
+	@ManyToOne
 	@JoinColumn(name="code_client")
-	@XmlTransient
 	private Individuel codeInd;
 
 	@ManyToOne
 	@JoinColumn(name="code_grp")
-	@XmlTransient
 	private Groupe groupe;
 	
+	@ManyToOne
+	@JoinColumn(name="num_credit")
+	private DemandeCredit demandeCredit;
+	
+	@ManyToOne
+	@JoinColumn(name="code_agence")
+	@XmlTransient
+	private Agence agence;
+	
+	@ManyToOne
+	@JoinColumn(name="compte_epargne")
+	@XmlTransient
+	private CompteEpargne compteEpargne;
+	
+	@ManyToOne
+	@JoinColumn(name="compte_dat")
+	@XmlTransient
+	private CompteDAT compteDat;
+	
+	@ManyToOne
+	@JoinColumn(name="num_compte_compta")
+	private Account account;
+	
+	@ManyToOne
+	@JoinColumn(name="code_budget")
+	private Budget budget;
+	
+	@ManyToOne
+	@JoinColumn(name="code_analytique")
+	private Analytique analytique;
+	
+	
 	public Grandlivre() {
+	}
+
+	public Grandlivre(String compte, double credit, String date, double debit,
+			double solde, String descr, String piece, String tcode,
+			String userId, Utilisateur utilisateur, Individuel codeInd,
+			Groupe groupe, DemandeCredit demandeCredit ) {
+		super();
+		this.compte = compte;
+		this.credit = credit;
+		this.date = date;
+		this.debit = debit;
+		this.solde = solde;
+		this.descr = descr;
+		this.piece = piece;
+		this.tcode = tcode;
+		this.userId = userId;
+		this.utilisateur = utilisateur;
+		this.codeInd = codeInd;
+		this.groupe = groupe;
+		this.demandeCredit = demandeCredit;
+	}
+	
+	public Grandlivre(String compte, double credit, String date, double debit,
+			double solde, String descr, String piece, String tcode,
+			String userId, Utilisateur utilisateur, Individuel codeInd,
+			Groupe groupe, DemandeCredit demandeCredit, Account account) {
+		super();
+		this.compte = compte;
+		this.credit = credit;
+		this.date = date;
+		this.debit = debit;
+		this.solde = solde;
+		this.descr = descr;
+		this.piece = piece;
+		this.tcode = tcode;
+		this.userId = userId;
+		this.utilisateur = utilisateur;
+		this.codeInd = codeInd;
+		this.groupe = groupe;
+		this.demandeCredit = demandeCredit;
+		this.account = account;
 	}
 
 	public String getId() {
@@ -76,21 +150,13 @@ public class Grandlivre implements Serializable {
 	public void setId(String id) {
 		this.id = id;
 	}
-
-	public String getAnalytique() {
-		return this.analytique;
+	
+	public double getSolde() {
+		return solde;
 	}
 
-	public void setAnalytique(String analytique) {
-		this.analytique = analytique;
-	}
-
-	public String getBudget() {
-		return this.budget;
-	}
-
-	public void setBudget(String budget) {
-		this.budget = budget;
+	public void setSolde(double solde) {
+		this.solde = solde;
 	}
 
 	public boolean getCloture() {
@@ -187,6 +253,70 @@ public class Grandlivre implements Serializable {
 
 	public void setGroupe(Groupe groupe) {
 		this.groupe = groupe;
+	}
+
+	public DemandeCredit getDemandeCredit() {
+		return demandeCredit;
+	}
+
+	public void setDemandeCredit(DemandeCredit demandeCredit) {
+		this.demandeCredit = demandeCredit;
+	}
+
+	public Agence getAgence() {
+		return agence;
+	}
+
+	public void setAgence(Agence agence) {
+		this.agence = agence;
+	}
+
+	public CompteEpargne getCompteEpargne() {
+		return compteEpargne;
+	}
+
+	public void setCompteEpargne(CompteEpargne compteEpargne) {
+		this.compteEpargne = compteEpargne;
+	}
+
+	public Utilisateur getUtilisateur() {
+		return utilisateur;
+	}
+
+	public void setUtilisateur(Utilisateur utilisateur) {
+		this.utilisateur = utilisateur;
+	}
+
+	public Account getAccount() {
+		return account;
+	}
+
+	public void setAccount(Account account) {
+		this.account = account;
+	}
+
+	public Budget getBudget() {
+		return budget;
+	}
+
+	public void setBudget(Budget budget) {
+		this.budget = budget;
+	}
+
+	public Analytique getAnalytique() {
+		return analytique;
+	}
+
+	public void setAnalytique(Analytique analytique) {
+		this.analytique = analytique;
+	}
+
+	public CompteDAT getCompteDat() {
+		return compteDat;
+	}
+
+	public void setCompteDat(CompteDAT compteDat) {
+		this.compteDat = compteDat;
 	}
 
 }

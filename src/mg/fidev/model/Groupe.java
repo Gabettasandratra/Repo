@@ -1,7 +1,6 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -10,8 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -34,8 +31,8 @@ public class Groupe implements Serializable {
 
 	private String nomGroupe;
 
-	@Temporal(TemporalType.DATE)
-	private Date dateInscription;
+	
+	private String dateInscription;
 
 	private String email;
 	
@@ -56,6 +53,11 @@ public class Groupe implements Serializable {
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 
+	//Compte DAT
+	@OneToMany(mappedBy="groupe")
+	@XmlTransient
+	private List<CompteDAT> compteDat;
+	
 	//bi-directional many-to-one association to DemandeCredit
 	@OneToMany(mappedBy="groupe")
 	@XmlTransient
@@ -79,6 +81,26 @@ public class Groupe implements Serializable {
 	@OneToMany(mappedBy="groupe", cascade = CascadeType.ALL)
 	@XmlTransient
 	private List<ListeRouge> listeRouge;
+	
+	@OneToMany(mappedBy="groupe")
+	@XmlTransient
+	private List<DroitInscription> droitInscription;
+
+	public List<ListeRouge> getListeRouge() {
+		return listeRouge;
+	}
+
+	public void setListeRouge(List<ListeRouge> listeRouge) {
+		this.listeRouge = listeRouge;
+	}
+
+	public List<DroitInscription> getDroitInscription() {
+		return droitInscription;
+	}
+
+	public void setDroitInscription(List<DroitInscription> droitInscription) {
+		this.droitInscription = droitInscription;
+	}
 
 	public Groupe() {
 	}
@@ -91,11 +113,11 @@ public class Groupe implements Serializable {
 		this.codeGrp = codeGrp;
 	}
 
-	public Date getDateInscription() {
+	public String getDateInscription() {
 		return this.dateInscription;
 	}
 
-	public void setDateInscription(Date dateInscription) {
+	public void setDateInscription(String dateInscription) {
 		this.dateInscription = dateInscription;
 	}
 
@@ -245,4 +267,12 @@ public class Groupe implements Serializable {
 		this.grandLivre = grandLivre;
 	}
 
+	public List<CompteDAT> getCompteDat() {
+		return compteDat;
+	}
+
+	public void setCompteDat(List<CompteDAT> compteDat) {
+		this.compteDat = compteDat;
+    }
+	
 }

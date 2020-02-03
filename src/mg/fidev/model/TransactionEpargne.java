@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @Entity
 @Table(name="transaction_epargne")
 @NamedQuery(name="TransactionEpargne.findAll", query="SELECT t FROM TransactionEpargne t")
-@XmlRootElement
+@XmlRootElement(name="transEp")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TransactionEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -39,7 +39,17 @@ public class TransactionEpargne implements Serializable {
 
 	@Column(name="type_trans_ep")
 	private String typeTransEp;
-
+	
+	@Column(name="type_paiement",nullable=false,length=50)
+	private String typePaie;
+	@Column(name="val_paie",nullable=true,length=50)
+	private String valPaie;
+	@Column(name="comm_retrait")
+	private double commRet;
+	@Column(name="comm_trans")
+	private double commTrans;
+	@Column(name="commPrelev")
+	private double penalPrelev;
 	//bi-directional many-to-one association to CompteCaisse
 	@ManyToOne
 	@JoinColumn(name="Compte_caissenom_cpt_caisse")
@@ -49,7 +59,6 @@ public class TransactionEpargne implements Serializable {
 	//bi-directional many-to-one association to CompteEpargne
 	@ManyToOne
 	@JoinColumn(name="Compte_epargnenum_compte_ep")
-	@XmlTransient
 	private CompteEpargne compteEpargne;
 
 	public TransactionEpargne() {
@@ -93,6 +102,46 @@ public class TransactionEpargne implements Serializable {
 
 	public void setPieceCompta(String pieceCompta) {
 		this.pieceCompta = pieceCompta;
+	}
+
+	public String getTypePaie() {
+		return typePaie;
+	}
+
+	public void setTypePaie(String typePaie) {
+		this.typePaie = typePaie;
+	}
+
+	public String getValPaie() {
+		return valPaie;
+	}
+
+	public void setValPaie(String valPaie) {
+		this.valPaie = valPaie;
+	}
+
+	public double getCommRet() {
+		return commRet;
+	}
+
+	public void setCommRet(double commRet) {
+		this.commRet = commRet;
+	}
+
+	public double getCommTrans() {
+		return commTrans;
+	}
+
+	public void setCommTrans(double commTrans) {
+		this.commTrans = commTrans;
+	}
+
+	public double getPenalPrelev() {
+		return penalPrelev;
+	}
+
+	public void setPenalPrelev(double penalPrelev) {
+		this.penalPrelev = penalPrelev;
 	}
 
 	public double getSolde() {

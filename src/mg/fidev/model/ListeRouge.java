@@ -13,7 +13,6 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name="liste_rouge")
@@ -30,18 +29,18 @@ public class ListeRouge implements Serializable{
 	
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="codeInd")
-	@XmlTransient
 	private Individuel individuel;
 	
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="codeGroupe")
-	@XmlTransient
 	private Groupe groupe;
 
 	public ListeRouge() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	
+	
 
 	public int getId() {
 		return id;

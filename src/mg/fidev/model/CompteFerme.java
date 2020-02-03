@@ -2,13 +2,18 @@ package mg.fidev.model;
 
 import java.io.Serializable;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-
-import java.util.Date;
 
 
 /**
@@ -26,10 +31,9 @@ public class CompteFerme implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
-
-	@Temporal(TemporalType.TIMESTAMP)
+	
 	@Column(name="date_cloture")
-	private Date dateCloture;
+	private String dateCloture;
 
 	@Column(name="frais_cloture")
 	private double fraisCloture;
@@ -41,7 +45,6 @@ public class CompteFerme implements Serializable {
 	//bi-directional many-to-one association to CompteEpargne
 	@ManyToOne
 	@JoinColumn(name="num_compte")
-	@XmlTransient
 	private CompteEpargne compteEpargne;
 
 	public CompteFerme() {
@@ -55,11 +58,11 @@ public class CompteFerme implements Serializable {
 		this.id = id;
 	}
 
-	public Date getDateCloture() {
+	public String getDateCloture() {
 		return this.dateCloture;
 	}
 
-	public void setDateCloture(Date dateCloture) {
+	public void setDateCloture(String dateCloture) {
 		this.dateCloture = dateCloture;
 	}
 

@@ -2,7 +2,6 @@ package mg.fidev.service.impl;
 
 /* Version 0.3 */
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,15 +13,16 @@ import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Adresse;
+import mg.fidev.model.CompteEpargne;
+import mg.fidev.model.DemandeCredit;
 import mg.fidev.model.Docidentite;
+import mg.fidev.model.DroitInscription;
+import mg.fidev.model.Garant;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
 import mg.fidev.model.ListeRouge;
 import mg.fidev.service.IndividuelService;
 import mg.fidev.utils.CodeIncrement;
-import mg.fidev.xmlRequest.AdresseXml;
-import mg.fidev.xmlRequest.DocidentiteXml;
-import mg.fidev.xmlRequest.IndividuelXml;
 
 @WebService(name = "individuelService", targetNamespace = "http://individuel.fidev.com/", serviceName = "individuelService", portName = "individuelServicePort", endpointInterface = "mg.fidev.service.IndividuelService")
 public class IndividuelServiceImpl implements IndividuelService {
@@ -30,85 +30,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 	private static EntityManager em = Persistence.createEntityManagerFactory(
 			PERSISTENCE_UNIT_NAME).createEntityManager();
 	private static EntityTransaction transaction = em.getTransaction();
-	
-	/****
-	 * ENREGISTREMENT CLIENT INDIVIDUEL
-	 * **/
-	//Methode pour Enregister un Client individuel
-	@Override
-	public String saveIndividuel(IndividuelXml request, String codeAgence) {
-		/* CETTE OPERATION CONSISTE A TRANSFORMER L'OBJET REQUEST EN PERSISTENCE */
-		/* INDIVIDUEL A SUAVEGARDER */
-		Individuel individu = new Individuel();
-		individu.setNomClient(request.getNomClient());
-		individu.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
-		individu.setPrenomClient(request.getPrenomClient());
-		individu.setSexe(request.getSexe());
-		individu.setEmail(request.getEmail());
-		individu.setNumeroMobile(request.getNumeroMobile());
-		individu.setDateInscription(request.getDateInscription());
-		individu.setDateNaissance(request.getDateNaissance());
-		//individu.setCodeAgence(request.getCodeAgence());
-		individu.setTitre(request.getTitre());
 
-		/* config */
-		individu.setEstClientIndividuel(true);
-		individu.setEstGarant(false);
-		individu.setGroupe(null);
-
-		/* les info perso */
-		individu.setParentNom(request.getParentNom());
-		individu.setParentAdresse(request.getParentAdresse());
-		individu.setProfession(request.getProfession());
-		individu.setLangue(request.getLangue());
-		individu.setLieuNaissance(request.getLieuNaissance());
-		individu.setEtatCivil(request.getEtatCivil());
-		individu.setNbEnfant(request.getNbEnfant());
-		individu.setNbPersCharge(request.getNbPersCharge());
-		individu.setNiveauEtude(request.getNiveauEtude());
-		individu.setNomConjoint(request.getNomConjoint());
-
-		// Les docidentités sont justes préparés mais pas encore associés à
-		// l'individu car pas de codeclient generer
-		List<DocidentiteXml> listesDocRequest = request.getDocidentites();
-		List<Docidentite> listesDocPersistence = new ArrayList<Docidentite>();
-		for (DocidentiteXml doc : listesDocRequest) {
-			Docidentite document = new Docidentite();
-			document.setTypedoc(doc.getTypedoc());
-			System.err.println("Num :"+doc.getNumero());
-			document.setNumero(doc.getNumero());
-			document.setDelivrePar(doc.getDelivrePar());
-			document.setDateEmis(doc.getDateEmis());
-			document.setDateExpire(doc.getDateExpire());
-			document.setPriorite(doc.getPriorite());
-			document.setIndividuel(individu);
-			listesDocPersistence.add(document);
-		}
-
-		// L'adresse qui est optional
-		if (request.getAdresse() != null) {
-			AdresseXml adresseRequest = request.getAdresse();
-			Adresse adresse = new Adresse();
-			adresse.setAdresseRegion(adresseRequest.getAdresseRegion());
-			adresse.setAdresseVille(adresseRequest.getAdresseVille());
-			adresse.setAdresseDistrict(adresseRequest.getAdresseDistrict());
-			adresse.setAdresseCommune(adresseRequest.getAdresseCommune());
-			adresse.setAdressePhysique(adresseRequest.getAdressePhysique());
-			adresse.setDistanceAgence(adresseRequest.getDistanceAgence());
-			adresse.setCodeRegion(adresseRequest.getCodeRegion());
-			individu.setAdresse(adresse);
-		}
-
-		transaction.begin();
-		em.persist(individu);
-		for (Docidentite doc : listesDocPersistence)
-			em.persist(doc);
-		transaction.commit();
-		em.refresh(individu); // pour que le em connait le id et code du nouveau
-		return "Okay";
-	}
-
-	
 	/***
 	 * LISTE DES CLIENTS INDIVIDUELS 
 	 * ***/
@@ -140,23 +62,6 @@ public class IndividuelServiceImpl implements IndividuelService {
 		return results;
 	}
 
-	@Override
-	///	Inutile
-	public boolean testMoxy(Individuel individu) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public String saveIndividuelByEntity(Individuel request) {
-		transaction.begin();
-		em.persist(request);
-		for (Docidentite doc : request.getDocidentites())
-			em.persist(doc);
-		transaction.commit();
-		em.refresh(request); // pour que le em connait le id et code du nouveau
-		return "Jereo ny base";
-	}
 
 	/***
 	 * ENREGISTREMENT INDIVIDUEL
@@ -164,11 +69,38 @@ public class IndividuelServiceImpl implements IndividuelService {
 	@Override
 	public String insertIndividuel(Individuel individuel, String codeAgence,
 			Docidentite docIdentite, Adresse adresse) {
+		
 		individuel.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
 		individuel.setEstClientIndividuel(true);
 		individuel.setAdresse(adresse);
 		docIdentite.setIndividuel(individuel);
 		try {
+			
+			if(individuel.getEstGarant() == true){
+				Garant gar = new Garant();
+				
+				gar.setCodeGarant(CodeIncrement.getCodeGar(em, codeAgence));
+				gar.setCodeIndividuel(individuel.getCodeInd());
+				gar.setDateInscription(individuel.getDateInscription());
+				gar.setDateNais(individuel.getDateNaissance());
+				gar.setEmail(individuel.getEmail());
+				gar.setEstClientIndividuel(true);
+				gar.setNom(individuel.getNomClient());
+				gar.setPrenom(individuel.getPrenomClient());
+				gar.setProfession(individuel.getProfession());
+				gar.setSexe(individuel.getSexe());
+				gar.setAdresse(adresse);
+				docIdentite.setGarant(gar);
+				transaction.begin();
+				em.persist(gar);
+				em.persist(docIdentite);
+				transaction.commit();
+				em.refresh(gar);
+				individuel.setEstGarant(true);
+				individuel.setCodeGarant(gar.getCodeGarant());
+				
+			}
+			
 			transaction.begin();
 			em.persist(individuel);
 			em.persist(docIdentite);
@@ -187,32 +119,56 @@ public class IndividuelServiceImpl implements IndividuelService {
 	 * ENREGISTREMENT DE NOUVEAU GARANT
 	 * ***/
 	@Override
-	public String saveGarant(Individuel individuel, Adresse adresse, Docidentite docId, String codeAgence) {
-		individuel.setEstGarant(true);
-		individuel.setAdresse(adresse);
-		docId.setIndividuel(individuel);
+	public boolean saveGarant(Individuel individuel, Adresse adresse, Docidentite docId, String codeAgence) {
 		
-		if(individuel.getEstClientIndividuel()){
-			individuel.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
-		}
-		else{
-			individuel.setCodeInd(CodeIncrement.getCodeGar(em, codeAgence));
-		}
+		Garant gar = new Garant();
+		
+		gar.setCodeGarant(CodeIncrement.getCodeGar(em, codeAgence));
+		gar.setDateInscription(individuel.getDateInscription());
+		gar.setDateNais(individuel.getDateNaissance());
+		gar.setEmail(individuel.getEmail());
+		gar.setNom(individuel.getNomClient());
+		gar.setPrenom(individuel.getPrenomClient());
+		gar.setProfession(individuel.getProfession());
+		gar.setSexe(individuel.getSexe());
+		gar.setAdresse(adresse);
+		docId.setGarant(gar);
+		
 		try {
+			
+			if(individuel.getEstClientIndividuel() == true){
+				individuel.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));				
+				individuel.setEstGarant(true);
+				individuel.setCodeGarant(gar.getCodeGarant());
+				//individuel.setEstClientIndividuel(true);
+				individuel.setAdresse(adresse);
+				docId.setIndividuel(individuel);
+			
+				transaction.begin();
+				em.persist(individuel);
+				em.persist(docId);
+				transaction.commit();
+				em.refresh(individuel);
+				em.refresh(docId);
+	
+				gar.setEstClientIndividuel(true);
+				gar.setCodeIndividuel(individuel.getCodeInd());
+			}
+	
 			transaction.begin();
-			em.persist(individuel);
+			em.persist(gar);
 			em.persist(docId);
 			transaction.commit();
-			em.refresh(individuel);
-			em.refresh(docId);
-			return "Insertion garant succes";
+			em.refresh(gar);
+			return true;
 		} catch (Exception e) {
-			return "Insertion garant failed "+e.getMessage();
+			e.getMessage();
+			return false;
 		}
 	}
 	
 	/***
-	 * AJOUTER AU LISTE ROUGE
+	 * AJOUTER UN CLIENT AU LISTE ROUGE
 	 * ***/
 
 	@Override
@@ -226,12 +182,16 @@ public class IndividuelServiceImpl implements IndividuelService {
 			
 			if(ind!=null){
 				listerouge.setIndividuel(ind);
+				ind.setListeRouge(true);
 			}else if(grp != null){
 				listerouge.setGroupe(grp);
 			}
 			transaction.begin();
+			em.flush();
 			em.persist(listerouge);
 			transaction.commit();
+			em.refresh(listerouge);
+			em.refresh(ind);
 			result = "Enregistrement reussit!!!";
 			
 		} catch (Exception e) {
@@ -242,12 +202,203 @@ public class IndividuelServiceImpl implements IndividuelService {
 	}
 
 	/***
-	 * AFFICHAGE DES INDIVIDUELS AU LISTE ROUGE
+	 * AFFICHAGE LISTE ROUGE
 	 * ***/
 	@Override
-	public List<ListeRouge> afficheListeRouge() {
-		TypedQuery<ListeRouge> query = em.createQuery("SELECT l FROM ListeRouge l", ListeRouge.class);
+	public List<ListeRouge> afficheListeRouge(String agence,String dateDeb,String dateFin) {
+		String sql = "SELECT l FROM ListeRouge l ";
+		if(!agence.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
+			
+			if(!agence.equals("")){
+				sql+="JOIN l.individuel i WHERE i.codeInd LIKE '"+agence+"%'";
+				if(!dateDeb.equals("") && dateFin.equals("")){
+					sql+=" AND l.date = '"+dateDeb+"'" ;
+				}
+				if(!dateFin.equals("") && !dateFin.equals("")){
+					sql+=" AND l.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'"  ;
+				}
+			}
+			
+			if(!dateDeb.equals("") && dateFin.equals("") && agence.equals("")){
+				sql+="WHERE l.date = '"+dateDeb+"'" ;
+			}
+			if(!dateFin.equals("") && !dateFin.equals("") && agence.equals("")){
+				sql+="WHERE l.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'" ;
+			}	
+		
+		}
+		TypedQuery<ListeRouge> query = em.createQuery(sql, ListeRouge.class);
 		List<ListeRouge> listRouge = query.getResultList();
 		return listRouge;
+	}
+
+	//chercher client individuel par son code
+	@Override
+	public List<Individuel> findByCode(String code) {
+		TypedQuery<Individuel> query = em.createQuery("SELECT i FROM Individuel i WHERE i.codeInd LIKE :code"
+				+ " AND i.estClientIndividuel = :x",Individuel.class);
+		query.setParameter("code", code+"%");
+		query.setParameter("x", true);
+		
+		List<Individuel> result = query.getResultList();
+		
+		if(!result.isEmpty())return result;
+		else System.out.println("Auccun client trouvé!!!");
+		
+		return null;
+	}
+
+	//liste garant crédit
+	@Override
+	public List<Garant> listeGarant() {
+		TypedQuery<Garant> query = em.createQuery("SELECT i FROM Garant i",Garant.class);
+		if(!query.getResultList().isEmpty()){
+			List<Garant> result = query.getResultList();
+			return result;
+		}
+		return null;
+	}
+
+
+	//enregistrement droit d'inscription
+	@Override
+	public boolean saveDroitInscription(DroitInscription droit, String codeInd,String codeGrp) {
+		
+		Individuel ind = em.find(Individuel.class, codeInd);
+		Groupe grp = em.find(Groupe.class, codeGrp);
+		try {		
+			if(ind!=null){
+				droit.setCodeInd(ind);
+				ind.setListeRouge(true);
+			}else if(grp != null){
+				droit.setGroupe(grp);
+			}
+			
+			transaction.begin();
+			em.flush();
+			em.persist(droit);
+			transaction.commit();
+			em.refresh(droit);			
+			return true;			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}		
+	}
+
+	//rapport individuel
+	@Override
+	public List<Individuel> rapportsIndividuel(String agence, String adresse,
+			String nivEtude, String sexe, String profession, String dateDeb,
+			String dateFin, String startDate, String endDate) {
+		
+		String sql = "select i from Individuel i join i.adresse a where i.estClientIndividuel = '"+true+"' ";		
+		
+		if(!agence.equals("") || !adresse.equals("") || !nivEtude.equals("") || !sexe.equals("") 
+				|| !profession.equals("") || !dateDeb.equals("") || !dateFin.equals("") || !startDate.equals("")
+				|| !endDate.equals("") ){
+			
+			if(!adresse.equals("")){
+				sql+=" and a.adressePhysique like '%"+ adresse +"%'";
+			}			
+			if(!agence.equals("")){
+				sql+=" and i.codeInd like '%"+ agence +"%'";
+			}
+			if(!nivEtude.equals("")){
+				sql+=" and i.niveauEtude like '%"+ nivEtude +"%'";
+			}
+			if(!sexe.equals("")){
+				sql+=" and i.sexe like '%"+ sexe +"%'";
+			}
+			if(!profession.equals("")){
+				sql+=" and i.profession like '%"+ profession +"%'";
+			}
+			if(!dateDeb.equals("") && dateFin.equals("")){
+				sql+=" and i.dateNaissance ='"+ dateDeb +"'";
+							
+			}
+			if(!dateDeb.equals("") && !dateFin.equals("")){
+				sql+=" and i.dateNaissance between '"+ dateDeb +"' and '"+ dateFin +"'";
+				
+			}	
+			
+			if(!startDate.equals("") && endDate.equals("")){
+				sql+=" and i.dateInscription ='"+ startDate +"'";
+						
+			}	
+			if(!startDate.equals("") && !endDate.equals("")){
+				sql+=" and i.dateInscription between '"+ startDate +"' and '"+ endDate +"'";	
+			}		
+			
+		}
+		
+		sql +=" order by i.nomClient asc";
+		
+		TypedQuery<Individuel> query = em.createQuery(sql, Individuel.class);
+				
+		if(!query.getResultList().isEmpty()){
+			return query.getResultList();
+		}		
+		return null;
+	}
+
+	//Rapport CIN
+	@Override
+	public List<Docidentite> rapportCIN(String dateDeb, String dateFin) {
+		
+		String sql = "select d from Docidentite d join d.individuel i where d.garant is null ";
+		
+		if(!dateDeb.equals("") || !dateFin.equals("") ){
+			
+			if(!dateDeb.equals("") && dateFin.equals("")){
+				sql+=" and i.dateInscription ='"+ dateDeb +"'";
+				
+			}
+			if(!dateDeb.equals("") && !dateFin.equals("")){
+				sql+=" and i.dateInscription between '"+ dateDeb +"' and '"+ dateFin +"'";
+				
+			}				
+			
+		}
+		
+		TypedQuery<Docidentite> result = em.createQuery(sql,Docidentite.class);
+		
+		if(!result.getResultList().isEmpty())
+			return 	result.getResultList();
+		return null;
+	}
+
+	//recupérer les crédits d'un client
+	@Override
+	public List<DemandeCredit> getDetailCredit(String code) {
+		Individuel ind = em.find(Individuel.class, code);
+		return ind.getDemandeCredits();
+	}
+
+	//recupérer les comptes épargne d'un client
+	@Override
+	public List<CompteEpargne> getDetailEpargne(String code) {
+		Individuel ind = em.find(Individuel.class, code);
+		return ind.getCompteEpargnes();
+	}
+
+	@Override
+	public Individuel getOneIndividuel(String code) {
+		Individuel ind = em.find(Individuel.class, code);
+		return ind;
+	}
+
+	@Override
+	public boolean deleteIndividuel(String code) {
+		Individuel ind = em.find(Individuel.class, code);
+		try {
+			transaction.begin();
+			em.remove(ind);
+			transaction.commit();
+			em.refresh(ind); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

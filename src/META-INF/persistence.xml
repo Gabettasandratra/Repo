@@ -50,14 +50,24 @@
 		<class>mg.fidev.model.DroitInscription</class>
 		<class>mg.fidev.model.ListeRouge</class>
 		<class>mg.fidev.model.ConfigFraisCreditGroupe</class>
+		<class>mg.fidev.model.InteretEpargne</class>
+		<class>mg.fidev.model.Analytique</class>
+		<class>mg.fidev.model.Budget</class>
+		<class>mg.fidev.model.Personnel</class>
+		<class>mg.fidev.model.Garant</class>
+		<class>mg.fidev.model.CalView</class>
+		<class>mg.fidev.model.Approbation</class>
+		<class>mg.fidev.model.ConfigGeneralDAT</class>
+		<class>mg.fidev.model.ConfigGLDAT</class>
+		<class>mg.fidev.model.CompteDAT</class>
 		<properties>
-			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/microfinance_v1"/>
+			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/base_old"/>
 			<property name="javax.persistence.jdbc.user" value="root"/>
 			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
 			<property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
 
 			<!-- <property name="eclipselink.ddlgeneration.output-mode" value="database" />
-			<property name="eclipselink.ddl-generation" 	value="create-or-extend-tables"/>  -->
+			<property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>   -->
 			
 			<!-- <property name="eclipselink.ddl-generation" 	value="create-tables"/> -->
 		

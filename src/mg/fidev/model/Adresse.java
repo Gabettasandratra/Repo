@@ -54,6 +54,10 @@ public class Adresse implements Serializable {
 	@OneToMany(mappedBy="adresse",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<Individuel> individuels;
+	
+	@OneToMany(mappedBy="adresse",cascade= CascadeType.ALL)
+	@XmlTransient
+	private List<Garant> garants;
 
 	public Adresse() {
 	}
@@ -188,4 +192,12 @@ public class Adresse implements Serializable {
 		return individuel;
 	}
 
+	public List<Garant> getGarants() {
+		return garants;
+	}
+
+	public void setGarants(List<Garant> garants) {
+		this.garants = garants;
+	}
+	
 }

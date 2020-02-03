@@ -31,11 +31,28 @@ public class Remboursement implements Serializable {
 	@Id
 	private String tcode;
 
-	private boolean cash;
-
 	private float cheqcomm;
-
-	private int cheqid;
+	
+	@Column(name="typeAction")
+	private String typeAction;
+	
+	@Column(name="nbEcheance")
+	private int nbEcheance;
+	
+	@Column(name="typePaie")
+	private String typePaie;
+	
+	@Column(name="valPaie")
+	private String valPaie;
+	
+	@Column(name="solde")
+	private double solde;
+	
+	@Column(name="totalPrincipale")
+	private double totalPrincipale;
+	
+	@Column(name="totalInteret")
+	private double totalInteret;
 
 	@Column(name="cpt_caisse_num")
 	private String cptCaisseNum;
@@ -61,7 +78,6 @@ public class Remboursement implements Serializable {
 	//bi-directional many-to-one association to DemandeCredit
 	@ManyToOne
 	@JoinColumn(name="num_credit")
-	@XmlTransient
 	private DemandeCredit demandeCredit;
 
 	//bi-directional many-to-one association to Utilisateur
@@ -81,6 +97,62 @@ public class Remboursement implements Serializable {
 		this.tcode = tcode;
 	}
 
+	public String getTypeAction() {
+		return typeAction;
+	}
+
+	public void setTypeAction(String typeAction) {
+		this.typeAction = typeAction;
+	}
+
+	public int getNbEcheance() {
+		return nbEcheance;
+	}
+
+	public void setNbEcheance(int nbEcheance) {
+		this.nbEcheance = nbEcheance;
+	}
+
+	public String getTypePaie() {
+		return typePaie;
+	}
+
+	public void setTypePaie(String typePaie) {
+		this.typePaie = typePaie;
+	}
+
+	public String getValPaie() {
+		return valPaie;
+	}
+
+	public void setValPaie(String valPaie) {
+		this.valPaie = valPaie;
+	}
+
+	public double getSolde() {
+		return solde;
+	}
+
+	public void setSolde(double solde) {
+		this.solde = solde;
+	}
+
+	public double getTotalPrincipale() {
+		return totalPrincipale;
+	}
+
+	public void setTotalPrincipale(double totalPrincipale) {
+		this.totalPrincipale = totalPrincipale;
+	}
+
+	public double getTotalInteret() {
+		return totalInteret;
+	}
+
+	public void setTotalInteret(double totalInteret) {
+		this.totalInteret = totalInteret;
+	}
+
 	public double getRestaPaie() {
 		return restaPaie;
 	}
@@ -95,14 +167,6 @@ public class Remboursement implements Serializable {
 
 	public void setCheqcomm(float cheqcomm) {
 		this.cheqcomm = cheqcomm;
-	}
-
-	public int getCheqid() {
-		return this.cheqid;
-	}
-
-	public void setCheqid(int cheqid) {
-		this.cheqid = cheqid;
 	}
 
 	public String getCptCaisseNum() {
@@ -137,14 +201,6 @@ public class Remboursement implements Serializable {
 		this.stationery = stationery;
 	}
 	
-	public boolean getCash() {
-		return cash;
-	}
-
-	public void setCash(boolean cash) {
-		this.cash = cash;
-	}
-
 	public String getDateRemb() {
 		return dateRemb;
 	}

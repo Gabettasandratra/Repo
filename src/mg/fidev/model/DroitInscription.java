@@ -6,10 +6,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name="droitinscription")
@@ -32,6 +35,16 @@ public class DroitInscription implements Serializable{
 	private double fraisDossier;
 	private double fraisAdmin;
 	private String compteCaisse;
+	
+	@ManyToOne
+	@JoinColumn(name="codeInd")
+	@XmlTransient
+	private Individuel codeInd;
+	
+	@ManyToOne
+	@JoinColumn(name="codeGrp")
+	@XmlTransient
+	private Groupe groupe;
 	public DroitInscription() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -77,6 +90,18 @@ public class DroitInscription implements Serializable{
 	}
 	public void setCompteCaisse(String compteCaisse) {
 		this.compteCaisse = compteCaisse;
+	}
+	public Individuel getCodeInd() {
+		return codeInd;
+	}
+	public void setCodeInd(Individuel codeInd) {
+		this.codeInd = codeInd;
+	}
+	public Groupe getGroupe() {
+		return groupe;
+	}
+	public void setGroupe(Groupe groupe) {
+		this.groupe = groupe;
 	}
 	
 }

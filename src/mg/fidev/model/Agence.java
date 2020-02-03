@@ -33,7 +33,15 @@ public class Agence implements Serializable {
 	@ManyToMany(mappedBy="agences")
 	@XmlTransient
 	private List<Utilisateur> utilisateurs;
-
+	
+	@OneToMany(mappedBy="agence")
+	@XmlTransient
+	private List<Personnel> personnels;
+	
+	@OneToMany(mappedBy="agence")
+	@XmlTransient
+	private List<Grandlivre> grandLivre;
+	
 	public Agence() {
 	}
 
@@ -69,4 +77,19 @@ public class Agence implements Serializable {
 		this.utilisateurs = utilisateurs;
 	}
 
+	public List<Personnel> getPersonnels() {
+		return personnels;
+	}
+
+	public void setPersonnels(List<Personnel> personnels) {
+		this.personnels = personnels;
+	}
+
+	public List<Grandlivre> getGrandLivre() {
+		return grandLivre;
+	}
+
+	public void setGrandLivre(List<Grandlivre> grandLivre) {
+		this.grandLivre = grandLivre;
+	}	
 }

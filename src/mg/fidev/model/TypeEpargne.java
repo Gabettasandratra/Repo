@@ -25,6 +25,9 @@ public class TypeEpargne implements Serializable {
 	@Id
 	@Column(name="nom_type_epargne")
 	private String nomTypeEpargne;
+	
+	@Column(name="abrev")
+	private String abrev;
 
 	@Column(name="descr_type_epargne")
 	private String descrTypeEpargne;
@@ -49,6 +52,14 @@ public class TypeEpargne implements Serializable {
 
 	public void setNomTypeEpargne(String nomTypeEpargne) {
 		this.nomTypeEpargne = nomTypeEpargne;
+	}
+
+	public String getAbrev() {
+		return abrev;
+	}
+
+	public void setAbrev(String abrev) {
+		this.abrev = abrev;
 	}
 
 	public String getDescrTypeEpargne() {

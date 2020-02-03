@@ -45,7 +45,7 @@ public class ConfigInteretProdEp implements Serializable {
 
 	private double soldeMinInd;
 
-	private float tauxInteret;
+	private double tauxInteret;
 
 	//bi-directional many-to-one association to ProduitEpargne
 	@OneToMany(mappedBy="configInteretProdEp")
@@ -135,11 +135,11 @@ public class ConfigInteretProdEp implements Serializable {
 		this.soldeMinInd = soldeMinInd;
 	}
 
-	public float getTauxInteret() {
+	public double getTauxInteret() {
 		return this.tauxInteret;
 	}
 
-	public void setTauxInteret(float tauxInteret) {
+	public void setTauxInteret(double tauxInteret) {
 		this.tauxInteret = tauxInteret;
 	}
 

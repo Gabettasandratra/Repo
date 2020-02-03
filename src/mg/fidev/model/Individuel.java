@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -64,7 +65,8 @@ public class Individuel implements Serializable {
 
 	private String nomConjoint;
 
-	private String numDmdCrdtAGarantir;
+	@Column(name="code_Garant", length=15)
+	private String codeGarant;
 
 	private String numeroMobile;
 
@@ -81,11 +83,26 @@ public class Individuel implements Serializable {
 	private String sexe;
 
 	private String titre;
+	
+	@Column(name="is_liste_rouge")
+	private boolean isListeRouge;
+	
+	@Column(name="is_liste_noir")
+	private boolean isListeNoir;
+
+	@Column(name="is_sain")
+	private boolean isSain;
+	
 
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="individuel")
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
+	
+	//Compte DAT
+	@OneToMany(mappedBy="individuel")
+	@XmlTransient
+	private List<CompteDAT> compteDat;
 
 	//bi-directional many-to-one association to DemandeCredit
 	@OneToMany(mappedBy="individuel")
@@ -93,14 +110,13 @@ public class Individuel implements Serializable {
 	private List<DemandeCredit> demandeCredits;
 
 	//bi-directional many-to-one association to Docidentite
-	@OneToMany(mappedBy="individuel")
+	@OneToMany(mappedBy="individuel",cascade = CascadeType.ALL)
 	@XmlTransient
 	private List<Docidentite> docidentites;
 
 	//bi-directional many-to-one association to Adresse
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="idAdresse")
-	@XmlTransient
 	private Adresse adresse;
 
 	//bi-directional many-to-one association to Groupe
@@ -116,6 +132,10 @@ public class Individuel implements Serializable {
 	@OneToMany(mappedBy="individuel",cascade = CascadeType.ALL)
 	@XmlTransient
 	private List<ListeRouge> listeRouge;
+	
+	@OneToMany(mappedBy="codeInd")
+	@XmlTransient
+	private List<DroitInscription> droitInscription;
 
 	public Individuel() {
 	}
@@ -247,13 +267,38 @@ public class Individuel implements Serializable {
 	public void setNomConjoint(String nomConjoint) {
 		this.nomConjoint = nomConjoint;
 	}
+	
 
-	public String getNumDmdCrdtAGarantir() {
-		return this.numDmdCrdtAGarantir;
+	public boolean isListeRouge() {
+		return isListeRouge;
 	}
 
-	public void setNumDmdCrdtAGarantir(String numDmdCrdtAGarantir) {
-		this.numDmdCrdtAGarantir = numDmdCrdtAGarantir;
+	public void setListeRouge(boolean isListeRouge) {
+		this.isListeRouge = isListeRouge;
+	}
+
+	public List<ListeRouge> getListeRouge() {
+		return listeRouge;
+	}
+
+	public void setListeRouge(List<ListeRouge> listeRouge) {
+		this.listeRouge = listeRouge;
+	}
+
+	public String getCodeGarant() {
+		return codeGarant;
+	}
+
+	public void setCodeGarant(String codeGarant) {
+		this.codeGarant = codeGarant;
+	}
+
+	public List<DroitInscription> getDroitInscription() {
+		return droitInscription;
+	}
+
+	public void setDroitInscription(List<DroitInscription> droitInscription) {
+		this.droitInscription = droitInscription;
 	}
 
 	public String getNumeroMobile() {
@@ -318,6 +363,22 @@ public class Individuel implements Serializable {
 
 	public void setTitre(String titre) {
 		this.titre = titre;
+	}
+	
+	public boolean isListeNoir() {
+		return isListeNoir;
+	}
+
+	public void setListeNoir(boolean isListeNoir) {
+		this.isListeNoir = isListeNoir;
+	}
+
+	public boolean isSain() {
+		return isSain;
+	}
+
+	public void setSain(boolean isSain) {
+		this.isSain = isSain;
 	}
 
 	public List<CompteEpargne> getCompteEpargnes() {
@@ -409,4 +470,14 @@ public class Individuel implements Serializable {
 	public void setGrandLivre(List<Grandlivre> grandLivre) {
 		this.grandLivre = grandLivre;
 	}
+
+	public List<CompteDAT> getCompteDat() {
+		return compteDat;
+	}
+
+	public void setCompteDat(List<CompteDAT> compteDat) {
+		this.compteDat = compteDat;
+	}
+	
+	
 }

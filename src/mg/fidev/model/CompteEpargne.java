@@ -1,15 +1,21 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import java.util.Date;
-import java.util.List;
 
 
 /**
@@ -19,7 +25,7 @@ import java.util.List;
 @Entity
 @Table(name="compte_epargne")
 @NamedQuery(name="CompteEpargne.findAll", query="SELECT c FROM CompteEpargne c")
-@XmlRootElement
+@XmlRootElement(name="compteEp")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CompteEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -28,9 +34,8 @@ public class CompteEpargne implements Serializable {
 	@Column(name="num_compte_ep")
 	private String numCompteEp;
 
-	@Temporal(TemporalType.DATE)
 	@Column(name="date_echeance")
-	private Date dateEcheance;
+	private String dateEcheance;
 
 	@Column(name="date_ouverture")
 	private String dateOuverture;
@@ -38,29 +43,31 @@ public class CompteEpargne implements Serializable {
 	private boolean isActif;
 
 	private double solde;
+	
+	private boolean fermer;
+	
+	private boolean comptGeler;
+	
+	private boolean pasRetrait;
 
 	//bi-directional many-to-one association to Groupe
 	@ManyToOne
 	@JoinColumn(name="codeGrp")
-	@XmlTransient
 	private Groupe groupe;
 
 	//bi-directional many-to-one association to Individuel
 	@ManyToOne
 	@JoinColumn(name="codeInd")
-	@XmlTransient
 	private Individuel individuel;
 
 	//bi-directional many-to-one association to ProduitEpargne
 	@ManyToOne
 	@JoinColumn(name="Produit_epargneId")
-	@XmlTransient
 	private ProduitEpargne produitEpargne;
 
 	//bi-directional many-to-one association to Utilisateur
 	@ManyToOne
 	@JoinColumn(name="UtilisateuridUtilisateur")
-	@XmlTransient
 	private Utilisateur utilisateur;
 
 	//bi-directional many-to-one association to CompteFerme
@@ -72,16 +79,14 @@ public class CompteEpargne implements Serializable {
 	@OneToMany(mappedBy="compteEpargne")
 	@XmlTransient
 	private List<TransactionEpargne> transactionEpargnes;
-
-	//bi-directional many-to-one association to Virement
-	@OneToMany(mappedBy="compteEpargne1")
+	
+	@OneToMany(mappedBy="compte", cascade = CascadeType.ALL)
 	@XmlTransient
-	private List<Virement> virements1;
-
-	//bi-directional many-to-one association to Virement
-	@OneToMany(mappedBy="compteEpargne2")
-	@XmlTransient
-	private List<Virement> virements2;
+	private List<InteretEpargne> interet;
+	
+	@OneToMany(mappedBy="compteEpargne")
+	@XmlTransient     
+	private List<Grandlivre> grandLivre;
 
 	public CompteEpargne() {
 	}
@@ -94,11 +99,11 @@ public class CompteEpargne implements Serializable {
 		this.numCompteEp = numCompteEp;
 	}
 
-	public Date getDateEcheance() {
+	public String getDateEcheance() {
 		return this.dateEcheance;
 	}
 
-	public void setDateEcheance(Date dateEcheance) {
+	public void setDateEcheance(String dateEcheance) {
 		this.dateEcheance = dateEcheance;
 	}
 
@@ -124,6 +129,40 @@ public class CompteEpargne implements Serializable {
 
 	public void setSolde(double solde) {
 		this.solde = solde;
+	}
+	
+	
+
+	public boolean isPasRetrait() {
+		return pasRetrait;
+	}
+
+	public void setPasRetrait(boolean pasRetrait) {
+		this.pasRetrait = pasRetrait;
+	}
+
+	public boolean isFermer() {
+		return fermer;
+	}
+
+	public void setFermer(boolean fermer) {
+		this.fermer = fermer;
+	}
+
+	public boolean isComptGeler() {
+		return comptGeler;
+	}
+
+	public void setComptGeler(boolean comptGeler) {
+		this.comptGeler = comptGeler;
+	}
+
+	public List<InteretEpargne> getInteret() {
+		return interet;
+	}
+
+	public void setInteret(List<InteretEpargne> interet) {
+		this.interet = interet;
 	}
 
 	public Groupe getGroupe() {
@@ -202,48 +241,16 @@ public class CompteEpargne implements Serializable {
 		return transactionEpargne;
 	}
 
-	public List<Virement> getVirements1() {
-		return this.virements1;
+	public List<Grandlivre> getGrandLivre() {
+		return grandLivre;
 	}
 
-	public void setVirements1(List<Virement> virements1) {
-		this.virements1 = virements1;
+	public void setGrandLivre(List<Grandlivre> grandLivre) {
+		this.grandLivre = grandLivre;
 	}
 
-	public Virement addVirements1(Virement virements1) {
-		getVirements1().add(virements1);
-		virements1.setCompteEpargne1(this);
-
-		return virements1;
-	}
-
-	public Virement removeVirements1(Virement virements1) {
-		getVirements1().remove(virements1);
-		virements1.setCompteEpargne1(null);
-
-		return virements1;
-	}
-
-	public List<Virement> getVirements2() {
-		return this.virements2;
-	}
-
-	public void setVirements2(List<Virement> virements2) {
-		this.virements2 = virements2;
-	}
-
-	public Virement addVirements2(Virement virements2) {
-		getVirements2().add(virements2);
-		virements2.setCompteEpargne2(this);
-
-		return virements2;
-	}
-
-	public Virement removeVirements2(Virement virements2) {
-		getVirements2().remove(virements2);
-		virements2.setCompteEpargne2(null);
-
-		return virements2;
+	public void setActif(boolean isActif) {
+		this.isActif = isActif;
 	}
 
 }

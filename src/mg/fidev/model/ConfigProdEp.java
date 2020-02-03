@@ -29,13 +29,28 @@ public class ConfigProdEp implements Serializable {
 
 	private int ageMinCpt;
 
-	private float fraisTenuCpt;
+	private double fraisTenuCpt;
 
 	private int nbrJrIn;
-
+	
 	private int nbrJrMaxDep;
-
+	
 	private int nbrJrMinRet;
+	
+	private double soldeOverture;
+
+	private String devise;
+	
+	private boolean soldeNegatif;
+
+	private double penalitePrelevemnt;
+	
+	private double commRetraitCash;
+	
+	private double commTransfer;
+	
+	private double fraisFermeture;
+	
 
 	//bi-directional many-to-one association to ProduitEpargne
 	@OneToMany(mappedBy="configProdEp")
@@ -61,11 +76,11 @@ public class ConfigProdEp implements Serializable {
 		this.ageMinCpt = ageMinCpt;
 	}
 
-	public float getFraisTenuCpt() {
+	public double getFraisTenuCpt() {
 		return this.fraisTenuCpt;
 	}
 
-	public void setFraisTenuCpt(float fraisTenuCpt) {
+	public void setFraisTenuCpt(double fraisTenuCpt) {
 		this.fraisTenuCpt = fraisTenuCpt;
 	}
 
@@ -114,5 +129,63 @@ public class ConfigProdEp implements Serializable {
 
 		return produitEpargne;
 	}
+
+	public double getSoldeOverture() {
+		return soldeOverture;
+	}
+
+	public void setSoldeOverture(double soldeOverture) {
+		this.soldeOverture = soldeOverture;
+	}
+
+	public String getDevise() {
+		return devise;
+	}
+
+	public void setDevise(String devise) {
+		this.devise = devise;
+	}
+
+	public boolean isSoldeNegatif() {
+		return soldeNegatif;
+	}
+
+	public void setSoldeNegatif(boolean soldeNegatif) {
+		this.soldeNegatif = soldeNegatif;
+	}
+
+	public double getPenalitePrelevemnt() {
+		return penalitePrelevemnt;
+	}
+
+	public void setPenalitePrelevemnt(double penalitePrelevemnt) {
+		this.penalitePrelevemnt = penalitePrelevemnt;
+	}
+
+	public double getCommRetraitCash() {
+		return commRetraitCash;
+	}
+
+	public void setCommRetraitCash(double commRetraitCash) {
+		this.commRetraitCash = commRetraitCash;
+	}
+
+	public double getCommTransfer() {
+		return commTransfer;
+	}
+
+	public void setCommTransfer(double commTransfer) {
+		this.commTransfer = commTransfer;
+	}
+
+	public double getFraisFermeture() {
+		return fraisFermeture;
+	}
+
+	public void setFraisFermeture(double fraisFermeture) {
+		this.fraisFermeture = fraisFermeture;
+	}
+	
+	
 
 }

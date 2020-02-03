@@ -26,7 +26,7 @@ public class ConfigGlEpargne implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int rowId;
-
+	
 	private String chargeIntNegGrp;
 
 	private String chargeIntNegInd;
@@ -96,7 +96,7 @@ public class ConfigGlEpargne implements Serializable {
 	public void setRowId(int rowId) {
 		this.rowId = rowId;
 	}
-
+	
 	public String getChargeIntNegGrp() {
 		return this.chargeIntNegGrp;
 	}

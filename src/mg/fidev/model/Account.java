@@ -37,11 +37,28 @@ public class Account implements Serializable {
 
 	@Column(name="num_cpt")
 	private String numCpt;
+	
+	@Column(name="devise")
+	private String devise;
+	
+	@Column(name="ferme")
+	private boolean ferme;
+	
+	@Column(name="solde_init")
+	private double soldeInit;
+	
+	@Column(name="solde_progressif")
+	private double soldeProgressif;
+	
+	private double sommeDebit;
+	
+	private double sommeCredit;
+	
+	//private double @javax.persistence.Transient
 
 	//bi-directional many-to-one association to Account
 	@ManyToOne
 	@JoinColumn(name="parent")
-	@XmlTransient
 	private Account account;
 
 	//bi-directional many-to-one association to Account
@@ -50,9 +67,19 @@ public class Account implements Serializable {
 	private List<Account> accounts;
 
 	//bi-directional many-to-one association to CompteCaisse
-	@OneToMany(mappedBy="account")
+	@OneToMany(mappedBy="account",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<CompteCaisse> compteCaisses;
+	
+	//bi-directional many-to-one association to GranLivre
+	@OneToMany(mappedBy="account",cascade=CascadeType.ALL,fetch = FetchType.LAZY)
+	@XmlTransient
+	private List<Grandlivre> granLivres;
+	
+	//relation OneToMany	
+	@OneToMany(mappedBy="account",cascade=CascadeType.ALL)
+	@XmlTransient
+	private List<Budget> budgets;
 
 	public Account() {
 	}
@@ -105,6 +132,59 @@ public class Account implements Serializable {
 		this.numCpt = numCpt;
 	}
 
+	public String getDevise() {
+		return devise;
+	}
+
+	public void setDevise(String devise) {
+		this.devise = devise;
+	}
+
+	public boolean isFerme() {
+		return ferme;
+	}
+
+	public void setFerme(boolean ferme) {
+		this.ferme = ferme;
+	}
+
+	public double getSoldeInit() {
+		return soldeInit;
+	}
+
+	public void setSoldeInit(double soldeInit) {
+		this.soldeInit = soldeInit;
+	}
+
+	public double getSoldeProgressif() {
+		return soldeProgressif;
+	}
+
+	public void setSoldeProgressif(double soldeProgressif) {
+		this.soldeProgressif = soldeProgressif;
+	}
+	
+	
+
+	public double getSommeDebit() {
+		return sommeDebit;
+	}
+
+	public void setSommeDebit(double sommeDebit) {
+		this.sommeDebit = sommeDebit;
+	}
+
+	public double getSommeCredit() {
+		return sommeCredit;
+	}
+
+	public void setSommeCredit(double sommeCredit) {
+		this.sommeCredit = sommeCredit;
+	}
+	
+	
+	
+
 	public Account getAccount() {
 		return this.account;
 	}
@@ -155,6 +235,30 @@ public class Account implements Serializable {
 		compteCaiss.setAccount(null);
 
 		return compteCaiss;
+	}
+
+	public List<Grandlivre> getGranLivres() {
+		return granLivres;
+	}
+
+	public void setGranLivres(List<Grandlivre> granLivres) {
+		this.granLivres = granLivres;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	public void setHeader(boolean isHeader) {
+		this.isHeader = isHeader;
+	}
+
+	public List<Budget> getBudgets() {
+		return budgets;
+	}
+
+	public void setBudgets(List<Budget> budgets) {
+		this.budgets = budgets;
 	}
 
 }

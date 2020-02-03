@@ -1,13 +1,15 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import java.math.BigInteger;
+import java.util.List;
 
 
 /**
@@ -24,7 +26,7 @@ public class Compte implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private String id;
+	private BigInteger id;
 
 	private boolean active;
 
@@ -38,22 +40,32 @@ public class Compte implements Serializable {
 
 	private String libelle;
 
-	@Column(name="parent_id")
-	private BigInteger parentId;
+	//bi-directional many-to-one association to Compte
+	@ManyToOne
+	@JoinColumn(name="parent_id")
+	private Compte compteParent;
+
+	//bi-directional many-to-one association to Compte
+	@OneToMany(mappedBy="compteParent", cascade=CascadeType.REMOVE)
+	@XmlTransient
+	private List<Compte> comptes;
 
 	@Column(name="solde_init")
 	private double soldeInit;
+	
+	@Column(name="solde_progressif")
+	private double soldeProgressif;
 
 	private String type;
 
 	public Compte() {
 	}
 
-	public String getId() {
+	public BigInteger getId() {
 		return this.id;
 	}
 
-	public void setId(String id) {
+	public void setId(BigInteger id) {
 		this.id = id;
 	}
 
@@ -105,12 +117,20 @@ public class Compte implements Serializable {
 		this.libelle = libelle;
 	}
 
-	public BigInteger getParentId() {
-		return this.parentId;
+	public Compte getCompteParent() {
+		return compteParent;
 	}
 
-	public void setParentId(BigInteger parentId) {
-		this.parentId = parentId;
+	public void setCompteParent(Compte compteParent) {
+		this.compteParent = compteParent;
+	}
+
+	public List<Compte> getComptes() {
+		return comptes;
+	}
+
+	public void setComptes(List<Compte> comptes) {
+		this.comptes = comptes;
 	}
 
 	public double getSoldeInit() {
@@ -119,6 +139,14 @@ public class Compte implements Serializable {
 
 	public void setSoldeInit(double soldeInit) {
 		this.soldeInit = soldeInit;
+	}
+
+	public double getSoldeProgressif() {
+		return soldeProgressif;
+	}
+
+	public void setSoldeProgressif(double soldeProgressif) {
+		this.soldeProgressif = soldeProgressif;
 	}
 
 	public String getType() {

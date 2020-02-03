@@ -45,7 +45,7 @@ public class ProduitCredit implements Serializable {
 	 * CONFIG CREDIT INDIVIDUEL
 	 * ***/
 	//bi-directional many-to-one association to ConfigCreditIndividuel
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="configCreditInd_id")
 	private ConfigCreditIndividuel configCreditIndividuel;
 	
@@ -53,7 +53,7 @@ public class ProduitCredit implements Serializable {
 	/***
 	 * CONFIG POUR TOUT CREDIT
 	 * ***/
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="config_id")
 	@XmlTransient
 	private ConfigCredit configCredit;
@@ -62,7 +62,7 @@ public class ProduitCredit implements Serializable {
 	 * CONFIG CREDIT GROUPE
 	 * **/
 	
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="configCreditGroup_id")
 	@XmlTransient
 	private ConfigCreditGroup configCreditGroupe;
@@ -72,14 +72,14 @@ public class ProduitCredit implements Serializable {
 	 * CONFIG FRAIS INDIVIDUEL
 	 * ***/
 	//bi-directional many-to-one association to ConfigFraisCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="configFrais_id")
 	private ConfigFraisCredit configFraisCredit;
 
 	/***
 	 * CONFIG FRAIS GROUPE
 	 * ***/
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="configFraisGroupe_id")
 	@XmlTransient
 	private ConfigFraisCreditGroupe confFraisGroupe;
@@ -88,7 +88,7 @@ public class ProduitCredit implements Serializable {
 	 * CONFIG GARANTIE
 	 * ***/
 	//bi-directional many-to-one association to ConfigGarantieCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="configGarantie_id")
 	@XmlTransient
 	private ConfigGarantieCredit configGarantieCredit;
@@ -98,7 +98,7 @@ public class ProduitCredit implements Serializable {
 	 * ***/
 	
 	//bi-directional many-to-one association to ConfigGeneralCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="configGeneral_id")
 	@XmlTransient
 	private ConfigGeneralCredit configGeneralCredit;
@@ -108,7 +108,7 @@ public class ProduitCredit implements Serializable {
 	 * CONFIG GL
 	 * ***/
 	//bi-directional many-to-one association to ConfigGlCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="configGLcredId")
 	private ConfigGlCredit configGlCredit;
 
@@ -116,7 +116,7 @@ public class ProduitCredit implements Serializable {
 	 * CONFIG PENALITE
 	 * ***/
 	//bi-directional many-to-one association to ConfigPenaliteCredit
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="configPenaliteId")
 	@XmlTransient
 	private ConfigPenaliteCredit configPenaliteCredit;

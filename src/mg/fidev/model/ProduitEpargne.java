@@ -38,6 +38,11 @@ public class ProduitEpargne implements Serializable {
 	@OneToMany(mappedBy="produitEpargne")
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
+	
+	//Compte DAT
+	@OneToMany(mappedBy="produitEpargne")
+	@XmlTransient
+	private List<CompteDAT> compteDat;
 
 	//bi-directional many-to-one association to ConfigGarantieCredit
 	@OneToMany(mappedBy="produitEpargne")
@@ -45,27 +50,34 @@ public class ProduitEpargne implements Serializable {
 	private List<ConfigGarantieCredit> configGarantieCredits;
 
 	//bi-directional many-to-one association to ConfigGlEpargne
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configGLepId")
 	@XmlTransient
 	private ConfigGlEpargne configGlEpargne;
 
 	//bi-directional many-to-one association to ConfigInteretProdEp
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configIntProId")
-	@XmlTransient
 	private ConfigInteretProdEp configInteretProdEp;
+	
+	//Config GL produit DAT
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configGlDat")
+	private ConfigGLDAT configGlDat;
+	
+	//Config Général produit DAT
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configGeneralDat")
+	private ConfigGeneralDAT configGeneralDat;
 
 	//bi-directional many-to-one association to ConfigProdEp
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configProdId")
-	@XmlTransient
 	private ConfigProdEp configProdEp;
 
 	//bi-directional many-to-one association to TypeEpargne
 	@ManyToOne
 	@JoinColumn(name="Type_epargnenom_type_epargne")
-	@XmlTransient
 	private TypeEpargne typeEpargne;
 
 	public ProduitEpargne() {
@@ -163,12 +175,36 @@ public class ProduitEpargne implements Serializable {
 		this.configProdEp = configProdEp;
 	}
 
+	public ConfigGLDAT getConfigGlDat() {
+		return configGlDat;
+	}
+
+	public void setConfigGlDat(ConfigGLDAT configGlDat) {
+		this.configGlDat = configGlDat;
+	}
+
+	public ConfigGeneralDAT getConfigGeneralDat() {
+		return configGeneralDat;
+	}
+
+	public void setConfigGeneralDat(ConfigGeneralDAT configGeneralDat) {
+		this.configGeneralDat = configGeneralDat;
+	}
+
 	public TypeEpargne getTypeEpargne() {
 		return this.typeEpargne;
 	}
 
 	public void setTypeEpargne(TypeEpargne typeEpargne) {
 		this.typeEpargne = typeEpargne;
+	}
+
+	public List<CompteDAT> getCompteDat() {
+		return compteDat;
+	}
+
+	public void setCompteDat(List<CompteDAT> compteDat) {
+		this.compteDat = compteDat;
 	}
 
 }

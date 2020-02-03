@@ -26,16 +26,19 @@ public class DemandeCredit implements Serializable {
 	@Column(name="num_credit")
 	private String numCredit;
 	
+	private int nbCredit;
+
 	@Column(name="date_demande")
 	private String dateDemande;
 
 	@Column(name="montant_demande")
 	private double montantDemande;
 
-	@Column(name="but_credit")
-	private String butCredit;
-
-	private String agentName;
+	@Column(name="but_credit_economique")
+	private String butEconomique;
+	
+	@Column(name="but_credit_social")
+	private String butSocial;
 
 	private String appBy;
 
@@ -90,20 +93,11 @@ public class DemandeCredit implements Serializable {
 
 	/***
 	 * GARANTIE DEMANDE
-	 * ****/
+	 * ***/
 	//bi-directional one-to-many association to GarantieCredit
 	@OneToMany(mappedBy="demandeCredit")
 	@XmlTransient
 	private List<GarantieCredit> garantieCredits;
-
-	
-	/***
-	 * REMBMONT
-	 * ***/
-	//bi-directional one-to-many association to RembMontant
-	@OneToMany(mappedBy="demandeCredit")
-	@XmlTransient
-	private List<RembMontant> rembMontants;
 
 	
 	/***
@@ -121,7 +115,10 @@ public class DemandeCredit implements Serializable {
 	@OneToMany(mappedBy="demandeCredit",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<Calapresdebl> calapresdebls;
-
+	
+	@OneToMany(mappedBy="demandeCredit")
+	@XmlTransient
+	private List<Grandlivre> grandLivre;
 	
 	
 	/**************************************************************************************************************************************/
@@ -163,6 +160,10 @@ public class DemandeCredit implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="user_id")
 	private Utilisateur utilisateur;
+	
+	@ManyToOne
+	@JoinColumn(name="agent")
+	private Personnel agent;
 
 	/************************************************************************************************************************************/
 	/************************************************************************************************************************************/
@@ -172,17 +173,32 @@ public class DemandeCredit implements Serializable {
 	
 	public DemandeCredit() {
 	}
-
-
-	public DemandeCredit(String dateDemande, double montantDemande,
-			String butCredit, String agentName) {
-		super();
-		this.dateDemande = dateDemande;
-		this.montantDemande = montantDemande;
-		this.butCredit = butCredit;
-		this.agentName = agentName;
-	}
 	
+
+	public String getButEconomique() {
+		return butEconomique;
+	}
+
+	public void setButEconomique(String butEconomique) {
+		this.butEconomique = butEconomique;
+	}
+
+	public String getButSocial() {
+		return butSocial;
+	}
+
+	public void setButSocial(String butSocial) {
+		this.butSocial = butSocial;
+	}
+
+	public Personnel getAgent() {
+		return agent;
+	}
+
+	public void setAgent(Personnel agent) {
+		this.agent = agent;
+	}
+
 	public String getNumCredit() {
 		return this.numCredit;
 	}
@@ -190,13 +206,15 @@ public class DemandeCredit implements Serializable {
 	public void setNumCredit(String numCredit) {
 		this.numCredit = numCredit;
 	}
-
-	public String getAgentName() {
-		return this.agentName;
+	
+	
+	public int getNbCredit() {
+		return nbCredit;
 	}
 
-	public void setAgentName(String agentName) {
-		this.agentName = agentName;
+
+	public void setNbCredit(int nbCredit) {
+		this.nbCredit = nbCredit;
 	}
 
 	public String getAppBy() {
@@ -215,13 +233,6 @@ public class DemandeCredit implements Serializable {
 		this.approbationStatut = approbationStatut;
 	}
 
-	public String getButCredit() {
-		return this.butCredit;
-	}
-
-	public void setButCredit(String butCredit) {
-		this.butCredit = butCredit;
-	}
 
 	public String getDateApprobation() {
 		return this.dateApprobation;
@@ -416,28 +427,6 @@ public class DemandeCredit implements Serializable {
 		return garantieCredit;
 	}
 
-	public List<RembMontant> getRembMontants() {
-		return this.rembMontants;
-	}
-
-	public void setRembMontants(List<RembMontant> rembMontants) {
-		this.rembMontants = rembMontants;
-	}
-
-	public RembMontant addRembMontant(RembMontant rembMontant) {
-		getRembMontants().add(rembMontant);
-		rembMontant.setDemandeCredit(this);
-
-		return rembMontant;
-	}
-
-	public RembMontant removeRembMontant(RembMontant rembMontant) {
-		getRembMontants().remove(rembMontant);
-		rembMontant.setDemandeCredit(null);
-
-		return rembMontant;
-	}
-
 	public List<Remboursement> getRemboursements() {
 		return this.remboursements;
 	}
@@ -480,6 +469,16 @@ public class DemandeCredit implements Serializable {
 		calapresdebl.setDemandeCredit(null);
 
 		return calapresdebl;
+	}
+
+
+	public List<Grandlivre> getGrandLivre() {
+		return grandLivre;
+	}
+
+
+	public void setGrandLivre(List<Grandlivre> grandLivre) {
+		this.grandLivre = grandLivre;
 	}
 
 }

@@ -11,7 +11,6 @@ import javax.persistence.NamedQuery;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -54,13 +53,11 @@ public class Decaissement implements Serializable {
 	//bi-directional many-to-one association to DemandeCredit
 	@ManyToOne
 	@JoinColumn(name="num_credit")
-	@XmlTransient
 	private DemandeCredit demandeCredit;
 
 	//bi-directional many-to-one association to Utilisateur
 	@ManyToOne
 	@JoinColumn(name="user_id")
-	@XmlTransient
 	private Utilisateur utilisateur;
 
 	public Decaissement() {

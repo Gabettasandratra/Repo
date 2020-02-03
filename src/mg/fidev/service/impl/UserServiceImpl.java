@@ -1,7 +1,6 @@
 package mg.fidev.service.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.jws.WebService;
@@ -12,15 +11,10 @@ import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Acces;
 import mg.fidev.model.Account;
+import mg.fidev.model.Agence;
 import mg.fidev.model.CompteCaisse;
-import mg.fidev.model.CompteEpargne;
-import mg.fidev.model.CompteFerme;
 import mg.fidev.model.Fonction;
-import mg.fidev.model.Grandlivre;
-import mg.fidev.model.Groupe;
-import mg.fidev.model.Individuel;
-import mg.fidev.model.ProduitEpargne;
-import mg.fidev.model.TransactionEpargne;
+import mg.fidev.model.Personnel;
 import mg.fidev.model.Utilisateur;
 import mg.fidev.service.UserService;
 import mg.fidev.utils.CodeIncrement;
@@ -79,10 +73,14 @@ public class UserServiceImpl implements UserService {
 	///	Méthode pour l'enregistrement d'un nouvel utilisateur
 	@Override
 	public boolean insertUser(String nomUser, String loginUser, String mdpUser, String mdpConf,
-			String genreUser, String telUser, List<String> listCptCaisse, int fonctionId) {
+			String genreUser, String telUser,  int fonctionId) {//List<String> listCptCaisse,
 		//	Instance nouvel utilisateur à insérer
 		Utilisateur user = new Utilisateur();
-		List<CompteCaisse> cptCaisse = new ArrayList<CompteCaisse>();
+		/*List<CompteCaisse> cptCaisse = new ArrayList<CompteCaisse>();
+		for(String a : listCptCaisse){
+		cptCaisse.add(em.find(CompteCaisse.class, a));
+     	}
+	  user.setCompteCaisses(cptCaisse);*/
 		String passHash = BCrypt.hashpw(mdpUser, BCrypt.gensalt());
 		
 		//	Affectation informations utilisateur
@@ -92,10 +90,7 @@ public class UserServiceImpl implements UserService {
 			user.setMdpUtilisateur(passHash);
 			user.setGenreUser(genreUser);
 			user.setTelUser(telUser);
-			for(String a : listCptCaisse){
-				cptCaisse.add(em.find(CompteCaisse.class, a));
-			}
-			user.setCompteCaisses(cptCaisse);
+
 			Fonction fct = em.find(Fonction.class, fonctionId);
 			user.setFonction(fct);
 			
@@ -129,182 +124,6 @@ public class UserServiceImpl implements UserService {
 		return st;
 	}
 
-	///	Méthode pour ouvrir un compte client
-	@Override
-	public boolean creerCompteClient(String dateOuverture,
-			Date dateEcheance, String idProduitEp,
-			String individuelId, String groupeId, int userId) {
-		//	Instance nouveau compte_epargne
-		CompteEpargne cpt_ep = new CompteEpargne();
-		
-		//	Insertion des informations sur le compte
-		cpt_ep.setDateOuverture(dateOuverture);
-		cpt_ep.setDateEcheance(dateEcheance);
-		ProduitEpargne pdt_ep = em.find(ProduitEpargne.class, idProduitEp);
-		Individuel ind = em.find(Individuel.class, individuelId);
-		Groupe grp = em.find(Groupe.class, groupeId);
-		Utilisateur ut = em.find(Utilisateur.class, userId);
-		cpt_ep.setUtilisateur(ut);
-		cpt_ep.setProduitEpargne(pdt_ep);
-		cpt_ep.setIsActif(true);
-		if(ind != null){
-			System.out.println("Compte individuel");
-			cpt_ep.setIndividuel(ind);
-		}
-		else if(grp != null){
-			System.out.println("Compte groupe");
-			cpt_ep.setGroupe(grp);
-		}
-		
-		//	Enregistrement du compte lorsque toutes les informations nécessaires
-		//	sont valides et complètes
-		if(cpt_ep.getIndividuel() != null || cpt_ep.getGroupe() != null){
-			System.out.println("Information compte épargne prête");
-			try{
-				transaction.begin();
-				em.persist(cpt_ep);
-				transaction.commit();
-				System.out.println("Nouveau compte épargne ouvert");
-				return true;
-			}catch(Exception ex){
-				System.err.println(ex.getMessage());
-				return false;
-			}
-		}
-		else
-			return false;
-	}
-
-	///	Méthode pour faire une transaction sur un compte épargne
-	@Override
-	public boolean transactionCompte(String typeTransac, String dateTransac,
-			double montant, String description, String pieceCompta,
-			String nomCptCaisse, String numCptEp) {
-		//	Instance de nouvelle transaction
-		TransactionEpargne trans = new TransactionEpargne();
-		
-		///	pour incrémenter le tcode dans la table grandlivre
-		String indexTcode = CodeIncrement.genTcode(em);
-		
-		//	Mouvement comptabilité
-		Grandlivre lDebit = new Grandlivre();
-		Grandlivre lCredit = new Grandlivre();
-		lDebit.setPiece(pieceCompta);
-		lDebit.setTcode(indexTcode);
-		lDebit.setDate(dateTransac);
-		lCredit.setPiece(pieceCompta);
-		lCredit.setTcode(indexTcode);
-		lCredit.setDate(dateTransac);
-		
-		//	Initialisation des informations sur la transaction
-		trans.setDateTransaction(dateTransac);
-		trans.setTypeTransEp(typeTransac);
-		trans.setMontant(montant);
-		trans.setDescription(description);
-		trans.setPieceCompta(pieceCompta);
-		CompteCaisse cptCaisse = em.find(CompteCaisse.class, nomCptCaisse);
-		CompteEpargne cptEp = em.find(CompteEpargne.class, numCptEp);
-		String cptC = String.valueOf(cptCaisse.getAccount().getTkey());
-		trans.setIdTransactionEp(indexTcode);
-		trans.setCompteCaisse(cptCaisse);
-		trans.setCompteEpargne(cptEp);
-		
-		//	Enregistrement de la transaction
-		if(trans.getCompteEpargne() != null){
-			System.out.println("Informations sur la transaction prêtes");
-			try {
-				if(trans.getTypeTransEp().equals("DE")){
-					lDebit.setCompte(cptC);
-					lDebit.setDebit(montant);
-					lDebit.setDescr("Dépôt épargne");
-					lCredit.setCompte("211");
-					lCredit.setCredit(montant);
-					lCredit.setDescr("Dépôt épargne");
-					transaction.begin();
-					em.flush();
-					em.persist(trans);
-					transaction.commit();
-					em.refresh(trans);
-					transaction.begin();
-					em.persist(lCredit);
-					em.persist(lDebit);
-					transaction.commit();
-					System.out.println("Transaction réussie");
-					return true;
-				}
-				else if(trans.getTypeTransEp().equals("RE")){
-					lDebit.setCompte("211");
-					lDebit.setDebit(montant);
-					lDebit.setDescr("Retrait épargne");
-					lCredit.setCompte(cptC);
-					lCredit.setCredit(montant);
-					lCredit.setDescr("Retrait épargne");
-					transaction.begin();
-					em.flush();
-					em.persist(trans);
-					transaction.commit();
-					em.refresh(trans);
-					transaction.begin();
-					em.persist(lDebit);
-					em.persist(lCredit);
-					transaction.commit();
-					System.out.println("Transaction réussie");
-					return true;
-				}
-				return false;
-			} catch (Exception e) {
-				System.err.println(e.getMessage());
-				return false;
-			}
-		}
-		else{
-			System.out.println("Erreur de transaction, compte inactif");
-			return false;
-		}
-	}
-
-	@Override
-	public boolean fermerCompteClient(Date dateFermeture, double fraisCloture,
-			String raison, String numRecu, String numCompte) {
-		CompteFerme cpt = new CompteFerme();
-		cpt.setDateCloture(dateFermeture);
-		cpt.setFraisCloture(fraisCloture);
-		cpt.setRaison(raison);
-		cpt.setNumRecue(numRecu);
-		CompteEpargne c = em.find(CompteEpargne.class, numCompte);
-		cpt.setCompteEpargne(c);
-		//boolean stat = transactionCompte("RE", dateFermeture.toString(), fraisCloture, "Fermeture compte", numRecu, null, numCompte);
-		c.setSolde(c.getSolde() - fraisCloture);
-		c.setIsActif(false);
-		try {
-			transaction.begin();
-			em.flush();
-			em.persist(cpt);
-			transaction.commit();
-			System.out.println("Compte "+c.getNumCompteEp()+" fermé");
-			return true;
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			return false;
-		}
-	}
-	
-	//	Méthode à appeler pour lors d'un mouvement compta
-	static void mvtCompta(){
-		//	RESTClient client = new RESTClient();
-		/*String url = "http://192.168.123.4:8080/HelloRestfull/rest/journal",
-			   description = "Depot via REST",
-			   piece = "PIECE N°3",
-			   tcode = "1000000000",
-			   compteDebit = "101xxx",
-			   compteCredit = "40xxxx";
-		Date date = new Date();
-		double montantDebit = 100, montantCredit = 100;
-		
-		String retour = client.postEpargne(url, date, description, piece, tcode, compteDebit, montantDebit, compteCredit, montantCredit); 
-		System.out.println("OUT : "+ retour);*/
-	}
-
 	@Override
 	public boolean ajoutCptCaisse(CompteCaisse cptCaisse, int numCptCompta) {
 		Account cptGL = em.find(Account.class, numCptCompta);
@@ -321,5 +140,103 @@ public class UserServiceImpl implements UserService {
 			return false;
 		}
 	}
+
+	@Override
+	public boolean addPersonnel(Personnel pers, String agence, int idFonction) {
+		try {
+			Agence ag = em.find(Agence.class, agence.substring(0,2));
+			Fonction f = em.find(Fonction.class, idFonction);
+			
+			pers.setCodePersonnel(CodeIncrement.getCodePers(em, agence));
+			pers.setAgence(ag);
+			pers.setFonction(f);
+			
+			transaction.begin();
+			em.persist(pers);
+			transaction.commit();
+			em.refresh(pers);
+			return true;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	@Override
+	public List<Personnel> getPersonnels() {
+		List<Personnel> result = new ArrayList<Personnel>();
+		
+		TypedQuery<Personnel> query = em.createQuery("select p from Personnel p",Personnel.class);
+		if(!query.getResultList().isEmpty()){
+			result = query.getResultList();
+			return result;
+		}
+		return null;
+	}
+		
+
+	@Override
+	public List<Agence> getAgence() {
+		List<Agence> result = new ArrayList<Agence>();		
+		TypedQuery<Agence> query = em.createQuery("select a from Agence a",Agence.class);
+		if(!query.getResultList().isEmpty()){
+			result = query.getResultList();
+			return result;
+		}
+		return null;
+	}
+
+	@Override
+	public List<Fonction> getFonction() {
+		List<Fonction> result = new ArrayList<Fonction>();
+		
+		TypedQuery<Fonction> query = em.createQuery("select f from Fonction f",Fonction.class);
+		if(!query.getResultList().isEmpty()){
+			result = query.getResultList();
+			return result;
+		}
+		return null;
+	}
+
+	@Override
+	public List<Utilisateur> getAllUser() {		
+		String sql = "select u from Utilisateur u";		
+		TypedQuery<Utilisateur> query = em.createQuery(sql,Utilisateur.class);			
+		return query.getResultList();
+	}
+
+	@Override
+	public Utilisateur findUser(int id) {
+		Utilisateur ut = em.find(Utilisateur.class, id);
+		return ut;
+	}
+
+	@Override
+	public Utilisateur updateUser(Utilisateur ut) {
+		Utilisateur user = findUser(ut.getIdUtilisateur());
+		user = ut;
+		transaction.begin();
+		em.flush();
+		transaction.commit();
+		em.refresh(user);
+		return user;
+	}
+
+	@Override
+	public boolean deleteUser(int id) {
+		try {
+			Utilisateur ut = em.find(Utilisateur.class, id);
+			transaction.begin();
+			em.remove(ut);
+			transaction.commit();
+			return true;
+			//em.refresh(ut); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 
 }

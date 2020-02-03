@@ -83,5 +83,12 @@ public interface GroupeService {
 			@WebParam(name = "codeGroupe2") @XmlElement(required=true,nillable=false) String codeGrp2,
 			@WebParam(name = "codeInd") @XmlElement(required=true,nillable=false) String codeInd);
 	
+	
+	/***
+	 * CHERCHER PAR SON CODE
+	 * ***/
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Groupe> findByCode(@WebParam(name = "code")@XmlElement(required = true)String code);
 
 }

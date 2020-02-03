@@ -27,10 +27,13 @@ public class CompteCaisse implements Serializable {
 	@Column(name="nom_cpt_caisse")
 	private String nomCptCaisse;
 
+	private String devise;
+
 	//bi-directional many-to-one association to Account
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="Plan_comptablenum_plan_comptable")
 	private Account account;
+	
 
 	//bi-directional many-to-one association to TransactionEpargne
 	@OneToMany(mappedBy="compteCaisse")
@@ -59,6 +62,14 @@ public class CompteCaisse implements Serializable {
 
 	public void setAccount(Account account) {
 		this.account = account;
+	}
+	
+	public String getDevise() {
+		return devise;
+	}
+
+	public void setDevise(String devise) {
+		this.devise = devise;
 	}
 
 	public List<TransactionEpargne> getTransactionEpargnes() {

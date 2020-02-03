@@ -1,14 +1,15 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -17,9 +18,7 @@ import java.util.List;
  */
 @Entity
 @Table(name="config_general_credit")
-@NamedQuery(name="ConfigGeneralCredit.findAll", query="SELECT c FROM ConfigGeneralCredit c")
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
+
 public class ConfigGeneralCredit implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -35,13 +34,13 @@ public class ConfigGeneralCredit implements Serializable {
 
 	private String devise;
 
-	private int enregPbliPostDemndCredit;
+	private boolean enregPbliPostDemndCredit;
 
-	private int enregPubliPostDecaiss;
+	private boolean enregPubliPostDecaiss;
 
 	private boolean exclurePrdtLimitation;
 
-	private boolean methodeDegressifCompose;
+//	private boolean methodeDegressifCompose;
 
 	private int nbrJrInt;
 
@@ -109,19 +108,19 @@ public class ConfigGeneralCredit implements Serializable {
 		this.devise = devise;
 	}
 
-	public int getEnregPbliPostDemndCredit() {
+	public boolean getEnregPbliPostDemndCredit() {
 		return this.enregPbliPostDemndCredit;
 	}
 
-	public void setEnregPbliPostDemndCredit(int enregPbliPostDemndCredit) {
+	public void setEnregPbliPostDemndCredit(boolean enregPbliPostDemndCredit) {
 		this.enregPbliPostDemndCredit = enregPbliPostDemndCredit;
 	}
 
-	public int getEnregPubliPostDecaiss() {
+	public boolean getEnregPubliPostDecaiss() {
 		return this.enregPubliPostDecaiss;
 	}
 
-	public void setEnregPubliPostDecaiss(int enregPubliPostDecaiss) {
+	public void setEnregPubliPostDecaiss(boolean enregPubliPostDecaiss) {
 		this.enregPubliPostDecaiss = enregPubliPostDecaiss;
 	}
 
@@ -133,13 +132,15 @@ public class ConfigGeneralCredit implements Serializable {
 		this.exclurePrdtLimitation = exclurePrdtLimitation;
 	}
 
-	public boolean getMethodeDegressifCompose() {
-		return this.methodeDegressifCompose;
-	}
-
-	public void setMethodeDegressifCompose(boolean methodeDegressifCompose) {
-		this.methodeDegressifCompose = methodeDegressifCompose;
-	}
+//	public boolean getMethodeDegressifCompose() {
+//		return this.methodeDegressifCompose;
+//	}
+//
+//	public void setMethodeDegressifCompose(boolean methodeDegressifCompose) {
+//		this.methodeDegressifCompose = methodeDegressifCompose;
+//	}
+	
+	
 
 	public int getNbrJrInt() {
 		return this.nbrJrInt;

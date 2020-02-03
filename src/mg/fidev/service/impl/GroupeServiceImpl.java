@@ -228,4 +228,20 @@ public class GroupeServiceImpl implements GroupeService {
 		return true;
 	}
 	
+	/***
+	 * CHERCHER GROUPE PAR SON CODE
+	 * ***/
+	@Override
+	public List<Groupe> findByCode(String code) {
+		TypedQuery<Groupe> query = em.createQuery("SELECT g FROM Groupe g WHERE g.codeGrp LIKE :code",Groupe.class);
+		query.setParameter("code", code+"%");
+		
+		List<Groupe> result = query.getResultList();
+		
+		if(!result.isEmpty())return result;
+		else System.out.println("Auccun client trouvé!!!");
+		
+		return null;
+	}
+	
 }

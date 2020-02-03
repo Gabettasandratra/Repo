@@ -1,13 +1,23 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -16,8 +26,8 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Utilisateur.findAll", query="SELECT u FROM Utilisateur u")
-@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="utilisateur")
 public class Utilisateur implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -44,6 +54,11 @@ public class Utilisateur implements Serializable {
 	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
+	
+	//Compte DAT
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<CompteDAT> compteDat;
 
 	//bi-directional many-to-one association to Decaissement
 	@OneToMany(mappedBy="utilisateur")
@@ -61,21 +76,15 @@ public class Utilisateur implements Serializable {
 	private List<Remboursement> remboursements;
 
 	//bi-directional many-to-many association to Agence
-	@ManyToMany
-	@JoinTable(
-		name="utilisateur_agence"
-		, joinColumns={
-			@JoinColumn(name="UtilisateuridUtilisateur")
-			}
-		, inverseJoinColumns={
-			@JoinColumn(name="AgencecodeAgence")
-			}
+	@ManyToMany(cascade=CascadeType.ALL)
+	@JoinTable(name="utilisateur_agence"
+		, joinColumns={@JoinColumn(name="UtilisateuridUtilisateur")
+			}, inverseJoinColumns={@JoinColumn(name="AgencecodeAgence")}
 		)
-	@XmlTransient
 	private List<Agence> agences;
 
 	//bi-directional many-to-many association to CompteCaisse
-	@ManyToMany
+	@ManyToMany(cascade=CascadeType.ALL)
 	@JoinTable(
 		name="utilisateur_compte_caisse"
 		, joinColumns={
@@ -89,10 +98,18 @@ public class Utilisateur implements Serializable {
 	private List<CompteCaisse> compteCaisses;
 
 	//bi-directional many-to-one association to Fonction
-	@ManyToOne
+	@ManyToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name="fonctionId")
-	@XmlTransient
 	private Fonction fonction;
+	
+	//bi-directional many-to-one association to granlivre
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<Grandlivre> grandlivres;
+	
+//	@ManyToOne(cascade=CascadeType.ALL)
+//	@JoinColumn(name="Code_agence")
+//	private Agence agence;
 
 	public Utilisateur() {
 	}
@@ -258,7 +275,7 @@ public class Utilisateur implements Serializable {
 	public List<Agence> getAgences() {
 		return this.agences;
 	}
-
+									
 	public void setAgences(List<Agence> agences) {
 		this.agences = agences;
 	}
@@ -277,6 +294,14 @@ public class Utilisateur implements Serializable {
 
 	public void setFonction(Fonction fonction) {
 		this.fonction = fonction;
+	}
+
+	public List<Grandlivre> getGrandlivres() {
+		return grandlivres;
+	}
+
+	public void setGrandlivres(List<Grandlivre> grandlivres) {
+		this.grandlivres = grandlivres;
 	}
 
 }
