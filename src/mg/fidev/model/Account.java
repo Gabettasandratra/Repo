@@ -49,11 +49,7 @@ public class Account implements Serializable {
 	
 	@Column(name="solde_progressif")
 	private double soldeProgressif;
-	
-	private double sommeDebit;
-	
-	private double sommeCredit;
-	
+
 	//private double @javax.persistence.Transient
 
 	//bi-directional many-to-one association to Account
@@ -69,7 +65,7 @@ public class Account implements Serializable {
 	//bi-directional many-to-one association to CompteCaisse
 	@OneToMany(mappedBy="account",cascade= CascadeType.ALL)
 	@XmlTransient
-	private List<CompteCaisse> compteCaisses;
+	private List<Caisse> caisses;
 	
 	//bi-directional many-to-one association to GranLivre
 	@OneToMany(mappedBy="account",cascade=CascadeType.ALL,fetch = FetchType.LAZY)
@@ -163,27 +159,6 @@ public class Account implements Serializable {
 	public void setSoldeProgressif(double soldeProgressif) {
 		this.soldeProgressif = soldeProgressif;
 	}
-	
-	
-
-	public double getSommeDebit() {
-		return sommeDebit;
-	}
-
-	public void setSommeDebit(double sommeDebit) {
-		this.sommeDebit = sommeDebit;
-	}
-
-	public double getSommeCredit() {
-		return sommeCredit;
-	}
-
-	public void setSommeCredit(double sommeCredit) {
-		this.sommeCredit = sommeCredit;
-	}
-	
-	
-	
 
 	public Account getAccount() {
 		return this.account;
@@ -215,28 +190,6 @@ public class Account implements Serializable {
 		return account;
 	}
 
-	public List<CompteCaisse> getCompteCaisses() {
-		return this.compteCaisses;
-	}
-
-	public void setCompteCaisses(List<CompteCaisse> compteCaisses) {
-		this.compteCaisses = compteCaisses;
-	}
-
-	public CompteCaisse addCompteCaiss(CompteCaisse compteCaiss) {
-		getCompteCaisses().add(compteCaiss);
-		compteCaiss.setAccount(this);
-
-		return compteCaiss;
-	}
-
-	public CompteCaisse removeCompteCaiss(CompteCaisse compteCaiss) {
-		getCompteCaisses().remove(compteCaiss);
-		compteCaiss.setAccount(null);
-
-		return compteCaiss;
-	}
-
 	public List<Grandlivre> getGranLivres() {
 		return granLivres;
 	}
@@ -261,4 +214,12 @@ public class Account implements Serializable {
 		this.budgets = budgets;
 	}
 
+	public List<Caisse> getCaisses() {
+		return caisses;
+	}
+
+	public void setCaisses(List<Caisse> caisses) {
+		this.caisses = caisses;
+	}
+	
 }

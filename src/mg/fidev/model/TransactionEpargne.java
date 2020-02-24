@@ -52,9 +52,9 @@ public class TransactionEpargne implements Serializable {
 	private double penalPrelev;
 	//bi-directional many-to-one association to CompteCaisse
 	@ManyToOne
-	@JoinColumn(name="Compte_caissenom_cpt_caisse")
+	@JoinColumn(name="id_caisse")
 	@XmlTransient
-	private CompteCaisse compteCaisse;
+	private Caisse caisse;
 
 	//bi-directional many-to-one association to CompteEpargne
 	@ManyToOne
@@ -159,13 +159,13 @@ public class TransactionEpargne implements Serializable {
 	public void setTypeTransEp(String typeTransEp) {
 		this.typeTransEp = typeTransEp;
 	}
-
-	public CompteCaisse getCompteCaisse() {
-		return this.compteCaisse;
+	
+	public Caisse getCaisse() {
+		return caisse;
 	}
 
-	public void setCompteCaisse(CompteCaisse compteCaisse) {
-		this.compteCaisse = compteCaisse;
+	public void setCaisse(Caisse caisse) {
+		this.caisse = caisse;
 	}
 
 	public CompteEpargne getCompteEpargne() {

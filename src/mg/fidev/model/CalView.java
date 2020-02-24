@@ -13,8 +13,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name="calendrierView")
-@XmlRootElement(name="calView")
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="calView")
 public class CalView implements Serializable {
 
 	private static final long serialVersionUID = 1L;

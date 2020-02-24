@@ -19,7 +19,6 @@ import mg.fidev.utils.AfficheBalance;
 import mg.fidev.utils.AfficheBilan;
 import mg.fidev.utils.AfficheListeCreditDeclasser;
 import mg.fidev.utils.MouvementCompta;
-import mg.fidev.utils.ResultatCompta;
 
 
 @WebService(name="comptabliteService", targetNamespace = "http://fidev.mg.comptabliteService", serviceName = "comptabliteService"
@@ -127,45 +126,55 @@ public interface ComptabiliteService {
 			@XmlElement(required=true) @WebParam(name="montant")double debit,
 			@XmlElement(required=true) @WebParam(name="utilisateur")int user);
 	
+	
+	//Rapport grand livre d'un client
 	@WebMethod
 	@WebResult(name="validation")	
 	public List<Grandlivre> grandLivreClient(
 			@XmlElement(required=false) @WebParam(name="codeInd")String codeCli,
 			@XmlElement(required=false) @WebParam(name="codeGrp")String codeGrp);
-	
+
+	//balance des comptes
 	@WebMethod
 	@WebResult(name="resultat")
-	public List<String> balance(
+	public List<String> balance( 
 			@XmlElement(required=false) @WebParam(name="dateDeb")String dateDeb,
 			@XmlElement(required=false) @WebParam(name="dateFin")String dateFin);
 	
+	//Test
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<MouvementCompta> mouvementCompte();
 	
+	//Test
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Grandlivre> tests();
 	
+	//Enregistrement budget
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean saveBudget(
 			@XmlElement(required=false) @WebParam(name="budget")Budget budget, 
 			@XmlElement(required=true) @WebParam(name="idCompte")int idCompte);
 	
+	//Affiche list budget
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Budget> listBudget();
 	
+	//Chercher par code budget
 	@WebMethod
 	@WebResult(name="resultat")
 	public Budget findBudget(
 			@XmlElement(required=false) @WebParam(name="code")String code);	
 	
+	//Affiche les codes analytiques
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Analytique> getAnalytique();
 	
+	//Enregistrement des divers opérations comptable
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean saveOperationDivers(
@@ -180,6 +189,7 @@ public interface ComptabiliteService {
 	@XmlElement(required=true) @WebParam(name="utilisateur")int user
 			);
 	
+	//Grand livre budgetaires
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Grandlivre> getGrandLivreBudget(
@@ -188,6 +198,7 @@ public interface ComptabiliteService {
 			@XmlElement(required=true) @WebParam(name="dateFin")String dateFin
 			);
 	
+	//Grand livre analytique
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Grandlivre> getGrandLivreAnalytique(
@@ -196,52 +207,61 @@ public interface ComptabiliteService {
 			@XmlElement(required=true) @WebParam(name="dateFin")String dateFin
 			);
 	
+	//Recupère tout les comptes
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Account> getAcountDistinct();
 	
+	//Grand Livre général
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Grandlivre> getGrandLivreGen(
 			@XmlElement(required=false) @WebParam(name="id")int id);
 	
+	//Journal caisse et journal banque
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Grandlivre> getJournal(
 			@XmlElement(required=false) @WebParam(name="date")String date,
 			@XmlElement(required=false) @WebParam(name="numCmpt")String numCmpt);
 	
+	//Affiche journal des divers comptes
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Grandlivre> getJournalDivers(
 			@XmlElement(required=false) @WebParam(name="date")String date);
 	
+	//Affiche balance
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<AfficheBalance> getBalance(
 			@XmlElement(required=false) @WebParam(name="dateDeb")String dateDeb,
 			@XmlElement(required=false) @WebParam(name="dateFin")String dateFin);
 	
+	//Déclasser crédits
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<AfficheListeCreditDeclasser> declasserCredit(
 	@XmlElement(required=false) @WebParam(name="date")String dateDeb);
 	
+	//Enregistrement déclassement crédit
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean saveDeclassement(
 	@XmlElement(required=false) @WebParam(name="date")String dateDeb,
 	@XmlElement(required=false) @WebParam(name="user")int user);
 
+	//Affiche bilan des comptes
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<AfficheBilan> getBilan(
 	@XmlElement(required=false) @WebParam(name="dateDeb")String dateDeb,
 	@XmlElement(required=false) @WebParam(name="dateFin")String dateFin);
 	
+	//Affiche resultats des comptes
 	@WebMethod
 	@WebResult(name="resultat")
-	public List<ResultatCompta> getResultat(
+	public List<AfficheBilan> getResultat(
 	@XmlElement(required=false) @WebParam(name="dateDeb")String dateDeb,
 	@XmlElement(required=false) @WebParam(name="dateFin")String dateFin);
 	

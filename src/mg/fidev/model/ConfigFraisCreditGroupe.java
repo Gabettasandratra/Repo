@@ -3,6 +3,7 @@ package mg.fidev.model;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -21,15 +22,22 @@ public class ConfigFraisCreditGroupe implements Serializable {
 	private int rowId;
 
 	private double commission;
-
+	
 	private boolean fraisDemandeOuDecais;
 
 	private double fraisDeveloppement;
-
 	private int fraisRefinancement;
-
 	private double papeterie;
-
+	
+	private int tauxFraisDev;
+	private int tauxCommission;
+	private int tauxRef;	
+	private int tauxPapeterie;
+	
+	//Frais avant ou après approbation
+	@Column(name="avantOuApres")
+	private String avantOuApres;
+	
 	//bi-directional many-to-one association to ProduitCredit
 	@OneToMany(mappedBy="confFraisGroupe")
 	@XmlTransient
@@ -95,6 +103,45 @@ public class ConfigFraisCreditGroupe implements Serializable {
 	public void setProduitCredits(List<ProduitCredit> produitCredits) {
 		this.produitCredits = produitCredits;
 	}
-	
+
+	public String isAvantOuApres() {
+		return avantOuApres;
+	}
+
+	public void setAvantOuApres(String avantOuApres) {
+		this.avantOuApres = avantOuApres;
+	}
+
+	public int getTauxFraisDev() {
+		return tauxFraisDev;
+	}
+
+	public void setTauxFraisDev(int tauxFraisDev) {
+		this.tauxFraisDev = tauxFraisDev;
+	}
+
+	public int getTauxCommission() {
+		return tauxCommission;
+	}
+
+	public void setTauxCommission(int tauxCommission) {
+		this.tauxCommission = tauxCommission;
+	}
+
+	public int getTauxRef() {
+		return tauxRef;
+	}
+
+	public void setTauxRef(int tauxRef) {
+		this.tauxRef = tauxRef;
+	}
+
+	public int getTauxPapeterie() {
+		return tauxPapeterie;
+	}
+
+	public void setTauxPapeterie(int tauxPapeterie) {
+		this.tauxPapeterie = tauxPapeterie;
+	}	
 	
 }

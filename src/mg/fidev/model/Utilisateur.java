@@ -65,10 +65,16 @@ public class Utilisateur implements Serializable {
 	@XmlTransient
 	private List<Decaissement> decaissements;
 
-	//bi-directional many-to-one association to DemandeCredit
+	//bi-directional many-to-one association to DemandeCredit demande saisissé
 	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<DemandeCredit> demandeCredits;
+	
+	//Agent credit	
+	@OneToMany(mappedBy="agent")
+	@XmlTransient
+	private List<DemandeCredit> clients;
+	
 
 	//bi-directional many-to-one association to Remboursement
 	@OneToMany(mappedBy="utilisateur")
@@ -95,7 +101,7 @@ public class Utilisateur implements Serializable {
 			}
 		)
 	@XmlTransient
-	private List<CompteCaisse> compteCaisses;
+	private List<Caisse> caisses;
 
 	//bi-directional many-to-one association to Fonction
 	@ManyToOne(cascade=CascadeType.ALL)
@@ -279,13 +285,21 @@ public class Utilisateur implements Serializable {
 	public void setAgences(List<Agence> agences) {
 		this.agences = agences;
 	}
-
-	public List<CompteCaisse> getCompteCaisses() {
-		return this.compteCaisses;
+	
+	public List<CompteDAT> getCompteDat() {
+		return compteDat;
 	}
 
-	public void setCompteCaisses(List<CompteCaisse> compteCaisses) {
-		this.compteCaisses = compteCaisses;
+	public void setCompteDat(List<CompteDAT> compteDat) {
+		this.compteDat = compteDat;
+	}
+
+	public List<Caisse> getCaisses() {
+		return caisses;
+	}
+
+	public void setCaisses(List<Caisse> caisses) {
+		this.caisses = caisses;
 	}
 
 	public Fonction getFonction() {
@@ -302,6 +316,14 @@ public class Utilisateur implements Serializable {
 
 	public void setGrandlivres(List<Grandlivre> grandlivres) {
 		this.grandlivres = grandlivres;
+	}
+
+	public List<DemandeCredit> getClients() {
+		return clients;
+	}
+
+	public void setClients(List<DemandeCredit> clients) {
+		this.clients = clients;
 	}
 
 }

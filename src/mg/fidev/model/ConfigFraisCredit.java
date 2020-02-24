@@ -36,7 +36,14 @@ public class ConfigFraisCredit implements Serializable {
 
 	private double papeterie;
 	
-	private boolean indOuGroupe;
+	//Frais avant ou après approbation
+	@Column(name="avantOuApres")
+	private String avantOuApres;
+	
+	private int tauxFraisDev;
+	private int tauxCommission;
+	private int tauxRef;	
+	private int tauxPapeterie;
 
 	//bi-directional many-to-one association to ProduitCredit
 	@OneToMany(mappedBy="configFraisCredit")
@@ -53,13 +60,13 @@ public class ConfigFraisCredit implements Serializable {
 	public void setRowId(int rowId) {
 		this.rowId = rowId;
 	}
-
-	public boolean isIndOuGroupe() {
-		return indOuGroupe;
+	
+	public String isAvantOuApres() {
+		return avantOuApres;
 	}
 
-	public void setIndOuGroupe(boolean indOuGroupe) {
-		this.indOuGroupe = indOuGroupe;
+	public void setAvantOuApres(String avantOuApres) {
+		this.avantOuApres = avantOuApres;
 	}
 
 	public double getCommission() {
@@ -123,5 +130,39 @@ public class ConfigFraisCredit implements Serializable {
 
 		return produitCredit;
 	}
+
+	public int getTauxFraisDev() {
+		return tauxFraisDev;
+	}
+
+	public void setTauxFraisDev(int tauxFraisDev) {
+		this.tauxFraisDev = tauxFraisDev;
+	}
+
+	public int getTauxCommission() {
+		return tauxCommission;
+	}
+
+	public void setTauxCommission(int tauxCommission) {
+		this.tauxCommission = tauxCommission;
+	}
+
+	public int getTauxRef() {
+		return tauxRef;
+	}
+
+	public void setTauxRef(int tauxRef) {
+		this.tauxRef = tauxRef;
+	}
+
+	public int getTauxPapeterie() {
+		return tauxPapeterie;
+	}
+
+	public void setTauxPapeterie(int tauxPapeterie) {
+		this.tauxPapeterie = tauxPapeterie;
+	}
+	
+	
 
 }

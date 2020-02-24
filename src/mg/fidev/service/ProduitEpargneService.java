@@ -313,7 +313,6 @@ public interface ProduitEpargneService {
 	/**
 	 * Rapport etat des comptes épargne
 	 * **/
-	
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<String> getEtatCompte(

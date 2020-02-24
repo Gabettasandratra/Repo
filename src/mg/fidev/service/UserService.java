@@ -11,7 +11,7 @@ import javax.jws.soap.SOAPBinding.ParameterStyle;
 import javax.xml.bind.annotation.XmlElement;
 
 import mg.fidev.model.Agence;
-import mg.fidev.model.CompteCaisse;
+import mg.fidev.model.Caisse;
 import mg.fidev.model.Fonction;
 import mg.fidev.model.Personnel;
 import mg.fidev.model.Utilisateur;
@@ -46,9 +46,10 @@ public interface UserService {
 	
 	@WebMethod @WebResult(name="cptCaisse")
 	public boolean ajoutCptCaisse(
-			@XmlElement(required=true) @WebParam(name="cptCaisse") CompteCaisse cptCaisse,
+			@XmlElement(required=true) @WebParam(name="cptCaisse") Caisse cptCaisse,
 			@XmlElement(required=true) @WebParam(name="planCompta") int numCptCompta
 			);
+	
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean addPersonnel(
@@ -86,4 +87,10 @@ public interface UserService {
 	@WebResult(name="validation")
 	public boolean deleteUser(
 	@XmlElement(required=true) @WebParam(name="id")int id);
+	
+	//liste utilisateurs par fonction
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Utilisateur> getUser(
+	@XmlElement(required=true) @WebParam(name="fonction")String nomFonction);
 }

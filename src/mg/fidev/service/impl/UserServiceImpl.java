@@ -12,7 +12,7 @@ import javax.persistence.TypedQuery;
 import mg.fidev.model.Acces;
 import mg.fidev.model.Account;
 import mg.fidev.model.Agence;
-import mg.fidev.model.CompteCaisse;
+import mg.fidev.model.Caisse;
 import mg.fidev.model.Fonction;
 import mg.fidev.model.Personnel;
 import mg.fidev.model.Utilisateur;
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
 			
 			//	Insertion dans la base de données
 			System.out.println("Information utilisateur prête");
-			try{	//	Insertion résussie
+			try{	//	Insertion résussie	
 				transaction.begin();
 				em.persist(user);
 				transaction.commit();
@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean ajoutCptCaisse(CompteCaisse cptCaisse, int numCptCompta) {
+	public boolean ajoutCptCaisse(Caisse	 cptCaisse, int numCptCompta) {
 		Account cptGL = em.find(Account.class, numCptCompta);
 		cptCaisse.setAccount(cptGL);
 		System.out.println("Nouveau compte caisse");
@@ -236,6 +236,16 @@ public class UserServiceImpl implements UserService {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	//Liste utilisateurs par fonction en paramètre
+	@Override
+	public List<Utilisateur> getUser(String nomFonction) {
+		String sql = "select u from Utilisateur u join u.fonction f where f.libelleFonction='"+nomFonction+"'";
+		TypedQuery<Utilisateur> query = em.createQuery(sql,Utilisateur.class);
+		if(!query.getResultList().isEmpty())
+			return query.getResultList();
+		return null;
 	}
 
 

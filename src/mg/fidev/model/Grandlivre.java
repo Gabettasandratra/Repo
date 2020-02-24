@@ -64,7 +64,7 @@ public class Grandlivre implements Serializable {
 	private Individuel codeInd;
 
 	@ManyToOne
-	@JoinColumn(name="code_grp")
+	@JoinColumn(name="code_grp") 
 	private Groupe groupe;
 	
 	@ManyToOne

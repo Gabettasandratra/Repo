@@ -1,7 +1,5 @@
 package mg.fidev.service.impl;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,8 +13,8 @@ import javax.persistence.TypedQuery;
 import mg.fidev.model.Account;
 import mg.fidev.model.Analytique;
 import mg.fidev.model.Budget;
+import mg.fidev.model.Caisse;
 import mg.fidev.model.Compte;
-import mg.fidev.model.CompteCaisse;
 import mg.fidev.model.ConfigGlCredit;
 import mg.fidev.model.DemandeCredit;
 import mg.fidev.model.Grandlivre;
@@ -30,7 +28,6 @@ import mg.fidev.utils.AfficheBilan;
 import mg.fidev.utils.AfficheListeCreditDeclasser;
 import mg.fidev.utils.CodeIncrement;
 import mg.fidev.utils.MouvementCompta;
-import mg.fidev.utils.ResultatCompta;
 
 @WebService(name="comptabliteService", targetNamespace="http://fidev.mg.comptabliteService", serviceName="comptabliteService",
 portName="comptabliteServicePort", endpointInterface="mg.fidev.service.ComptabiliteService")
@@ -131,7 +128,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 	public boolean addCompteCaisse(String cptCaisse, String devise, int planCompta) {
 		
 		Account cptGL = em.find(Account.class, planCompta);
-		CompteCaisse cmpt = new CompteCaisse();
+		Caisse cmpt = new Caisse();
 		System.out.println("Nouveau compte caisse");
 		try {
 			cmpt.setNomCptCaisse(cptCaisse);
@@ -867,7 +864,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		String sql ="select g from Grandlivre g join g.account a where a.numCpt like '" + numCmpt + "%'";
 		
 		if(!date.equals("")){
-			sql += " and g.date = '" + date + "'";
+			sql += " and g.date <= '" + date + "'";
 		}
 		sql +=" order by a.numCpt asc";
 		TypedQuery<Grandlivre> query = em.createQuery(sql,Grandlivre.class);
@@ -886,7 +883,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		String sql ="select g from Grandlivre g join g.account a where a.numCpt not like '" + 1 + "%' and a.numCpt not like '" + 2 + "%'" ;
 		
 		if(!date.equals("")){
-			sql += " and g.date = '" + date + "'";
+			sql += " and g.date <= '" + date + "'";
 		}
 		sql +=" order by a.numCpt asc";
 		TypedQuery<Grandlivre> query = em.createQuery(sql,Grandlivre.class);
@@ -1311,13 +1308,79 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		
 		return true;
 	}
-
+	
+	
 
 	//resultat financiers par période
 	@Override
-	public List<ResultatCompta> getResultat(String dateDeb, String dateFin) {
+    public List<AfficheBilan> getResultat(String dateDeb, String dateFin) {	
 		
-        try {
+		List<AfficheBilan> result = new ArrayList<AfficheBilan>();
+		
+		int nb = 7;	
+		
+		for (int i = 6; i <= nb; i++) {
+			String num = String.valueOf(i); 			
+			//compte parent		
+			Account parent = CodeIncrement.getAcount(em, num);
+			AfficheBilan bilan = new AfficheBilan();
+			
+			String sql = "select distinct g.account from Grandlivre g join g.account a "
+					+ " where a.numCpt like '" + num + "%' and g.date between '"+dateDeb+"' and '"+dateFin+"' order by a.numCpt asc";
+			List<Account> ac = new ArrayList<Account>();
+			TypedQuery<Account> query = em.createQuery(sql, Account.class);
+			
+			if(!query.getResultList().isEmpty()){
+				ac = query.getResultList();					
+				List<AfficheBalance> lCompt = new ArrayList<AfficheBalance>();
+				
+				for (Account account : ac) {
+					AfficheBalance b = new AfficheBalance();
+					
+					//Solde au dateDeb
+					//Total débit
+					double tDebit = 0;
+					Query q1 = em.createQuery("select sum(g.debit) from Grandlivre g join g.account a"
+							   + " where a.numCpt='"+account.getNumCpt()+"' and g.date between '"+dateDeb+"' and '"+dateFin+"'");
+					if(q1.getSingleResult() != null){
+						tDebit = (Double) q1.getSingleResult(); 
+					}				
+					//total crédit
+					double tCredit = 0 ; 
+					Query q2 = em.createQuery("select sum(g.credit) from Grandlivre g join g.account a"
+						   + " where a.numCpt='"+account.getNumCpt()+"' and g.date between '"+dateDeb+"' and '"+dateFin+"'");
+					if(q2.getSingleResult() != null){
+						tCredit = (Double)q2.getSingleResult();
+					}	
+					
+					double solde = tDebit - tCredit;
+					
+					if(num.equals("6")){
+						b.setSommeCred(solde); 
+						b.setSommeDeb(0);
+					}
+					else{
+						b.setSommeCred(0); 
+						b.setSommeDeb(solde);
+					}
+
+					b.setNumCompte(account.getNumCpt());
+					b.setLibele(account.getLabel());      
+					b.setSoldeInit(0); 
+					b.setStat("");
+					b.setSoldeFin(0); 
+					
+					lCompt.add(b);
+				}
+				bilan.setCompteParent(parent.getLabel());
+				bilan.setListCompte(lCompt); 
+				result.add(bilan);
+			}
+		
+		}		
+		return result;
+	}
+	/*  try {
 			
 			LocalDate date1 = LocalDate.parse(dateDeb);
 			LocalDate date2 = LocalDate.parse(dateFin);
@@ -1328,12 +1391,20 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			
 			System.out.println("Diferrence de mois "+val + "\n");
 			
+			String mois = dateDeb.substring(0,6);    
+			
+			if(!dateDeb.equals("") && dateFin.equals("")){
+				String sql = "select sum(g.debit) from Grandlivre g join g.account a where "
+						+ " a.numCpt ";
+				Query q = em.createQuery("");
+			}
+			if(!dateDeb.equals("") && !dateFin.equals("")){
+				
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		
-		return null;
-	}
+		}*/
 
 
 }

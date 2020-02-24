@@ -111,6 +111,11 @@ public class ProduitCredit implements Serializable {
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="configGLcredId")
 	private ConfigGlCredit configGlCredit;
+	
+	//ConfigGL2
+	@ManyToOne(cascade = CascadeType.PERSIST)
+	@JoinColumn(name="configGL2Id")
+	private ConfigDeclasseCredit configDeclasse;
 
 	/***
 	 * CONFIG PENALITE
@@ -251,6 +256,14 @@ public class ProduitCredit implements Serializable {
 
 	public void setConfFraisGroupe(ConfigFraisCreditGroupe confFraisGroupe) {
 		this.confFraisGroupe = confFraisGroupe;
+	}
+
+	public ConfigDeclasseCredit getConfigDeclasse() {
+		return configDeclasse;
+	}
+
+	public void setConfigDeclasse(ConfigDeclasseCredit configDeclasse) {
+		this.configDeclasse = configDeclasse;
 	}
 	
 }

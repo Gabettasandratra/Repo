@@ -1,14 +1,20 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import java.util.List;
 
 
 /**
@@ -33,26 +39,43 @@ public class DemandeCredit implements Serializable {
 
 	@Column(name="montant_demande")
 	private double montantDemande;
-
-	@Column(name="but_credit_economique")
-	private String butEconomique;
 	
-	@Column(name="but_credit_social")
-	private String butSocial;
+	@Column(name="interet")
+	private double interet;
 
+	@Column(name="but_credit")
+	private String butCredit;
+	
 	private String appBy;
-
-	@Column(name="approbation_statut")
-	private String approbationStatut;
-
+	
 	@Column(name="date_approbation")
 	private String dateApprobation;
-
-	@Column(name="descr_approbation")
-	private String descrApprobation;
-
+	
+	@Column(name="approbation_statut")
+	private String approbationStatut;
+	
 	@Column(name="montant_approved")
 	private double montantApproved;
+	
+	//1 Si commission payé sinon 0
+	@Column(name="commission")
+	private boolean commission;
+	
+	@Column(name="taux")
+	private double taux;
+	
+	@Column(name="nbTranche")
+	private int nbTranche;
+	
+	@Column(name="typeTranche")
+	private String typeTranche;
+	
+	@Column(name="diffPaie")
+	private int diffPaie;
+	
+	@Column(name="modeCalculInteret")
+	private String modeCalculInteret;
+	
 	
 	private double solde_total;
 	
@@ -64,53 +87,37 @@ public class DemandeCredit implements Serializable {
 									/**********************RELEATION ONE TO MANY********************************/
 	/******************************************************************************************************************************/
 	
-	/***
-	 * CALENDRIER GENERER AU DEMANDE 
-	 * ***/
+	//CALENDRIER GENERER AU DEMANDE 
 	//bi-directional one-to-many association to Calpaiementdue
-	@OneToMany(mappedBy="demandeCredit", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy="demandeCredit", cascade = CascadeType.ALL)
 	@XmlTransient
 	private List<Calpaiementdue> calpaiementdues;
-
 	
-	/***
-	 * COMMISSION DE CREDIT
-	 * ***/
+	//COMMISSION DE CREDIT
 	//bi-directional one-to-many association to CommissionCredit
 	@OneToMany(mappedBy="demandeCredit")
 	@XmlTransient
 	private List<CommissionCredit> commissionCredits;
 
-	
-	/***
-	 * DECAISSEMENT
-	 * ***/
+	//DECAISSEMENT
 	//bi-directional one-to-many association to Decaissement
 	@OneToMany(mappedBy="demandeCredit")
 	@XmlTransient
 	private List<Decaissement> decaissements;
 
-
-	/***
-	 * GARANTIE DEMANDE
-	 * ***/
+	//GARANTIES crédit
 	//bi-directional one-to-many association to GarantieCredit
-	@OneToMany(mappedBy="demandeCredit")
+	@OneToMany(mappedBy="demandeCredit", cascade = CascadeType.ALL)
 	@XmlTransient
 	private List<GarantieCredit> garantieCredits;
 
-	
-	/***
-	 * REMBOURSEMET CREDIT
-	 * ***/
+	//REMBOURSEMET CREDIT
 	//bi-directional one-to-many association to Remboursement
 	@OneToMany(mappedBy="demandeCredit",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<Remboursement> remboursements;
 
-	/***
-	 * CALENDRIER GENERER AU DEBLOCAGE
-	 * ***/
+	//CALENDRIER GENERER AU DEBLOCAGE
 	//bi-directional one-to-many association to Calapresdebl
 	@OneToMany(mappedBy="demandeCredit",cascade= CascadeType.ALL)
 	@XmlTransient
@@ -120,51 +127,50 @@ public class DemandeCredit implements Serializable {
 	@XmlTransient
 	private List<Grandlivre> grandLivre;
 	
+	//Relation garant de crédit
+	@OneToMany(mappedBy="demandeCredit")
+	@XmlTransient
+	private List<Garant>  garants;
+	
+	//Relation to approbation
+	@OneToMany(mappedBy="demandeCredit")
+	@XmlTransient
+	private List<ApprobationCredit> approbations;
+	
 	
 	/**************************************************************************************************************************************/
 							/***************************RELATION MANY TO ONE***************************************/
 	/**************************************************************************************************************************************/
 	
-	/***
-	 *GROUPE 
-	 ***/
-	
+	//GROUPE
 	//bi-directional many-to-one association to Groupe
 	@ManyToOne
 	@JoinColumn(name="codeGrp")
 	private Groupe groupe;
 
-	/***
-	 * INDIVIDUEL
-	 * ***/
-	
+	//INDIVIDUEL
 	//bi-directional many-to-one association to Individuel
 	@ManyToOne
 	@JoinColumn(name="codeInd")
 	private Individuel individuel;
-
 	
-	/***
-	 * PRODUIT CREDIT
-	 * ***/
-	
+	//PRODUIT CREDIT	
 	//bi-directional many-to-one association to ProduitCredit
 	@ManyToOne
 	@JoinColumn(name="produitCredit_id")
 	private ProduitCredit produitCredit;
 
-	/***
-	 * UTILISATEUR
-	 * ***/
+	//UTILISATEUR
 	//bi-directional many-to-one association to Utilisateur
 	@ManyToOne
 	@JoinColumn(name="user_id")
 	private Utilisateur utilisateur;
 	
+	//Agent de crédit
 	@ManyToOne
 	@JoinColumn(name="agent")
-	private Personnel agent;
-
+	private Utilisateur agent;
+	
 	/************************************************************************************************************************************/
 	/************************************************************************************************************************************/
 	/************************************************************************************************************************************/
@@ -172,31 +178,14 @@ public class DemandeCredit implements Serializable {
 	
 	
 	public DemandeCredit() {
-	}
-	
+	}	
 
 	public String getButEconomique() {
-		return butEconomique;
+		return butCredit;
 	}
 
 	public void setButEconomique(String butEconomique) {
-		this.butEconomique = butEconomique;
-	}
-
-	public String getButSocial() {
-		return butSocial;
-	}
-
-	public void setButSocial(String butSocial) {
-		this.butSocial = butSocial;
-	}
-
-	public Personnel getAgent() {
-		return agent;
-	}
-
-	public void setAgent(Personnel agent) {
-		this.agent = agent;
+		this.butCredit = butEconomique;
 	}
 
 	public String getNumCredit() {
@@ -217,6 +206,14 @@ public class DemandeCredit implements Serializable {
 		this.nbCredit = nbCredit;
 	}
 
+	public boolean isCommission() {
+		return commission;
+	}
+
+	public void setCommission(boolean commission) {
+		this.commission = commission;
+	}
+
 	public String getAppBy() {
 		return this.appBy;
 	}
@@ -233,29 +230,12 @@ public class DemandeCredit implements Serializable {
 		this.approbationStatut = approbationStatut;
 	}
 
-
-	public String getDateApprobation() {
-		return this.dateApprobation;
-	}
-
-	public void setDateApprobation(String dateApprobation) {
-		this.dateApprobation = dateApprobation;
-	}
-
 	public String getDateDemande() {
 		return this.dateDemande;
 	}
 
 	public void setDateDemande(String dateDemande) {
 		this.dateDemande = dateDemande;
-	}
-
-	public String getDescrApprobation() {
-		return this.descrApprobation;
-	}
-
-	public void setDescrApprobation(String descrApprobation) {
-		this.descrApprobation = descrApprobation;
 	}
 
 	public double getMontantApproved() {
@@ -481,4 +461,92 @@ public class DemandeCredit implements Serializable {
 		this.grandLivre = grandLivre;
 	}
 
+	public String getButCredit() {
+		return butCredit;
+	}
+
+	public void setButCredit(String butCredit) {
+		this.butCredit = butCredit;
+	}
+
+	public List<Garant> getGarants() {
+		return garants;
+	}
+
+	public void setGarants(List<Garant> garants) {
+		this.garants = garants;
+	}
+
+	public Utilisateur getAgent() {
+		return agent;
+	}
+
+	public void setAgent(Utilisateur agent) {
+		this.agent = agent;
+	}
+
+	public double getTaux() {
+		return taux;
+	}
+
+	public void setTaux(double taux) {
+		this.taux = taux;
+	}
+
+	public int getNbTranche() {
+		return nbTranche;
+	}
+
+	public void setNbTranche(int nbTranche) {
+		this.nbTranche = nbTranche;
+	}
+
+	public String getTypeTranche() {
+		return typeTranche;
+	}
+
+	public void setTypeTranche(String typeTranche) {
+		this.typeTranche = typeTranche;
+	}
+
+	public int getDiffPaie() {
+		return diffPaie;
+	}
+
+	public void setDiffPaie(int diffPaie) {
+		this.diffPaie = diffPaie;
+	}
+
+	public String getModeCalculInteret() {
+		return modeCalculInteret;
+	}
+
+	public void setModeCalculInteret(String modeCalculInteret) {
+		this.modeCalculInteret = modeCalculInteret;
+	}
+
+	public List<ApprobationCredit> getApprobations() {
+		return approbations;
+	}
+
+	public void setApprobations(List<ApprobationCredit> approbations) {
+		this.approbations = approbations;
+	}
+
+	public double getInteret() {
+		return interet;
+	}
+
+	public void setInteret(double interet) {
+		this.interet = interet;
+	}
+
+	public String getDateApprobation() {
+		return dateApprobation;
+	}
+
+	public void setDateApprobation(String dateApprobation) {
+		this.dateApprobation = dateApprobation;
+	}
+	
 }

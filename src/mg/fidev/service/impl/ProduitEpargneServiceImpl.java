@@ -14,8 +14,8 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Account;
+import mg.fidev.model.Caisse;
 import mg.fidev.model.CatEpargne;
-import mg.fidev.model.CompteCaisse;
 import mg.fidev.model.CompteDAT;
 import mg.fidev.model.CompteEpargne;
 import mg.fidev.model.CompteFerme;
@@ -452,12 +452,12 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			ConfigInteretProdEp confInter = cptEp.getProduitEpargne().getConfigInteretProdEp();
 			
 			String cptC = "";			
-			CompteCaisse cptCaisse = new CompteCaisse();
+			Caisse cptCaisse = new Caisse();
 			if(nomCptCaisse.equalsIgnoreCase("")){
 				
 			}else{
-				cptCaisse = em.find(CompteCaisse.class, nomCptCaisse);
-				cptC = String.valueOf(cptCaisse.getAccount().getTkey());			
+				cptCaisse = em.find(Caisse.class, nomCptCaisse);
+				cptC = String.valueOf(cptCaisse.getAccount().getNumCpt());			
 			}
 			
 			//	Initialisation des informations de transaction
@@ -471,7 +471,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			trans.setTypePaie(typPaie);
 			
 			if(typPaie.equalsIgnoreCase("cash")){
-				trans.setCompteCaisse(cptCaisse);							
+				trans.setCaisse(cptCaisse);							
 			}else if(typPaie.equalsIgnoreCase("cheque")){
 				trans.setValPaie(numCheq);										
 			}else if(typPaie.equalsIgnoreCase("mobile")){
@@ -742,8 +742,8 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		
 		///	pour incrémenter le tcode dans la table grandlivre
 		//compte caisse
-		CompteCaisse cptCaisse = em.find(CompteCaisse.class, nomCptCaisse);
-		String cptC = String.valueOf(cptCaisse.getAccount().getTkey());
+		Caisse cptCaisse = em.find(Caisse.class, nomCptCaisse);
+		String cptC = String.valueOf(cptCaisse.getAccount().getNumCpt());
 		
 		//Transaction
 		TransactionEpargne retirer = new TransactionEpargne();
@@ -781,8 +781,8 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				
 				//Type de payement 
 				if(typPaie.equalsIgnoreCase("cash")){
-					retirer.setCompteCaisse(cptCaisse);		
-					depot.setCompteCaisse(cptCaisse);
+					retirer.setCaisse(cptCaisse);		
+					depot.setCaisse(cptCaisse);
 				}else if(typPaie.equalsIgnoreCase("cheque")){
 					retirer.setValPaie(numCheq);	
 					depot.setValPaie(numCheq);	
@@ -1439,6 +1439,8 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		try {	
 			compFerme.setCompteEpargne(cmpt);
 			cmpt.setFermer(true);
+			cmpt.setActif(false);
+			cmpt.setPasRetrait(true); 
 			transaction.begin();
 			em.flush();
 			em.persist(compFerme);
@@ -1708,13 +1710,12 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	}
 	
 	//Selection distinct de compte caisse dans transction epargne 
-
-	static List<CompteCaisse> getCompteCaisseDistinct(){
+	static List<Caisse> getCompteCaisseDistinct(){
 		
-		List<CompteCaisse> result = new ArrayList<CompteCaisse>();
+		List<Caisse> result = new ArrayList<Caisse>();
 		
-		TypedQuery<CompteCaisse> query = em.createQuery("select distinct t.compteCaisse from TransactionEpargne t"
-				,CompteCaisse.class);
+		TypedQuery<Caisse> query = em.createQuery("select distinct t.compteCaisse from TransactionEpargne t"
+				,Caisse.class);
 		if(!query.getResultList().isEmpty()){
 			result = query.getResultList();
 			return result;
@@ -1894,9 +1895,9 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	}
 
 	//Compte caisse dans grand livre
-	static List<CompteCaisse> getDistinctCaisse(String date){
+	static List<Caisse> getDistinctCaisse(String date){
 		String sql = "select distinct t.compteCaisse from TransactionEpargne t where t.dateTransaction ='"+date+"'";
-		TypedQuery<CompteCaisse> query = em.createQuery(sql,CompteCaisse.class);
+		TypedQuery<Caisse> query = em.createQuery(sql,Caisse.class);
 		if(!query.getResultList().isEmpty()){
 			return query.getResultList();
 		}
@@ -2019,8 +2020,8 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 						switch (typePaie) {
 						case "cash":
 							//Compte caisse
-							CompteCaisse cpt = em.find(CompteCaisse.class, nomCptCaisse);
-							String c = String.valueOf(cpt.getAccount().getTkey());
+							Caisse cpt = em.find(Caisse.class, nomCptCaisse);
+							String c = String.valueOf(cpt.getAccount().getNumCpt());
 							
 						    accDeb = CodeIncrement.getAcount(em, c);
 							soldDeb = accDeb.getSoldeProgressif() + compte.getMontant();
@@ -2407,8 +2408,8 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			switch (typePaie) {
 			case "cash":
 				//Compte caisse
-				CompteCaisse cpt = em.find(CompteCaisse.class, nomCptCaisse);
-				String c = String.valueOf(cpt.getAccount().getTkey());
+				Caisse cpt = em.find(Caisse.class, nomCptCaisse);
+				String c = String.valueOf(cpt.getAccount().getNumCpt());
 				
 			    accCredit = CodeIncrement.getAcount(em, c);
 				soldCredit = accCredit.getSoldeProgressif() - montant;
@@ -2561,7 +2562,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			sql+="  where d.ret='"+true+"' and d.dateDepot between '"+dateDeb+"' and '"+dateFin+"'";
 		}
 		//d.fermer = '"+false+"' and
-		TypedQuery<CompteDAT> requete = em.createQuery(sql,CompteDAT.class);
+		TypedQuery<CompteDAT> requete = em.createQuery(sql,CompteDAT.class);    
 		
 		if(!requete.getResultList().isEmpty())
 			return requete.getResultList();

@@ -3,48 +3,52 @@ package mg.fidev.model;
 import java.io.Serializable;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
-@Table(name="approbation")
-@XmlRootElement(name="aprobations")
+@Table(name="approbationCredit")
+@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Approbation implements Serializable{
-	
+public class ApprobationCredit implements Serializable{
+
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	private String numCredit;
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private int id;
 	
 	private String dateAp;
 	
 	private String personeAp;
 	
 	private String description;
-	
+
 	private double montantApprouver;
 	
-	@OneToOne
-	@PrimaryKeyJoinColumn
-	private DemandeCredit demaCredit;
+	//bi-directional many-to-one association to DemandeCredit
+	@ManyToOne
+	@JoinColumn(name="num_credit")
+	private DemandeCredit demandeCredit;
 
-	public Approbation() {
+	public ApprobationCredit() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	
-	public String getNumCredit() {
-		return numCredit;
+
+	public int getId() {
+		return id;
 	}
 
-	public void setNumCredit(String numCredit) {
-		this.numCredit = numCredit;
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getDateAp() {
@@ -79,12 +83,12 @@ public class Approbation implements Serializable{
 		this.montantApprouver = montantApprouver;
 	}
 
-	public DemandeCredit getDemaCredit() {
-		return demaCredit;
+	public DemandeCredit getDemandeCredit() {
+		return demandeCredit;
 	}
 
-	public void setDemaCredit(DemandeCredit demaCredit) {
-		this.demaCredit = demaCredit;
+	public void setDemandeCredit(DemandeCredit demandeCredit) {
+		this.demandeCredit = demandeCredit;
 	}
-	
+
 }

@@ -45,6 +45,14 @@ public class Garant implements Serializable{
 	@Column(name="code_individuel", length=15)
 	private String codeIndividuel;
 	
+	//Taux à garantissé sur le crédit
+	@Column(name="taux_cred")
+	private double tauxCred;
+	
+	//Montant à garantir sur le crédit
+	@Column(name="total_montant")
+	private double montant;
+	
 	//bi-directional many-to-one association to Docidentite
 	@OneToMany(mappedBy="garant")
 	@XmlTransient
@@ -53,14 +61,14 @@ public class Garant implements Serializable{
 	//bi-directional many-to-one association to Adresse
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="idAdresse")
-	@XmlTransient
 	private Adresse adresse;
 	
-	//bi-directional many-to-one association to Docidentite
-	@OneToMany(mappedBy="garant")
+	//bi-directional many-to-one association to DemandeCredit
+	@ManyToOne
+	@JoinColumn(name="numCredit")
 	@XmlTransient
-	private List<GarantieCredit> garanties;
-
+	private DemandeCredit demandeCredit;
+	
 	public Garant() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -162,11 +170,30 @@ public class Garant implements Serializable{
 		this.adresse = adresse;
 	}
 
-	public List<GarantieCredit> getGaranties() {
-		return garanties;
+	public DemandeCredit getDemandeCredit() {
+		return demandeCredit;
 	}
 
-	public void setGaranties(List<GarantieCredit> garanties) {
-		this.garanties = garanties;
+	public void setDemandeCredit(DemandeCredit demandeCredit) {
+		this.demandeCredit = demandeCredit;
 	}
+
+	public double getTauxCred() {
+		return tauxCred;
+	}
+
+	public void setTauxCred(double tauxCred) {
+		this.tauxCred = tauxCred;
+	}
+
+	public double getMontant() {
+		return montant;
+	}
+
+	public void setMontant(double montant) {
+		this.montant = montant;
+	}
+	
+	
+
 }

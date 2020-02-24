@@ -1,18 +1,15 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name="personnel_institution")
@@ -35,11 +32,6 @@ public class Personnel implements Serializable{
 	@ManyToOne
 	@JoinColumn(name="id_agence")
 	private Agence agence;
-	
-	@OneToMany(mappedBy="agent")
-	@XmlTransient
-	private List<DemandeCredit> numCredit;
-	
 
 	public Personnel() {
 		super();
@@ -87,12 +79,4 @@ public class Personnel implements Serializable{
 		this.agence = agence;
 	}
 
-	public List<DemandeCredit> getNumCredit() {
-		return numCredit;
-	}
-
-	public void setNumCredit(List<DemandeCredit> numCredit) {
-		this.numCredit = numCredit;
-	}
-	
 }
