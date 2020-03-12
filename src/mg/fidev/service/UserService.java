@@ -28,7 +28,8 @@ public interface UserService {
 			@XmlElement(required=true) @WebParam(name="mdpUser") String mdpUser,
 			@XmlElement(required=true) @WebParam(name="mdpUserConf") String mdpUserConf,
 			@XmlElement(required=true) @WebParam(name="genreUser") String genreUser,
-			@XmlElement(required=true) @WebParam(name="telUser") String telUser,			
+			@XmlElement(required=true) @WebParam(name="telUser") String telUser,
+			@XmlElement(required=true) @WebParam(name="photo") String photo,
 			@XmlElement(required=true) @WebParam(name="fonction") int fonctionId);
 	//@XmlElement(required=false,nillable=true) @WebParam(name="compteCaisse") List<String> listCptCaisse,
 	
@@ -93,4 +94,5 @@ public interface UserService {
 	@WebResult(name="resultat")
 	public List<Utilisateur> getUser(
 	@XmlElement(required=true) @WebParam(name="fonction")String nomFonction);
+	
 }

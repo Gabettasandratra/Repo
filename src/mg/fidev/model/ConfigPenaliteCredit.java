@@ -30,10 +30,14 @@ public class ConfigPenaliteCredit implements Serializable {
 	private int differePaiement;
 
 	private int limiteExpirationPenal;
+	
+	@Column(name="montantFixe")
+	private double montantFixe;
 
 	private String modeCalcul;
 
-	private double montantPenalPeriod;
+	@Column(name="pourcentage")
+	private int pourcentage;
 
 	private boolean penalJrFerie;
 
@@ -79,15 +83,7 @@ public class ConfigPenaliteCredit implements Serializable {
 	public void setModeCalcul(String modeCalcul) {
 		this.modeCalcul = modeCalcul;
 	}
-
-	public double getMontantPenalPeriod() {
-		return this.montantPenalPeriod;
-	}
-
-	public void setMontantPenalPeriod(double montantPenalPeriod) {
-		this.montantPenalPeriod = montantPenalPeriod;
-	}
-
+	
 	public boolean getPenalJrFerie() {
 		return this.penalJrFerie;
 	}
@@ -116,6 +112,22 @@ public class ConfigPenaliteCredit implements Serializable {
 		produitCredit.setConfigPenaliteCredit(null);
 
 		return produitCredit;
+	}
+
+	public double getMontantFixe() {
+		return montantFixe;
+	}
+
+	public void setMontantFixe(double montantFixe) {
+		this.montantFixe = montantFixe;
+	}
+
+	public int getPourcentage() {
+		return pourcentage;
+	}
+
+	public void setPourcentage(int pourcentage) {
+		this.pourcentage = pourcentage;
 	}
 
 }

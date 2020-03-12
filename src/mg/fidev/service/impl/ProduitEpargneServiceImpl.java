@@ -47,10 +47,14 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	 * Method recupere le dernier index
 	 */ 
 	static int getLastIndex(String typeEp) { 
-		String sql = "select count(*) from produit_epargne where Type_epargnenom_type_epargne = '"+typeEp+"' ";
-		Query q = em.createNativeQuery(sql);
-		int result = Integer.parseInt(q.getSingleResult().toString());
-		return result;
+		//select count(*) from produit_epargne where Type_epargnenom_type_epargne = '"+typeEp+"' 
+		String sql = "select count(p) from ProduitEpargne p join p.typeEpargne t "
+				+ " where t.nomTypeEpargne = '"+typeEp+"' ";
+		Query q = em.createQuery(sql);
+		
+		long result = (long) q.getSingleResult();
+		System.out.println("result count: "+ result);
+		return (int)result;
 	}
 
 	//Enregistrer un nouveau produit
@@ -58,13 +62,18 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	public boolean saveProduit(String nomProdEp, String nomTypeEp, boolean isActive) {
 		try {
 			ProduitEpargne pro = new ProduitEpargne();
-			pro.setNomProdEpargne(nomProdEp);
 			TypeEpargne typeEp = em.find(TypeEpargne.class, nomTypeEp);
+			
+			pro.setNomProdEpargne(nomProdEp);
 			pro.setTypeEpargne(typeEp);
 			pro.setEtat(isActive);
-
+			
+			String index = "";
 			int lastIndex = getLastIndex(pro.getTypeEpargne().getNomTypeEpargne());
-			String index = String.format("%03d", ++lastIndex);
+			if(lastIndex==0)
+				index = String.format("001");
+			else
+				index = String.format("%03d", ++lastIndex);				
 			
 			if(pro.getTypeEpargne().getNomTypeEpargne().equals("DAT (Dépôt à terme)"))
 				pro.setIdProdEpargne("AT" + index);
@@ -72,8 +81,9 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				pro.setIdProdEpargne("AV" + index);
 			else if(pro.getTypeEpargne().getNomTypeEpargne().equals("Dépôt de garantie"))
 				pro.setIdProdEpargne("Ga" + index);
-			else if(pro.getTypeEpargne().getNomTypeEpargne().equals("Plan d'épargne"))
+			else if(pro.getTypeEpargne().getNomTypeEpargne().equals("Plan épargne"))
 				pro.setIdProdEpargne("PE" + index);
+			
 			em.getTransaction().begin();
 			em.persist(pro);
 			em.getTransaction().commit();
@@ -113,6 +123,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			em.flush();
 			em.getTransaction().commit();
 			em.refresh(p);
+			System.out.println("Desactivé");
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -120,6 +131,43 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			return false;
 		}
 	}
+	
+	//Activer produit
+	@Override
+	public boolean activerProduit(String idProd) {
+		try {
+			ProduitEpargne p = em.find(ProduitEpargne.class, idProd);
+			p.setEtat(true);
+			em.getTransaction().begin();
+			em.flush();
+			em.getTransaction().commit();
+			em.refresh(p);
+			System.out.println("Activé");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Erreur");
+			return false;
+		}
+	}
+	
+	//Supprimer produit épargne
+	@Override
+	public boolean supprimerProduitEpargne(String idProd) {
+		try {
+			ProduitEpargne p = em.find(ProduitEpargne.class, idProd);
+			em.getTransaction().begin();
+			em.remove(p); 
+			em.getTransaction().commit();
+			System.out.println("Suppression ok");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Erreur suppression");
+			return false;
+		}
+	}
+	
 
 	//modifier produit
 	@Override
@@ -295,14 +343,13 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	/***
 	 * OUVRIR COMPTE EPARGNE
 	 * ***/
-	@SuppressWarnings("unused")
 	@Override
 	public CompteEpargne ouvrirCompte(String dateOuverture,boolean geler,boolean pasRetrait
 			,String dateRetirer, String idProduitEp,String individuelId, String groupeId, int userId) {
 			//Instance nouveau compte_epargne
 			CompteEpargne cpt_ep = new CompteEpargne();
 			
-			
+			System.out.println("Code Ind = "+individuelId +" Code Grp = "+groupeId);
 			ProduitEpargne pdt_ep = em.find(ProduitEpargne.class, idProduitEp);
 			Individuel ind = em.find(Individuel.class, individuelId);
 			Groupe grp = em.find(Groupe.class, groupeId);			
@@ -312,62 +359,75 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			ConfigProdEp confProduit = pdt_ep.getConfigProdEp();
 			
 			//vérification si le client a déjà un compte avec le même produit
+			boolean verInd = false;
+			boolean verGrp = false;
 			
-			String sql = "select c from CompteEpargne c join c.individuel i join c.produitEpargne p "
-					+ " where i.codeInd='"+ind.getCodeInd()+"' and p.idProdEpargne='"+idProduitEp+"'";
-			Query qrs = em.createQuery(sql);
-						
-			if(!qrs.getResultList().isEmpty()){
-				return null;
-			}else{
-
-			//Insertion des informations sur le compte
-			cpt_ep.setDateOuverture(dateOuverture);
-			cpt_ep.setDateEcheance(dateRetirer);
-			cpt_ep.setUtilisateur(ut);
-			cpt_ep.setProduitEpargne(pdt_ep);
-			cpt_ep.setIsActif(true);
 			if(ind != null){
-				System.out.println("Compte individuel");
-				String dateNais = ind.getDateNaissance();				
-				LocalDate dateNow = LocalDate.now();
-				
-				int age = Period.between(LocalDate.parse(dateNais), dateNow).getYears();
-				System.out.println("âge = "+age);
-				if(age>=confProduit.getAgeMinCpt()){					
-					cpt_ep.setIndividuel(ind);
-					cpt_ep.setNumCompteEp(individuelId+"/"+idProduitEp);
-					
-				}else{
-					return null;
-				}
+				String sql = "select c from CompteEpargne c join c.individuel i join c.produitEpargne p "
+						+ " where i.codeInd='"+ind.getCodeInd()+"' and p.idProdEpargne='"+idProduitEp+"'";
+				Query qrs = em.createQuery(sql);
+				if(qrs.getResultList().isEmpty())
+					verInd = true;
 			}
-			else if(grp != null){
-				System.out.println("Compte groupe");
-				cpt_ep.setGroupe(grp);
-				cpt_ep.setNumCompteEp(groupeId+"/"+idProduitEp);
+			if(grp!=null){
+				String sql = "select c from CompteEpargne c join c.groupe g join c.produitEpargne p "
+						+ " where g.codeGrp='"+grp.getCodeGrp()+"' and p.idProdEpargne='"+idProduitEp+"'";
+				Query qrs = em.createQuery(sql);
+				if(qrs.getResultList().isEmpty())
+					verGrp = true;
 			}
+			System.out.println("valeur de verInd = "+verInd +" valeur de VerGrp = "+verGrp);
 			
-			//	Enregistrement du compte lorsque toutes les informations nécessaires
-			//	sont valides et complètes
-			if(cpt_ep.getIndividuel() != null || cpt_ep.getGroupe() != null){
-				System.out.println("Information compte épargne prête");
-				try{
+						
+			if(verInd == true || verGrp == true){
+				//Insertion des informations sur le compte
+				cpt_ep.setDateOuverture(dateOuverture);
+				cpt_ep.setDateEcheance(dateRetirer);
+				cpt_ep.setUtilisateur(ut);
+				cpt_ep.setProduitEpargne(pdt_ep);
+				cpt_ep.setIsActif(true);
+				if(ind != null){
+					System.out.println("Compte individuel");
+					String dateNais = ind.getDateNaissance();				
+					LocalDate dateNow = LocalDate.now();
 					
-					em.getTransaction().begin();
-					em.persist(cpt_ep);
-					em.getTransaction().commit();
-					em.refresh(cpt_ep);
-					System.out.println("Nouveau compte épargne ouvert");
-					return cpt_ep;
-				}catch(Exception ex){
-					System.err.println(ex.getMessage());
-					return null;
+					int age = Period.between(LocalDate.parse(dateNais), dateNow).getYears();
+					System.out.println("âge = "+age);
+					if(age>=confProduit.getAgeMinCpt()){					
+						cpt_ep.setIndividuel(ind);
+						cpt_ep.setNumCompteEp(individuelId+"/"+idProduitEp);
+						
+					}else{
+						return null;
+					}
 				}
+				else if(grp != null){
+					System.out.println("Compte groupe");
+					cpt_ep.setGroupe(grp);
+					cpt_ep.setNumCompteEp(groupeId+"/"+idProduitEp);
+				}
+				
+				//	Enregistrement du compte lorsque toutes les informations nécessaires
+				//	sont valides et complètes
+				if(cpt_ep.getIndividuel() != null || cpt_ep.getGroupe() != null){
+					System.out.println("Information compte épargne prête");
+					try{
+						
+						em.getTransaction().begin();
+						em.persist(cpt_ep);
+						em.getTransaction().commit();
+						em.refresh(cpt_ep);
+						System.out.println("Nouveau compte épargne ouvert");
+						return cpt_ep;
+					}catch(Exception ex){
+						System.err.println(ex.getMessage());
+						return null;
+					}
+				}
+				else
+					return null;
 			}
-			else
-				return null;
-			}
+			return null;
 		
 	}
 
@@ -402,10 +462,10 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		return result;
 	}
 
-	
 	/***
 	 * TRASACTION EPARGNE
 	 * ***/
+	@SuppressWarnings("unused")
 	@Override
 	public boolean trasactionEpargne(String typeTransac, String dateTransac,
 			double montant, String description, String pieceCompta,String typPaie,String numTel, String numCheq,
@@ -416,6 +476,8 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			//UTILISATEUR DE SAISIE
 			Utilisateur ut = em.find(Utilisateur.class, idUser);
+			
+			String result="";
 			
 			///incrémenter le tcode dans la table grandlivre
 			String indexTcode = CodeIncrement.genTcode(em);
@@ -541,6 +603,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 							
 							if(confProd.getSoldeOverture() > montant){
 								System.out.println("Ce montant ne correspond pas,le solde d'ouverture est "+confProd.getSoldeOverture());
+								result = "Ce montant ne correspond pas,le solde d'ouverture est "+confProd.getSoldeOverture();
 								return false;
 							}else{
 								lDebit.setDescr("Dépôt d'ouverture du compte "+numCptEp);
@@ -555,6 +618,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 								transaction.commit();
 								em.refresh(trans);
 								System.out.println("Transaction réussie");
+								result = "Transaction réussie";
 								return true;
 							}
 							
@@ -571,6 +635,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 							transaction.commit();
 							em.refresh(trans);
 							System.out.println("Transaction réussie");
+							result = "Transaction réussie";
 							return true;							
 						}						
 					
@@ -579,17 +644,31 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 						//Vérifier si le compte est autorisé à faire de rétrait
 						if(trans.getCompteEpargne().isPasRetrait() == true){
 							System.out.println("Désolé,ce compte n'est pas autorisé à faire de rétrait");
+							result = "Désolé,ce compte n'est pas autorisé à faire de rétrait";
 							return false;
 						}else{
 							double sd = cptEp.getSolde() - montant;
 							if(sd < confInter.getSoldeMinInd() ){
 								System.out.println("Montant superieur au montant autorisé");
+								result = "Montant superieur au montant autorisé";
 								return false;
 							}else{						
 														
-								int diff = 0; 
-								if(diff < 0){
-									System.out.println("Le retrait est autorisé apres "+diff+ " jours");
+								int diff = confProd.getNbrJrMinRet(); 
+								String rq = "select max(t.dateTransaction) from TransactionEpargne t join "
+										+ " t.compteEpargne c where c.numCompteEp='"+numCptEp+"' and t.typeTransEp ='RE'";
+								Query qs = em.createQuery(rq);
+								int v = confProd.getNbrJrMinRet();
+								if(qs.getSingleResult() != null){
+									String dernierTransaction = (String)qs.getSingleResult();
+									long difDate = calcDate(dernierTransaction,dateTransac);
+									v = (int)difDate;
+								}
+								System.out.println("valeur = "+v);
+								if(diff > v){
+									int a = diff-v;
+									System.out.println("Le retrait est autorisé apres "+a+ " jours");
+									result = "Le retrait est autorisé apres "+a+ " jours";
 									return false;
 								}else{
 									
@@ -705,7 +784,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 									em.refresh(trans);							
 									
 									System.out.println("Transaction réussie");							
-									
+									result = "Transaction réussie";
 									return true;						
 									
 								}												
@@ -716,21 +795,40 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 					return false;
 				} catch (Exception e) {
 					System.err.println(e.getMessage());
+					result = "Erreur enregistrement";
 					return false;
 				}
 			}
 			else{
 				System.out.println("Pas de transaction autorisé, car ce compte est inactif");
+				result = "Pas de transaction autorisé, car ce compte est inactif";
 				return false;
 			}
 	}
 
+	//calcul difference entre deux date retrait
+	static long calcDate(String dateDeb, String dateFin) {
+		try {			
+			LocalDate date1 = LocalDate.parse(dateDeb);
+			LocalDate date2 = LocalDate.parse(dateFin);
+			System.out.println("dernière transaction "+date1);
+			System.out.println("date retrait "+date2);
+	
+			long val = ChronoUnit.DAYS.between(date1,date2);			
+			System.out.println(val + "\n");			
+			return val;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
 	/***
 	 * VIREMENT
 	 * ***/
 
+	@SuppressWarnings("unused")
 	@Override
-	public String virement(String cmpt1, String cmpt2, double montant,String pieceCompta,String  dateTransac, 
+	public boolean virement(String cmpt1, String cmpt2, double montant,String pieceCompta,String  dateTransac, 
 			String typPaie,String numTel, String numCheq,String nomCptCaisse,int user) {
 		
 		//valeur de retour
@@ -758,7 +856,10 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		if(cp1.getIsActif() == true && cp2.getIsActif() == true){
 		
 			//tester si le solde du compte a retirer et inferieur au montant
-			if(cp1.getSolde() < montant) result = "Solde du compte "+cmpt1+" est inferieur au montant";
+			if(cp1.getSolde() < montant){
+				result = "Solde du compte "+cmpt1+" est inferieur au montant";
+				return false;
+			}				
 			else{
 				
 				//Initialisation des informations sur les transactions
@@ -905,8 +1006,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 								gl.setAccount(accGl);
 								
 								gl.setSolde(sdl); 
-								accGl.setSoldeProgressif(sdl);
-								
+								accGl.setSoldeProgressif(sdl);							
 								
 								transaction.begin();
 								em.flush();
@@ -1033,18 +1133,21 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 						System.out.println("Transaction réussie");
 						
 						 result = "Virement reussit!!!";
+						 return true;
 					} catch (Exception e) {
 						System.err.println(e.getMessage());
 						 result ="erreur de virement";
+						 return false;
 					}		
 				}
 			}
 		}
 		else{
 			 result = "Désolé, vous ne pouvez pas faire cette action,le compte "+cmpt1+" est inactif";
+			 return false;
 		}
 		
-		return result;
+		return false;
 	}
 	
 	/***
@@ -1437,9 +1540,9 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		CompteEpargne cmpt = em.find(CompteEpargne.class, numCmpt);
 		
 		try {	
-			compFerme.setCompteEpargne(cmpt);
 			cmpt.setFermer(true);
 			cmpt.setActif(false);
+			compFerme.setCompteEpargne(cmpt);
 			cmpt.setPasRetrait(true); 
 			transaction.begin();
 			em.flush();
@@ -2661,8 +2764,5 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		result.setPenalite(penalite); 
 		return result;
 	}
-	
-	
-	
 }
 

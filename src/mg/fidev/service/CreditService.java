@@ -430,6 +430,7 @@ public interface CreditService {
 	@WebResult(name = "validation")
 	public boolean configGarantiCredit(
 			@WebParam(name= "configGarCredit") @XmlElement(required=false,nillable=true) ConfigGarantieCredit configGarCredit,
+			@WebParam(name= "produitEpargne") @XmlElement(required=true,nillable=false) String idProduitEpargne,
 			@WebParam(name= "idProduit") @XmlElement(required=true,nillable=false) String idProduit
 			);
 	

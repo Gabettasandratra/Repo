@@ -71,12 +71,12 @@ public class CompteEpargne implements Serializable {
 	private Utilisateur utilisateur;
 
 	//bi-directional many-to-one association to CompteFerme
-	@OneToMany(mappedBy="compteEpargne")
+	@OneToMany(mappedBy="compteEpargne", cascade = CascadeType.ALL)
 	@XmlTransient
 	private List<CompteFerme> compteFermes;
 
 	//bi-directional many-to-one association to TransactionEpargne
-	@OneToMany(mappedBy="compteEpargne")
+	@OneToMany(mappedBy="compteEpargne", cascade = CascadeType.ALL)
 	@XmlTransient
 	private List<TransactionEpargne> transactionEpargnes;
 	
@@ -84,7 +84,7 @@ public class CompteEpargne implements Serializable {
 	@XmlTransient
 	private List<InteretEpargne> interet;
 	
-	@OneToMany(mappedBy="compteEpargne")
+	@OneToMany(mappedBy="compteEpargne", cascade = CascadeType.ALL)
 	@XmlTransient     
 	private List<Grandlivre> grandLivre;
 

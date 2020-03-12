@@ -25,35 +25,24 @@ public class ConfigGarantieCredit implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int rowId;
-
-	private boolean garantieBaseClasse;
-
+	
+	private boolean lierEpargne;
+	
 	private boolean garantieBaseMontantCredit;
 
-	private boolean garantieGrpDecaiss;
-
 	private boolean garantieGrpOblig;
-
-	private boolean garantieIndDecaiss;
 
 	private boolean garantieIndOblig;
 
 	private boolean garantIndOblig;
 
-	private boolean montantExigeDemande;
+	private double percentMontantGrp;
 
-	private float percentMontantEnCoursGrp;
-
-	private float percentMontantEnCoursInd;
-
-	private float percentMontantGrp;
-
-	private float percentMontantInd;
+	private double percentMontantInd;
 
 	//bi-directional many-to-one association to ProduitEpargne
 	@ManyToOne
 	@JoinColumn(name="produitEpargneId")
-	@XmlTransient
 	private ProduitEpargne produitEpargne;
 
 	//bi-directional many-to-one association to ProduitCredit
@@ -72,14 +61,6 @@ public class ConfigGarantieCredit implements Serializable {
 		this.rowId = rowId;
 	}
 
-	public boolean getGarantieBaseClasse() {
-		return this.garantieBaseClasse;
-	}
-
-	public void setGarantieBaseClasse(boolean garantieBaseClasse) {
-		this.garantieBaseClasse = garantieBaseClasse;
-	}
-
 	public boolean getGarantieBaseMontantCredit() {
 		return this.garantieBaseMontantCredit;
 	}
@@ -87,15 +68,7 @@ public class ConfigGarantieCredit implements Serializable {
 	public void setGarantieBaseMontantCredit(boolean garantieBaseMontantCredit) {
 		this.garantieBaseMontantCredit = garantieBaseMontantCredit;
 	}
-
-	public boolean getGarantieGrpDecaiss() {
-		return this.garantieGrpDecaiss;
-	}
-
-	public void setGarantieGrpDecaiss(boolean garantieGrpDecaiss) {
-		this.garantieGrpDecaiss = garantieGrpDecaiss;
-	}
-
+	
 	public boolean getGarantieGrpOblig() {
 		return this.garantieGrpOblig;
 	}
@@ -103,15 +76,6 @@ public class ConfigGarantieCredit implements Serializable {
 	public void setGarantieGrpOblig(boolean garantieGrpOblig) {
 		this.garantieGrpOblig = garantieGrpOblig;
 	}
-
-	public boolean getGarantieIndDecaiss() {
-		return this.garantieIndDecaiss;
-	}
-
-	public void setGarantieIndDecaiss(boolean garantieIndDecaiss) {
-		this.garantieIndDecaiss = garantieIndDecaiss;
-	}
-
 	public boolean getGarantieIndOblig() {
 		return this.garantieIndOblig;
 	}
@@ -128,43 +92,27 @@ public class ConfigGarantieCredit implements Serializable {
 		this.garantIndOblig = garantIndOblig;
 	}
 
-	public boolean getMontantExigeDemande() {
-		return this.montantExigeDemande;
+	public boolean isLierEpargne() {
+		return lierEpargne;
 	}
 
-	public void setMontantExigeDemande(boolean montantExigeDemande) {
-		this.montantExigeDemande = montantExigeDemande;
+	public void setLierEpargne(boolean lierEpargne) {
+		this.lierEpargne = lierEpargne;
 	}
 
-	public float getPercentMontantEnCoursGrp() {
-		return this.percentMontantEnCoursGrp;
+	public double getPercentMontantGrp() {
+		return percentMontantGrp;
 	}
 
-	public void setPercentMontantEnCoursGrp(float percentMontantEnCoursGrp) {
-		this.percentMontantEnCoursGrp = percentMontantEnCoursGrp;
-	}
-
-	public float getPercentMontantEnCoursInd() {
-		return this.percentMontantEnCoursInd;
-	}
-
-	public void setPercentMontantEnCoursInd(float percentMontantEnCoursInd) {
-		this.percentMontantEnCoursInd = percentMontantEnCoursInd;
-	}
-
-	public float getPercentMontantGrp() {
-		return this.percentMontantGrp;
-	}
-
-	public void setPercentMontantGrp(float percentMontantGrp) {
+	public void setPercentMontantGrp(double percentMontantGrp) {
 		this.percentMontantGrp = percentMontantGrp;
 	}
 
-	public float getPercentMontantInd() {
-		return this.percentMontantInd;
+	public double getPercentMontantInd() {
+		return percentMontantInd;
 	}
 
-	public void setPercentMontantInd(float percentMontantInd) {
+	public void setPercentMontantInd(double percentMontantInd) {
 		this.percentMontantInd = percentMontantInd;
 	}
 

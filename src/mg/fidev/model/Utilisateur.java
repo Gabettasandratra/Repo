@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -44,40 +45,43 @@ public class Utilisateur implements Serializable {
 	private String nomUtilisateur;
 
 	private String telUser;
+	
+	@Column(name="photo")
+	private String photo;
 
 	//bi-directional many-to-one association to CommissionCredit
-	@OneToMany(mappedBy="utilisateur")
+	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
 	@XmlTransient
 	private List<CommissionCredit> commissionCredits;
 
 	//bi-directional many-to-one association to CompteEpargne
-	@OneToMany(mappedBy="utilisateur")
+	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 	
 	//Compte DAT
-	@OneToMany(mappedBy="utilisateur")
+	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
 	@XmlTransient
 	private List<CompteDAT> compteDat;
 
 	//bi-directional many-to-one association to Decaissement
-	@OneToMany(mappedBy="utilisateur")
+	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
 	@XmlTransient
 	private List<Decaissement> decaissements;
 
 	//bi-directional many-to-one association to DemandeCredit demande saisissé
-	@OneToMany(mappedBy="utilisateur")
+	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
 	@XmlTransient
 	private List<DemandeCredit> demandeCredits;
 	
 	//Agent credit	
-	@OneToMany(mappedBy="agent")
+	@OneToMany(mappedBy="agent",cascade=CascadeType.ALL)
 	@XmlTransient
 	private List<DemandeCredit> clients;
 	
 
 	//bi-directional many-to-one association to Remboursement
-	@OneToMany(mappedBy="utilisateur")
+	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
 	@XmlTransient
 	private List<Remboursement> remboursements;
 
@@ -109,7 +113,7 @@ public class Utilisateur implements Serializable {
 	private Fonction fonction;
 	
 	//bi-directional many-to-one association to granlivre
-	@OneToMany(mappedBy="utilisateur")
+	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
 	@XmlTransient
 	private List<Grandlivre> grandlivres;
 	
@@ -324,6 +328,14 @@ public class Utilisateur implements Serializable {
 
 	public void setClients(List<DemandeCredit> clients) {
 		this.clients = clients;
+	}
+
+	public String getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(String photo) {
+		this.photo = photo;
 	}
 
 }

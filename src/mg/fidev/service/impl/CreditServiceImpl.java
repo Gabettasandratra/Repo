@@ -43,6 +43,7 @@ import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
 import mg.fidev.model.MembreGroupe;
 import mg.fidev.model.ProduitCredit;
+import mg.fidev.model.ProduitEpargne;
 import mg.fidev.model.Remboursement;
 import mg.fidev.model.Utilisateur;
 import mg.fidev.service.CreditService;
@@ -679,7 +680,7 @@ public class CreditServiceImpl implements CreditService {
 				}
 				break;
 			case "Hebdomadairement":
-				double interetSemaine = intTot / nbTranche;
+				double interetSemaine = intTot / 4;
 				for (int i = 0; i < nbTranche; i++) {
 					CalView cal = new CalView();
 					dtDmd = dtDmd.plusWeeks(1);
@@ -704,7 +705,7 @@ public class CreditServiceImpl implements CreditService {
 				}
 				break;
 			case "Quinzaine":
-				double interet_quinz = intTot / nbTranche;
+				double interet_quinz = intTot / 2;
 				for (int i = 0; i < nbTranche; i++) {
 					CalView cal = new CalView();
 					dtDmd = dtDmd.plusWeeks(2);
@@ -1144,10 +1145,133 @@ public class CreditServiceImpl implements CreditService {
 		
 		ConfigCreditIndividuel confInds = dm.getProduitCredit().getConfigCreditIndividuel();
 		ConfigGlCredit confGL = dm.getProduitCredit().getConfigGlCredit();
+		ConfigGeneralCredit confGen = dm.getProduitCredit().getConfigGeneralCredit();
 		
 		///	pour incrémenter le tcode dans la table grandlivre
 		String indexTcode = CodeIncrement.genTcode(em);
-		List<Calapresdebl> calRembAprDebl = CodeIncrement.getCalendrierRemboursement(dm);
+		List<Calapresdebl> calRembAprDebl = new ArrayList<Calapresdebl>();
+		
+		//Suppression des calendrier dues au fiche crédit
+		/*String sql_fiche = "select f from FicheCredit f where f.transaction='Tranche due' "
+				+ " and f.num_credit='"+dm.getNumCredit()+"'";
+		TypedQuery<FicheCredit> query_fiche = em.createQuery(sql_fiche,FicheCredit.class);
+		List<FicheCredit> fs = query_fiche.getResultList();
+		for (FicheCredit ficheCredit : fs) {
+			try {
+				transaction.begin();
+				em.remove(ficheCredit); 
+				transaction.commit();
+				System.out.println("Tranche due fiche crédit n°: "+ficheCredit.getId()+" supprimé");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}			
+		}
+		
+		FicheCredit ficheCredit = new FicheCredit();
+		double soldCourant = 0;
+		double totInter = 0;*/
+		
+		//Tester si mettre à jour la date remboursement ou pas
+		if(confGen.getRecalcDateEcheanceAuDecais().equalsIgnoreCase("ne pas mettre a jours les dates")){
+			System.out.println("Ne pas mettre à jour le calendrier de remboursement");
+			List<Calpaiementdue> calDue = dm.getCalpaiementdues();
+			for (Calpaiementdue calpaiementdue : calDue) {
+				Calapresdebl calFinal = new Calapresdebl();
+				calFinal.setDate(calpaiementdue.getDate());
+				calFinal.setDemandeCredit(calpaiementdue.getDemandeCredit());
+				calFinal.setMcomm(calpaiementdue.getMontantComm());
+				calFinal.setMint(calpaiementdue.getMontantInt());
+				calFinal.setMpen(calpaiementdue.getMontantPenal());
+				calFinal.setMprinc(calpaiementdue.getMontantPrinc());
+				calFinal.setPayer(false);
+				calRembAprDebl.add(calFinal);
+				
+				//Total solde courant
+				/*soldCourant += calFinal.getMprinc() + calFinal.getMint() - calFinal.getMpen();
+				//total intérêt				
+				totInter += calFinal.getMint();
+				//Solde total
+				double soldTotal = totInter + dm.getMontantDemande();
+								
+				//ajout calendrier due au Fihe credit
+				FicheCredit fiche = new FicheCredit();
+				fiche.setDate(calFinal.getDate()); 
+				fiche.setPiece("");
+				fiche.setTransaction("Tranche due");
+				fiche.setPrincipale(calFinal.getMprinc()); 
+				fiche.setInteret(calFinal.getMint()); 
+				fiche.setPenalite(calFinal.getMpen());
+				fiche.setSoldeCourant(soldCourant);
+				fiche.setTotalPrincipal(dm.getMontantDemande());
+				fiche.setTotalInteret(totInter);
+				fiche.setTotalSolde(soldTotal); 
+				fiche.setNum_credit(dm.getNumCredit());
+				try {
+					transaction.begin();
+					em.persist(fiche);
+					transaction.commit();
+					em.refresh(fiche); 
+					System.out.println("Fiche credit enregitré");
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}*/
+				
+			}
+		}else if(confGen.getRecalcDateEcheanceAuDecais().equalsIgnoreCase("mettre a jours les dates")){
+			System.out.println("mettre à jour le calendrier de remboursement");
+			String codeClient = "";
+			if(dm.getIndividuel() != null){
+				codeClient = dm.getIndividuel().getCodeInd();
+			}
+			if(dm.getGroupe() != null){
+				codeClient = dm.getGroupe().getCodeGrp();
+			}
+			List<CalView> lisCalView = demCredit(codeClient, date, montant, dm.getTaux()
+					, dm.getNbTranche(), dm.getTypeTranche(), dm.getDiffPaie(), dm.getModeCalculInteret());
+			for (CalView calView : lisCalView) {
+				Calapresdebl calFinal = new Calapresdebl();
+				calFinal.setDate(calView.getDate());
+				calFinal.setDemandeCredit(dm);
+				calFinal.setMcomm(calView.getMontantComm());
+				calFinal.setMint(calView.getMontantInt());
+				calFinal.setMpen(calView.getMontantPenal());
+				calFinal.setMprinc(calView.getMontantPrinc());
+				calFinal.setPayer(false);
+				calRembAprDebl.add(calFinal);	
+				
+				//Total solde courant
+				/*soldCourant += calView.getMontantPrinc() + calView.getMontantInt() - calView.getMontantPenal();
+				//total intérêt				
+				totInter += calView.getMontantInt();
+				//Solde total
+				double soldTotal = totInter + dm.getMontantDemande();
+								
+				//ajout calendrier due au Fihe credit
+				FicheCredit fiche = new FicheCredit();
+				fiche.setDate(calView.getDate()); 
+				fiche.setPiece("");
+				fiche.setTransaction("Tranche due");
+				fiche.setPrincipale(calView.getMontantPrinc()); 
+				fiche.setInteret(calView.getMontantInt()); 
+				fiche.setPenalite(calView.getMontantPenal());
+				fiche.setSoldeCourant(soldCourant);
+				fiche.setTotalPrincipal(dm.getMontantDemande());
+				fiche.setTotalInteret(totInter);
+				fiche.setTotalSolde(soldTotal); 
+				fiche.setNum_credit(dm.getNumCredit());
+				try {
+					transaction.begin();
+					em.persist(fiche);
+					transaction.commit();
+					em.refresh(fiche); 
+					System.out.println("Fiche credit enregitré");
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}	*/	
+			}
+		}
 		
 		//Solde Demander
 		Grandlivre debit = new Grandlivre();
@@ -1199,7 +1323,7 @@ public class CreditServiceImpl implements CreditService {
 						System.out.println("Compte caisse");
 						cptCaisse = em.find(Caisse.class, comptCaise);
 						String cptC = String.valueOf(cptCaisse.getAccount().getNumCpt());
-						accCred = CodeIncrement.getAcount(em, cptC);//cptCaisse.getAccount();
+						accCred = CodeIncrement.getAcount(em, cptC);//cptCaisse.getAccount(); 
 						System.out.println("Compte crédité "+accCred.getNumCpt());
 						decais.setCptCaisseNum(cptC);
 						credit1.setCompte(cptC);
@@ -1370,6 +1494,7 @@ public class CreditServiceImpl implements CreditService {
 		return result;
 	}
 
+	//Calucl difference entre la date au calendrier de remboursement et la date de paiement échéance
 	static Long calculDifferenceDate(String date, String numCredit){
 		Query requete = em
 				.createQuery("SELECT MIN(c.date) FROM Calapresdebl c JOIN c.demandeCredit numCred WHERE"
@@ -1401,19 +1526,28 @@ public class CreditServiceImpl implements CreditService {
 	/***
 	 * REMBOURSEMENT
 	 * ***/
-
-	@SuppressWarnings({ "rawtypes", "unused"})
+	@SuppressWarnings({"unused"})
 	@Override
 	public boolean saveRemboursement(String numCredit, int userId, String date,
 			double montant, String piece,String typePaie,String numTel,String numCheque, String cmptCaisse) { 
 
-		DemandeCredit dm = em.find(DemandeCredit.class, numCredit); Utilisateur ut = em.find(Utilisateur.class, userId);		
+		//Instance de crédit en question
+		DemandeCredit dm = em.find(DemandeCredit.class, numCredit); 
+		//Instance de l'utilisateur qui enregistre l'opération
+		Utilisateur ut = em.find(Utilisateur.class, userId);
+		
+		//Instance de configuration GrandLivre crédit
 		ConfigGlCredit confGl = dm.getProduitCredit().getConfigGlCredit();
+		//Instance de configuration pénalité
+		ConfigPenaliteCredit confPenalit = dm.getProduitCredit().getConfigPenaliteCredit();
 		int pen = 5;
+		
+		//Remboursement à partir d'un N° compte epargne 
+		//String numCompteEp;
 		
 		//valeur de retour		
 		boolean retour = false;  
-		
+	
 		Caisse cptCaisse = new Caisse();
 		String cptC = "";		
 		if(!cmptCaisse.equalsIgnoreCase("")){
@@ -1433,14 +1567,6 @@ public class CreditServiceImpl implements CreditService {
 			
 			//Verifie si le crédit est déjà remboursé ou pas
 			if (dm.getSolde_total() != 0) {//>	
-				
-				// recupérer le dernier Principale total, intérêt total, solde total  du crédit
-				double principalTotal = dm.getPrincipale_total();
-				double interetTotal = dm.getInteret_total();
-				double soldeTotal = dm.getSolde_total();
-				
-				//calcul difference entre date échéance due parraport à la date aujourd'hui
-				//Long diffDate = calculDifferenceDate(date, numCredit);
 									
 				//initialisation de la valeur du capital à ajouter dans le grand livre
 				double capitals = 0.0;
@@ -1452,7 +1578,7 @@ public class CreditServiceImpl implements CreditService {
 					//Instance des classes necessaire
 					Remboursement saveRemb = new Remboursement(); 
 					Calapresdebl cals = new Calapresdebl(); 
-					
+							
 					// / pour incrémenter le tcode dans la table grandlivre
 					String indexTcode = CodeIncrement.genTcode(em);	
 					
@@ -1472,29 +1598,23 @@ public class CreditServiceImpl implements CreditService {
 					query.setParameter("dateRemb", dateCal);
 					query.setParameter("numCred", "" + numCredit + "");
 					
-					double princ = 0.0;
-					double inter = 0.0;
-					int rowId = 0;
-					double restMontant = 0.0;
+					cals = (Calapresdebl) query.getSingleResult();
 					
 					// Recupère le montant principal et interet à rembouser
-					List resultList = query.getResultList();
-					if (resultList != null) {
-						
-						cals = (Calapresdebl) query.getSingleResult();
-						
-						princ = cals.getMprinc();
-						inter = cals.getMint();
-						rowId = cals.getRowId();
+					double princ = cals.getMprinc();
+					double inter = cals.getMint();
+					int rowId = cals.getRowId();
 					
-						System.out.println("calendrier numero: "+ rowId);
-						System.out.println("Principal total: " + princ);
-						System.out.println("Interet total: " + inter);
+					System.out.println("calendrier numero: "+ rowId);
+					System.out.println("Principal total: " + princ);
+					System.out.println("Interet total: " + inter);
+					
+					double restMontant = 0.0;						
 						
 						// Montant a remboursé
-						double montRembourser = montant;							
+						double montRembourser = 0;							
 						// Recuperer le montant reste au dernier remboursement			
-						/*Query qr = em.createQuery("SELECT r.restaPaie FROM Remboursement r JOIN r.demandeCredit numDem"
+						Query qr = em.createQuery("SELECT r.restaPaie FROM Remboursement r JOIN r.demandeCredit numDem"
 										+ " WHERE r.dateRemb =( SELECT MAX(rb.dateRemb) FROM Remboursement rb JOIN rb.demandeCredit nums WHERE nums.numCredit"
 										+ "= :numsCredit AND r.typeAction = :a) AND numDem.numCredit = :numero");
 						qr.setParameter("numsCredit", numCredit);
@@ -1506,136 +1626,270 @@ public class CreditServiceImpl implements CreditService {
 						} else {
 							double derRestPaie = (double)qr.getSingleResult();
 							montRembourser = montant + derRestPaie;								
-							System.out.println("montant reste de dernière paiement : "+ derRestPaie);
-						}*/
-						// On considère que le paiement de l'intérêt est
-						// prioritaire
-						//soustraction du montant payé par le montant d'intérêt due
-						double restPaieInt = montRembourser - inter;						
+							System.out.println("montant reste au dernière paiement : "+ derRestPaie);
+						}
+						System.out.println("montant à rembourser : "+ montRembourser);
 						
+						//Calcul remboursement
+						//Intérêt remboursé
 						double interetRemb = 0.0;
+						//Principal remboursé
 						double principaleRem = 0.0;
+						//reste de paiement principal
 						double restPaiePrinc = 0.0;
-
-						if (restPaieInt > 0.0) {
-							
-							interetRemb = inter;
-							inters = interetRemb;
-
-							restPaiePrinc = restPaieInt - princ;
-
-							if (restPaiePrinc >= 0.0) {
-								principaleRem = princ; cals.setPayer(true);	
-							} else if (restPaiePrinc < 0.0) {
-								principaleRem = restPaieInt; 
-								cals.setMpen((float)((restPaiePrinc*(-1))*pen)/100 ); cals.setPayer(false);
-							}
-							
-							restMontant = restPaiePrinc;
-							capitals = principaleRem;
-
-							principalTotal = principalTotal - principaleRem;
-							interetTotal = interetTotal - interetRemb;
-							soldeTotal = principalTotal + interetTotal;
-
-							if (soldeTotal == 0.0) {
-								dm.setApprobationStatut("Credit remboursé");
-							}
-
-							// Insertion à l'Entité Remboursement
-							
-							//requette pour recupérer le nombre échéance déjà fait
-							String rba = "Remboursement";
-					
-							Query qu =  em.createQuery("SELECT MAX(re.nbEcheance) FROM Remboursement re JOIN re.demandeCredit numCred WHERE"
-											+ " re.typeAction = :te AND numCred.numCredit = :num");
-							qu.setParameter("te", rba);
-							qu.setParameter("num", numCredit);
-							int nbEcheance=1;
-							
-							if((qu.getSingleResult()) == null)
-								nbEcheance = 1;
-							else{
-								int a = Integer.parseInt(qu.getSingleResult().toString());
-								nbEcheance = a+1;
-							}
-							
-							//Prend le type de paiement fait par l'utilisateur: paiement cash, par chèque ou par mobile
-							if(typePaie.equalsIgnoreCase("cash")){
-								saveRemb.setCptCaisseNum(cptC);
-							}else if(typePaie.equalsIgnoreCase("cheque")){
-								saveRemb.setValPaie(numCheque);
-							}else if(typePaie.equalsIgnoreCase("mobile")){
-								saveRemb.setValPaie(numTel);
-							}
-							saveRemb.setTcode(indexTcode);
-							saveRemb.setDemandeCredit(dm);
-							saveRemb.setUtilisateur(ut);
-							saveRemb.setDateRemb(date);
-							saveRemb.setPiece(piece);
-							saveRemb.setNbEcheance(nbEcheance);
-							saveRemb.setTypeAction("Remboursement");
-							saveRemb.setTypePaie(typePaie);
-							
-							
-							saveRemb.setCheqcomm(0);
-							saveRemb.setStationery(0);
-							saveRemb.setOverpay(0);
-							
-							saveRemb.setPrincipal(principaleRem);
-							saveRemb.setInteret(interetRemb);
-							saveRemb.setMontant_paye(montant);
-							saveRemb.setRestaPaie(restPaiePrinc);
-							
-							saveRemb.setSolde(soldeTotal);
-							saveRemb.setTotalPrincipale(principalTotal);
-							saveRemb.setTotalInteret(interetTotal);
-							
-							//ajout calendrier due au Fihe credit
-							FicheCredit fiche = new FicheCredit();
-							fiche.setDate(date); 
-							fiche.setPiece(piece);
-							fiche.setTransaction("Remboursement");
-							fiche.setPrincipale(principaleRem); 
-							fiche.setInteret(interetRemb); 
-							fiche.setPenalite(0);
-							fiche.setSoldeCourant(0);
-							fiche.setTotalPrincipal(montant);
-							fiche.setTotalInteret(0);
-							fiche.setTotalSolde(montant); 
-							fiche.setNum_credit(dm.getNumCredit());	
-
-							// Modification sur l'entité DemandeCredit
-							dm.setSolde_total(soldeTotal);
-							dm.setPrincipale_total(principalTotal);
-							dm.setInteret_total(interetTotal);
-							
-							try {
-								transaction.begin();
-								em.merge(cals);
-								em.merge(dm);
-								em.persist(saveRemb);
-								transaction.commit();
-								em.refresh(saveRemb);
-								em.refresh(dm);
-								em.refresh(cals); 
-								//montant = montant - restPaiePrinc;
-								results = "Remboursement Enregistrer!!!";
-								System.out.println(results);
-							} catch (Exception e) {
-								e.printStackTrace();
-							} finally {
-								if (em == null) {
-									em.close();
+						//reste de paiement intérêt
+						double restInt = 0.0;
+						
+						//Instancie la configuration individuel ou la configuration groupe selon le client en question
+						ConfigCreditGroup confGroupe = null;
+						ConfigCreditIndividuel confInd = null;
+						boolean cInd = false;
+						boolean cGrp = false;
+						
+						if(dm.getIndividuel() != null){
+							confInd = dm.getProduitCredit().getConfigCreditIndividuel();
+							if(confInd.getPariementPrealableInt() == true)
+								cInd = true;
+							else
+								cInd = false;
+						}
+						if(dm.getGroupe() != null){
+							confGroupe = dm.getProduitCredit().getConfigCreditGroupe();
+							if(confGroupe.isPaiePrealableInt() == true)
+								cGrp = true;
+							else 
+								cGrp = false;
+								
+						}
+						
+						if(cInd == true || cGrp == true){
+							System.out.println("paiement préalable des intérêts");
+							//Si le paiement de l'intérêt est prioritaire
+							//On soustraire le montant total remboursé par montant intéret dans le calendrier de remboursement
+							double restPaieInt = montRembourser - inter;						
+							System.out.println("Reste paiement intérêts: "+restPaieInt);
+							//S'il y a de reste aprés soustraction par intérêt 
+							if (restPaieInt > 0.0) {
+								
+								interetRemb = inter;
+								inters = interetRemb;
+								
+								restPaiePrinc = restPaieInt - princ;
+								System.out.println("Reste paiement principal: "+restPaiePrinc);
+								if (restPaiePrinc >= 0.0) {
+									//Si reste de paiement principal superieur ou égal à 0
+									principaleRem = princ;
+									//reste paiement
+									restMontant = restPaiePrinc; 
+									cals.setPayer(true);	
+									System.out.println("Reste paiement: "+restMontant);
+								} else if (restPaiePrinc < 0.0) {
+									principaleRem = restPaieInt; 
+									//calcul pénalité
+									double montantPenal = 0;
+									
+									if(confPenalit.getModeCalcul().equalsIgnoreCase("montant fixe")){
+										montantPenal = confPenalit.getMontantFixe();
+									}
+									if(confPenalit.getModeCalcul().equalsIgnoreCase("pourcentage")){
+										montantPenal = (restPaiePrinc*(-1)*confPenalit.getPourcentage())/100;
+									}
+									System.out.println("penalite: "+montantPenal);
+									cals.setMpen((float)montantPenal);
+									cals.setPayer(true);
+									restMontant = restPaiePrinc + (montantPenal*(-1));
+									System.out.println("Reste paiement: "+restMontant);
 								}
-							}										
+								
+								capitals = principaleRem;						
+								
+								
+							} else if (restPaieInt < 0.0) {
+								System.out.println("montant inferieur au interet due");
+								interetRemb = montRembourser;
+								inters = montRembourser;
+								//calcul pénalité
+								double montantPenal = 0;
+								
+								if(confPenalit.getModeCalcul().equalsIgnoreCase("montant fixe")){
+									montantPenal = confPenalit.getMontantFixe();
+								}
+								if(confPenalit.getModeCalcul().equalsIgnoreCase("pourcentage")){
+									montantPenal = (restPaieInt*(-1)*confPenalit.getPourcentage())/100;
+								}									
+								cals.setMpen((float)montantPenal);
+								cals.setPayer(true);
+								restMontant = restPaieInt + (montantPenal*(-1));
+								System.out.println("Interêt payer: "+inters);
+							}				
+							
+						}			
+						else if(cInd == false || cGrp == false){
+							System.out.println("Paiement de capital prioritaire");
+							//Si le paiement de capital est prioritaire
+							//On soustraire le montant total remboursé par montant du principal dans le calendrier de remboursement
+							double restPrinc = montRembourser - princ;						
+							System.out.println("Reste de Paiement de capital: "+restPrinc);
+							//S'il y a de reste aprés soustraction par intérêt 
+							if (restPrinc > 0.0) {
+								
+								principaleRem = princ;
+								capitals = princ;
+								
+								restInt = restPrinc - inter;
+								System.out.println("Reste de Paiement intérêt: "+restInt);
+								if (restInt >= 0.0) {
+									//Si reste de paiement principal superieur ou égal à 0
+									interetRemb = inter;
+									//reste paiement
+									restMontant = restInt; 
+									cals.setPayer(true);
+									System.out.println("intérêt remboursé: "+interetRemb);
+									System.out.println("Reste montant: "+restMontant);
+									
+								} else if (restInt < 0.0) {
+									interetRemb = restInt; 
+									//calcul pénalité
+									double montantPenal = 0;
+									
+									if(confPenalit.getModeCalcul().equalsIgnoreCase("montant fixe")){
+										montantPenal = confPenalit.getMontantFixe();
+									}
+									if(confPenalit.getModeCalcul().equalsIgnoreCase("pourcentage")){
+										montantPenal = (restInt*(-1)*confPenalit.getPourcentage())/100;
+									}									
+									cals.setMpen((float)montantPenal);
+									cals.setPayer(true);
+									restMontant = restInt + (montantPenal*(-1));
+									System.out.println("pénalité: "+montantPenal);
+									System.out.println("Reste montant: "+restMontant);
+								}								
+								inters = interetRemb;					
+								
+								
+							} else if (restPrinc < 0.0) {
+								System.out.println("montant inferieur au principal due");
+								principaleRem = montRembourser;
+								capitals = montRembourser;
+								//calcul pénalité
+								double montantPenal = 0;
+								
+								if(confPenalit.getModeCalcul().equalsIgnoreCase("montant fixe")){
+									montantPenal = confPenalit.getMontantFixe();
+								}
+								if(confPenalit.getModeCalcul().equalsIgnoreCase("pourcentage")){
+									montantPenal = (restPrinc*(-1)*confPenalit.getPourcentage())/100;
+								}									
+								cals.setMpen((float)montantPenal);
+								cals.setPayer(true);
+								restMontant = restPrinc + (montantPenal*(-1));
+								System.out.println("pénalité: "+montantPenal);
+								System.out.println("Reste montant: "+restMontant);
+							}
+						}
 
-						} else if (restPaieInt < 0.0) {
-							System.out.println("montant inferieur au interet due");
-						}				
-					} else {
-						results = "Ce client ne pouvez pas rembourser aujourd'hui";
+					// recupérer le dernier Principale total, intérêt total, solde total  du crédit
+					double principalTotal = dm.getPrincipale_total();
+					double interetTotal = dm.getInteret_total();
+					double soldeTotal = dm.getSolde_total();
+					principalTotal = principalTotal - principaleRem;
+					interetTotal = interetTotal - interetRemb;
+					soldeTotal = principalTotal + interetTotal;
+
+					if (soldeTotal == 0.0) {
+						dm.setApprobationStatut("Credit remboursé");
 					}
+
+					// Insertion à l'Entité Remboursement
+					
+					//requette pour recupérer le nombre échéance déjà fait
+					String rba = "Remboursement";
+			
+					Query qu =  em.createQuery("SELECT MAX(re.nbEcheance) FROM Remboursement re JOIN re.demandeCredit numCred WHERE"
+									+ " re.typeAction = :te AND numCred.numCredit = :num");
+					qu.setParameter("te", rba);
+					qu.setParameter("num", numCredit);
+					int nbEcheance=1;
+					
+					if((qu.getSingleResult()) == null)
+						nbEcheance = 1;
+					else{
+						int a = Integer.parseInt(qu.getSingleResult().toString());
+						nbEcheance = a+1;
+					}
+					
+					//Prend le type de paiement fait par l'utilisateur: paiement cash, par chèque ou par mobile
+					if(typePaie.equalsIgnoreCase("cash")){
+						saveRemb.setCptCaisseNum(cptC);
+					}else if(typePaie.equalsIgnoreCase("cheque")){
+						saveRemb.setValPaie(numCheque);
+					}else if(typePaie.equalsIgnoreCase("mobile")){
+						saveRemb.setValPaie(numTel);
+					}
+					saveRemb.setTcode(indexTcode);
+					saveRemb.setDemandeCredit(dm);
+					saveRemb.setUtilisateur(ut);
+					saveRemb.setDateRemb(date);
+					saveRemb.setPiece(piece);
+					saveRemb.setNbEcheance(nbEcheance);
+					saveRemb.setTypeAction("Remboursement");
+					saveRemb.setTypePaie(typePaie);
+					
+					
+					saveRemb.setCheqcomm(0);
+					saveRemb.setStationery(0);
+					saveRemb.setOverpay(0);
+					
+					saveRemb.setPrincipal(principaleRem);
+					saveRemb.setInteret(interetRemb);
+					saveRemb.setMontant_paye(montant);
+					saveRemb.setRestaPaie(restPaiePrinc);
+					
+					saveRemb.setSolde(soldeTotal);
+					saveRemb.setTotalPrincipale(principalTotal);
+					saveRemb.setTotalInteret(interetTotal);
+					
+					//ajout calendrier due au Fihe credit
+					FicheCredit fiche = new FicheCredit();
+					fiche.setDate(date); 
+					fiche.setPiece(piece);
+					fiche.setTransaction("Remboursement");
+					fiche.setPrincipale(principaleRem); 
+					fiche.setInteret(interetRemb); 
+					fiche.setPenalite(0);
+					fiche.setSoldeCourant(0);
+					fiche.setTotalPrincipal(montant);
+					fiche.setTotalInteret(0);
+					fiche.setTotalSolde(montant); 
+					fiche.setNum_credit(dm.getNumCredit());	
+
+					// Modification sur l'entité DemandeCredit
+					dm.setSolde_total(soldeTotal);
+					dm.setPrincipale_total(principalTotal);
+					dm.setInteret_total(interetTotal);
+					
+					try {
+						transaction.begin();
+						em.merge(cals);
+						em.merge(dm);
+						em.persist(saveRemb);
+						em.persist(fiche); 
+						transaction.commit();
+						em.refresh(saveRemb);
+						em.refresh(dm);
+						em.refresh(cals); 
+						em.refresh(fiche); 
+						//montant = montant - restPaiePrinc;
+						results = "Remboursement Enregistrer!!!";
+						System.out.println(results);
+					} catch (Exception e) {
+						e.printStackTrace();
+					} finally {
+						if (em == null) {
+							em.close();
+						}
+					}	
+					
 					
 				
 				//imputation comptable remboursemnt
@@ -2394,14 +2648,15 @@ public class CreditServiceImpl implements CreditService {
 	 * Configuration garantie crédit
 	 * **/
 	@Override
-	public boolean configGarantiCredit(ConfigGarantieCredit configGarCredit,String idProduit) {
+	public boolean configGarantiCredit(ConfigGarantieCredit configGarCredit,String idProduitEpargne,String idProduit) {
 	
 		ProduitCredit pdtCred = em.find(ProduitCredit.class, idProduit);
+		ProduitEpargne pdEp = em.find(ProduitEpargne.class, idProduitEpargne);
 		Query q = em.createQuery("select i from ConfigCredit i");
 		ConfigCredit conf = (ConfigCredit) q.getSingleResult();
 		
 		try {
-			
+			configGarCredit.setProduitEpargne(pdEp); 
 			pdtCred.setConfigCredit(conf);
 			pdtCred.setConfigGarantieCredit(configGarCredit);
 			transaction.begin();
@@ -2651,7 +2906,10 @@ public class CreditServiceImpl implements CreditService {
 				AfficheSoldeRestantDu aff = new AfficheSoldeRestantDu();
 				String sql = "select max(r.dateRemb) from Remboursement r join r.demandeCredit d "
 						+ " where d.numCredit='"+demandeCredit.getNumCredit()+"'";
-				String dernierRemb = em.createQuery(sql).getSingleResult().toString();
+				String dernierRemb = ""; 
+				Query q = em.createQuery(sql);
+				if(q.getSingleResult() != null)
+					dernierRemb = (String) q.getSingleResult();
 				
 				aff.setNumCred(demandeCredit.getNumCredit());
 				if(demandeCredit.getIndividuel() != null)
@@ -2666,10 +2924,7 @@ public class CreditServiceImpl implements CreditService {
 				aff.setPrincipalPayer(demandeCredit.getMontantDemande() - demandeCredit.getPrincipale_total());
 				aff.setInteretPayer(demandeCredit.getInteret() - demandeCredit.getInteret_total());
 				aff.setTotalRestant(demandeCredit.getSolde_total());
-				if(!dernierRemb.equals(""))
-					aff.setDernierRemboursement(dernierRemb);
-				else
-					aff.setDernierRemboursement("");
+				aff.setDernierRemboursement(dernierRemb);
 				
 				result.add(aff);
 			}		
@@ -2728,14 +2983,14 @@ public class CreditServiceImpl implements CreditService {
 						double montDecs =(double) em.createQuery("select d.montantDec from Decaissement d join d.demandeCredit a "
 								+ " where a.numCredit = '"+demandeCredit.getNumCredit()+"'").getSingleResult();						
 						//select total echeance
-						int totEcheance = (int) em.createQuery("select count(c) from Calapresdebl c join c.demandeCredit d "
+						long totEcheance = (long) em.createQuery("select count(c) from Calapresdebl c join c.demandeCredit d "
 								+ " where d.numCredit = '"+demandeCredit.getNumCredit()+"'").getSingleResult();
 						//select echeance achevé
-						int echeance = (int) em.createQuery("select count(r) from Remboursement r join r.demandeCredit d "
+						long echeance = (long) em.createQuery("select count(r) from Remboursement r join r.demandeCredit d "
 								+ " where d.numCredit = '"+demandeCredit.getNumCredit()+"'").getSingleResult();
 						aff.setMontantDecaisser(montDecs);
-						aff.setEcheanceAchever(echeance);
-						aff.setTotalEchenance(totEcheance); 
+						aff.setEcheanceAchever((int) echeance);
+						aff.setTotalEchenance((int) totEcheance); 
 						tEcheance += totEcheance;
 						eche += echeance;
 						clients.add(aff);

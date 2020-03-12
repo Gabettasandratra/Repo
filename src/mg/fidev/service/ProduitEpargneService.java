@@ -62,6 +62,16 @@ public interface ProduitEpargneService {
 	@WebResult(name = "validation")
 	public boolean desactiverProduit(@WebParam(name = "idProd") String idProd);
 	
+	//Activer produit épargne
+	@WebMethod
+	@WebResult(name = "validation")
+	public boolean activerProduit(@WebParam(name = "idProd") String idProd);
+	
+	//Supprimer produit épargne
+	@WebMethod
+	@WebResult(name = "validation")
+	public boolean supprimerProduitEpargne(@WebParam(name = "idProd") String idProd);
+	
 	/***
 	 * modification d'un produit épargne
 	 * ***/
@@ -71,6 +81,8 @@ public interface ProduitEpargneService {
 			@WebParam(name = "idProd")String idProd,
 			@WebParam(name = "nomProd")String nomProd, 
 			@WebParam(name = "isActive")boolean isActive);
+	
+	
 	
 	/**
 	 * configuration intérêt d'épargne
@@ -195,7 +207,7 @@ public interface ProduitEpargneService {
 	 * ***/
 	@WebMethod
 	@WebResult(name="resultat")
-	public String virement(
+	public boolean virement(
 			@XmlElement(required=true) @WebParam(name="comptRetirer")String cmpt1,
 			@XmlElement(required=true) @WebParam(name="comptDepot")String cmpt2,
 			@XmlElement(required=true) @WebParam(name="montant")double montant,

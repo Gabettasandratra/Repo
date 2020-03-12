@@ -35,24 +35,23 @@ public class ProduitEpargne implements Serializable {
 	private String nomProdEpargne;
 
 	//bi-directional many-to-one association to CompteEpargne
-	@OneToMany(mappedBy="produitEpargne")
+	@OneToMany(mappedBy="produitEpargne",cascade=CascadeType.REMOVE)
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 	
 	//Compte DAT
-	@OneToMany(mappedBy="produitEpargne")
+	@OneToMany(mappedBy="produitEpargne",cascade=CascadeType.REMOVE)
 	@XmlTransient
 	private List<CompteDAT> compteDat;
 
 	//bi-directional many-to-one association to ConfigGarantieCredit
-	@OneToMany(mappedBy="produitEpargne")
+	@OneToMany(mappedBy="produitEpargne",cascade=CascadeType.REMOVE)
 	@XmlTransient
 	private List<ConfigGarantieCredit> configGarantieCredits;
 
 	//bi-directional many-to-one association to ConfigGlEpargne
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configGLepId")
-	@XmlTransient
 	private ConfigGlEpargne configGlEpargne;
 
 	//bi-directional many-to-one association to ConfigInteretProdEp

@@ -124,5 +124,15 @@ public interface IndividuelService {
 			@WebParam(name = "codeClient")@XmlElement(required = false)String code
 			);
 	
+	@WebMethod
+	@WebResult(name="resultat")
+	public long verifDate(
+	@WebParam(name = "dateDeb")@XmlElement(required = false)String dateDeb, 
+	@WebParam(name = "dateFin")@XmlElement(required = false)String dateFin);
+	
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean changerSain(
+			@WebParam(name = "codeClient")@XmlElement(required = false)String code);
 	
 }

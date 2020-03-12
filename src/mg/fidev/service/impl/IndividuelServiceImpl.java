@@ -2,6 +2,8 @@ package mg.fidev.service.impl;
 
 /* Version 0.3 */
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
@@ -401,4 +403,50 @@ public class IndividuelServiceImpl implements IndividuelService {
 		}
 		return false;
 	}
+
+	/*
+	 * fonction qui permet de ferivier la date de naissance d'un client parraport au date délivrance CIN
+	 * @paramètre(dateDebut,dateFin)
+	 * */
+	
+	@Override
+	public long verifDate(String dateDeb, String dateFin) {
+		try {			
+			LocalDate date1 = LocalDate.parse(dateDeb);
+			LocalDate date2 = LocalDate.parse(dateFin);
+			System.out.println("date nais "+date1);
+			System.out.println("date CIN "+date2);
+	
+			long val = ChronoUnit.YEARS.between(date1,date2);			
+			System.out.println(val + "\n");			
+			return val;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}	
+	/*
+	 * méthode pour changer un client en sain
+	 * @param(String codeIndividuel)
+	 * */	
+	@Override
+	public boolean changerSain(String code) {
+		Individuel ind = em.find(Individuel.class, code);
+		try {
+			ind.setListeNoir(false);
+			ind.setListeRouge(false);
+			ind.setSain(true);
+			
+			transaction.begin();
+			em.flush();
+			transaction.commit();
+			em.refresh(ind);
+			return true;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
 }

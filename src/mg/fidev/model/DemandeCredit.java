@@ -95,13 +95,13 @@ public class DemandeCredit implements Serializable {
 	
 	//COMMISSION DE CREDIT
 	//bi-directional one-to-many association to CommissionCredit
-	@OneToMany(mappedBy="demandeCredit")
+	@OneToMany(mappedBy="demandeCredit",cascade=CascadeType.REMOVE)
 	@XmlTransient
 	private List<CommissionCredit> commissionCredits;
 
 	//DECAISSEMENT
 	//bi-directional one-to-many association to Decaissement
-	@OneToMany(mappedBy="demandeCredit")
+	@OneToMany(mappedBy="demandeCredit",cascade=CascadeType.REMOVE)
 	@XmlTransient
 	private List<Decaissement> decaissements;
 

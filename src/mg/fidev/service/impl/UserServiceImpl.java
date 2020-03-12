@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
 	///	Méthode pour l'enregistrement d'un nouvel utilisateur
 	@Override
 	public boolean insertUser(String nomUser, String loginUser, String mdpUser, String mdpConf,
-			String genreUser, String telUser,  int fonctionId) {//List<String> listCptCaisse,
+			String genreUser, String telUser,String photo,  int fonctionId) {//List<String> listCptCaisse,
 		//	Instance nouvel utilisateur à insérer
 		Utilisateur user = new Utilisateur();
 		/*List<CompteCaisse> cptCaisse = new ArrayList<CompteCaisse>();
@@ -90,6 +90,7 @@ public class UserServiceImpl implements UserService {
 			user.setMdpUtilisateur(passHash);
 			user.setGenreUser(genreUser);
 			user.setTelUser(telUser);
+			user.setPhoto(photo); 
 
 			Fonction fct = em.find(Fonction.class, fonctionId);
 			user.setFonction(fct);
