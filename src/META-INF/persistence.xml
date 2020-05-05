@@ -64,14 +64,20 @@
 		<class>mg.fidev.model.ConfigDeclasseCredit</class>
 		<class>mg.fidev.model.MembreGroupe</class>
 		<class>mg.fidev.model.ApprobationCredit</class>
+		<class>mg.fidev.model.CreditMembreGroupe</class>
+		<class>mg.fidev.model.CrediGroupeView</class>
+		<class>mg.fidev.model.FonctionMembreGroupe</class>
+		<class>mg.fidev.model.MembreView</class>
+		<class>mg.fidev.model.ConfigTransactionCompta</class>
+		<class>mg.fidev.model.OperationView</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/base_old"/>
 			<property name="javax.persistence.jdbc.user" value="root"/>
 			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
 			<property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
 			
-			<!-- <property name="eclipselink.ddlgeneration.output-mode" value="database" />
-			<property name="eclipselink.ddl-generation" value="create-or-extend-tables"/> -->
+			<!-- <property name="eclipselink.ddlgeneration.output-mode" value="database"/>
+			<property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>  -->
 
 			<!-- <property name="eclipselink.ddl-generation" 	value="create-tables"/> -->
 		

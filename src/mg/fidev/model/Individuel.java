@@ -84,6 +84,9 @@ public class Individuel implements Serializable {
 
 	private String titre;
 	
+	@Column(name="approuver")
+	private boolean approuver;
+	
 	@Column(name="is_liste_rouge")
 	private boolean isListeRouge;
 	
@@ -136,6 +139,16 @@ public class Individuel implements Serializable {
 	@OneToMany(mappedBy="codeInd")
 	@XmlTransient
 	private List<DroitInscription> droitInscription;
+	
+	//Montant credit par membre groupe
+	@OneToMany(mappedBy="individuel")
+	@XmlTransient
+	private List<CreditMembreGroupe> montantMembres;
+	
+	//Relation to membreGroupe
+	@OneToMany(mappedBy="individuel")
+	@XmlTransient
+	private List<MembreGroupe> membres;
 
 	public Individuel() {
 	}
@@ -478,7 +491,28 @@ public class Individuel implements Serializable {
 	public void setCompteDat(List<CompteDAT> compteDat) {
 		this.compteDat = compteDat;
 	}
-	
-	
-	
+
+	public List<CreditMembreGroupe> getMontantMembres() {
+		return montantMembres;
+	}
+
+	public void setMontantMembres(List<CreditMembreGroupe> montantMembres) {
+		this.montantMembres = montantMembres;
+	}
+
+	public List<MembreGroupe> getMembres() {
+		return membres;
+	}
+
+	public void setMembres(List<MembreGroupe> membres) {
+		this.membres = membres;
+	}
+
+	public boolean isApprouver() {
+		return approuver;
+	}
+
+	public void setApprouver(boolean approuver) {
+		this.approuver = approuver;
+	}
 }

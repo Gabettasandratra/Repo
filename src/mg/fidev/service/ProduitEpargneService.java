@@ -82,8 +82,6 @@ public interface ProduitEpargneService {
 			@WebParam(name = "nomProd")String nomProd, 
 			@WebParam(name = "isActive")boolean isActive);
 	
-	
-	
 	/**
 	 * configuration intérêt d'épargne
 	 * ***/
@@ -175,7 +173,6 @@ public interface ProduitEpargneService {
 		);
 	
 	//CHERCHER COMPTE PAR CODE CLIENT ET PRODUIT
-	
 	@WebMethod
 	@WebResult(name="resultat")
 	public CompteEpargne findCompte(

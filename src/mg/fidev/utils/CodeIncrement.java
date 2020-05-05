@@ -165,7 +165,7 @@ public class CodeIncrement {
 			q.setParameter("x", codeClient);
 		
 			if (q.getSingleResult() != null) {
-				int credit = (int)q.getSingleResult();
+				int credit = Integer.parseInt(q.getSingleResult().toString());
 				nb = credit + nb;
 			}
 			
@@ -175,6 +175,19 @@ public class CodeIncrement {
 		
 		return nb;
 	}
+	
+	//Chercher compte comptable dans la table account
+	 public static Account getAcount(EntityManager em,String numCompte){
+		 Query query = em.createQuery("select a from Account a where a.numCpt = :x");
+		 query.setParameter("x", numCompte);
+		 
+		 if(query.getSingleResult() != null){		 
+			 Account acount =(Account) query.getSingleResult();
+			 return acount;
+		 }
+		 
+		 return null;
+	 }     
 	
 	
 	/**********************************************************************************************************************/
@@ -715,18 +728,7 @@ public class CodeIncrement {
 		return listcal;
 	}
 	
-	
- public static Account getAcount(EntityManager em,String numCompte){
-	 Query query = em.createQuery("select a from Account a where a.numCpt = :x");
-	 query.setParameter("x", numCompte);
-	 
-	 if(query.getSingleResult() != null){		 
-		 Account acount =(Account) query.getSingleResult();
-		 return acount;
-	 }
-	 
-	 return null;
- }
+
 	
 	
 	/**

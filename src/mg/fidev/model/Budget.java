@@ -7,8 +7,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -41,10 +39,8 @@ public class Budget implements Serializable{
 	@Column(name="description", length=250)
 	private String description;
 	
-	//Relation plusieur à un avec l'entité account
-	@ManyToOne
-	@JoinColumn(name="id_compte")
-	private Account account;
+	@Column(name="realisation")
+	private double realisation;
 	
 	//relation un à plusieur avec l'entité grand livre	
 	@OneToMany(mappedBy="budget",cascade=CascadeType.ALL)
@@ -106,12 +102,12 @@ public class Budget implements Serializable{
 		this.description = description;
 	}
 
-	public Account getAccount() {
-		return account;
+	public double getRealisation() {
+		return realisation;
 	}
 
-	public void setAccount(Account account) {
-		this.account = account;
+	public void setRealisation(double realisation) {
+		this.realisation += realisation;
 	}
 
 	public List<Grandlivre> getGrandlivres() {

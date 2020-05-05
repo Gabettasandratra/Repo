@@ -137,6 +137,10 @@ public class DemandeCredit implements Serializable {
 	@XmlTransient
 	private List<ApprobationCredit> approbations;
 	
+	//Montant credit par membre groupe
+	@OneToMany(mappedBy="demandeCredit",cascade= CascadeType.ALL)
+	@XmlTransient
+	private List<CreditMembreGroupe> montantMembres;
 	
 	/**************************************************************************************************************************************/
 							/***************************RELATION MANY TO ONE***************************************/
@@ -548,5 +552,12 @@ public class DemandeCredit implements Serializable {
 	public void setDateApprobation(String dateApprobation) {
 		this.dateApprobation = dateApprobation;
 	}
-	
+
+	public List<CreditMembreGroupe> getMontantMembres() {
+		return montantMembres;
+	}
+
+	public void setMontantMembres(List<CreditMembreGroupe> montantMembres) {
+		this.montantMembres = montantMembres;
+	}	
 }

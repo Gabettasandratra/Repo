@@ -9,6 +9,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 
@@ -18,7 +21,8 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @Entity
 @Table(name="config_general_credit")
-
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ConfigGeneralCredit implements Serializable {
 	private static final long serialVersionUID = 1L;
 

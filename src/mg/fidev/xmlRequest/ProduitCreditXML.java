@@ -41,5 +41,31 @@ public class ProduitCreditXML implements Serializable {
 	public void setNomProdCredit(String nomProdCredit) {
 		this.nomProdCredit = nomProdCredit;
 	}
+	/*  try {
+	
+	LocalDate date1 = LocalDate.parse(dateDeb);
+	LocalDate date2 = LocalDate.parse(dateFin);
+	System.out.println("date début "+date1);
+	System.out.println("date fin "+date2);
+
+	Long val = ChronoUnit.MONTHS.between(date1, date2);			
+	
+	System.out.println("Diferrence de mois "+val + "\n");
+	
+	String mois = dateDeb.substring(0,6);    
+	
+	if(!dateDeb.equals("") && dateFin.equals("")){
+		String sql = "select sum(g.debit) from Grandlivre g join g.account a where "
+				+ " a.numCpt ";
+		Query q = em.createQuery("");
+	}
+	if(!dateDeb.equals("") && !dateFin.equals("")){
+		
+	}
+	
+} catch (Exception e) {
+	e.printStackTrace();
+}*/
+
 
 }

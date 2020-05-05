@@ -16,11 +16,13 @@ import mg.fidev.model.Budget;
 import mg.fidev.model.Caisse;
 import mg.fidev.model.Compte;
 import mg.fidev.model.ConfigGlCredit;
+import mg.fidev.model.ConfigTransactionCompta;
 import mg.fidev.model.DemandeCredit;
 import mg.fidev.model.Grandlivre;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
 import mg.fidev.model.ListeRouge;
+import mg.fidev.model.OperationView;
 import mg.fidev.model.Utilisateur;
 import mg.fidev.service.ComptabiliteService;
 import mg.fidev.utils.AfficheBalance;
@@ -39,7 +41,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 	private static EntityTransaction transaction = em.getTransaction();
 	
 	
-	//AFFICHE GRAND LIVRE 
+	//FONCTION QUI AFFICHE LE GRAND LIVRE 
 	@Override
 	public List<Grandlivre> afficheGrandLivre(String compte,String nomUtilisateur,String dateDeb, String dateFin) {
 		List<Grandlivre> result = new ArrayList<Grandlivre>();
@@ -111,7 +113,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 
 	
 	/***
-	 * LIST COMPTES
+	 * Liste des comptes comptable
 	 * ***/
 	@Override
 	public List<Account> listComptes() {
@@ -145,7 +147,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		}
 	}
 	
-	//Ajout nouveau compte comptable
+	//Ajout nouveau compte comptable (Test)
 	@Override
 	public Compte ajoutCompte(Compte compte, String compteParent) {
 		/*
@@ -212,7 +214,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		}
 	}
 	
-	//Recupérer les comptes comptable
+	//Recupérer les comptes comptable (Test)
 	@Override
 	public List<Compte> getComptes() {
 		try {
@@ -228,6 +230,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		return null;
 	}
 	
+	//Recupérer les comptes comptable
 	@Override
 	public List<Account> getAccounts() {
 		
@@ -246,7 +249,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 	}
 	
 	/***
-	 * METHODE POUR SUPPRIMER UN COMPTE COMPTA 
+	 * Fonction qui supprime un compte compta 
 	 * ***/
 	@Override
 	public boolean supprimerCompte(int compte){
@@ -268,19 +271,18 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		return false;
 	}
 	
-	//Transaction caisse comptable
+	//Transaction caisse et banque comptable
 	@Override
 	public boolean saveTransaction(String date,String piece, String description,
 			String compte,String compte2,double debit, int user) {
 		
-		//on selectionne l'utilisateur de saisie
+		//instaciation de l'utilisateur de saisie
 		Utilisateur ut = em.find(Utilisateur.class, user);
-		//on selectionne le compte entré en parametre
-		String sql = "select c from Compte c where c.compte = '"+compte+"'";
-		Compte cmpt =(Compte) em.createQuery(sql).getSingleResult();
+		//instance de compte que l'utilisateur saisit 
+		Account cmpt =CodeIncrement.getAcount(em, compte);
 		
-		String sql2 = "select c from Compte c where c.compte = '"+compte2+"'";
-		Compte cmpt2 =(Compte) em.createQuery(sql2).getSingleResult();
+		//Instance de compte d'equilibre à la configuration
+		Account cmpt2 = CodeIncrement.getAcount(em, compte2);
 		
 		//on instancie le grand livre	
 		Grandlivre debiter = new Grandlivre();
@@ -290,30 +292,30 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		debiter.setDate(date);
 		debiter.setDescr(description);
 		debiter.setPiece(piece);
-		debiter.setCompte(compte);
+		debiter.setAccount(cmpt);
+		
 		debiter.setDebit(debit);
 		debiter.setUserId(ut.getNomUtilisateur());
 		debiter.setSolde(cmpt.getSoldeProgressif()+debit);
 		cmpt.setSoldeProgressif(cmpt.getSoldeProgressif()+debit);
 		
-		debiter.setAccount(CodeIncrement.getAcount(em, compte));
 		
 		crediter.setTcode(CodeIncrement.genTcode(em));
 		crediter.setDate(date);
 		crediter.setDescr(description);
 		crediter.setPiece(piece);
-		crediter.setCompte(compte2);
+		crediter.setAccount(cmpt2);
+		
 		crediter.setCredit(debit);
 		crediter.setUserId(ut.getNomUtilisateur());
 		crediter.setSolde(cmpt2.getSoldeProgressif()-debit);
 		cmpt2.setSoldeProgressif(cmpt2.getSoldeProgressif()-debit);
-		crediter.setAccount(CodeIncrement.getAcount(em, compte2));
 		
 		try {		
 			transaction.begin();
 			em.persist(crediter);
 			em.persist(debiter);
-				em.flush();
+			em.flush();
 			transaction.commit();
 			System.out.println("Enregistrement reussit");
 			return true;
@@ -326,7 +328,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 	
 	}
 	
-	//Get Compte actif
+	//Get Compte actif (Test)
 	@Override
 	public List<Compte> getComptesActif(String compte) {
 		try {
@@ -395,48 +397,6 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		}
 		
 		return null;
-	/*	List<Compte> Listcompte = new ArrayList<Compte>();
-		//List<Grandlivre> result = new ArrayList<Grandlivre>();
-		List<String> retour = new ArrayList<String>();
-		
-		TypedQuery<Compte> req = em.createQuery("SELECT c FROM Compte c WHERE c.active = :a",Compte.class);
-		req.setParameter("a", true);
-		Listcompte=req.getResultList();
-		
-		for (Compte compte : Listcompte) {
-			String numCompte = compte.getCompte();
-			Query query = em.createQuery("SELECT SUM(g.debit) FROM Grandlivre g WHERE "
-					+ " g.compte = :cmpt AND g.date BETWEEN :dateDeb AND :dateFin GROUP BY g.compte");
-			query.setParameter("cmpt", numCompte);
-			query.setParameter("dateDeb", dateDeb);
-			query.setParameter("dateFin", dateFin);	
-			
-			Query query2 = em.createQuery("SELECT SUM(g.credit) FROM Grandlivre g WHERE "
-					+ " g.compte = :cmpt AND g.date BETWEEN :dateDeb AND :dateFin GROUP BY g.compte");
-			query2.setParameter("cmpt", numCompte);
-			query2.setParameter("dateDeb", dateDeb);
-			query2.setParameter("dateFin", dateFin);	
-			
-			double totalDebit= 0.0;
-			double totalCredit=0.0;
-			
-			if(!query.getResultList().isEmpty()){
-				totalDebit = (double) query.getSingleResult();	
-			}
-			if(!query2.getResultList().isEmpty()){
-				totalCredit = (double) query2.getSingleResult();	
-			}
-			System.out.println("Compte : "+compte.getCompte()+"Solde initial :"+compte.getSoldeInit() +" total debit : "+totalDebit
-					+" total credit : "+totalCredit +" Solde final : "+compte.getSoldeProgressif());
-			retour.add(String.valueOf(compte.getCompte()));
-			retour.add(compte.getLibelle());
-			retour.add(String.valueOf(totalDebit));
-			retour.add(String.valueOf(totalCredit));
-			retour.add(String.valueOf(compte.getSoldeProgressif()));
-			
-		}
-		
-		return retour;*/
 	}
 
 	static List<Account> getCompteDistinct(){
@@ -568,16 +528,11 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 
 	//Enregistrement budget
 	@Override
-	public boolean saveBudget(Budget budget, int idCompte) {
+	public boolean saveBudget(Budget budget) {
 		try {
-
-			Account account = em.find(Account.class, idCompte);
-			account.setSoldeInit(budget.getPrevision());
-			budget.setAccount(account);
 			budget.setCode(CodeIncrement.getCodeBudget(em));
-
+			budget.setRealisation(0); 
 			transaction.begin();
-			em.flush();
 			em.persist(budget);
 			transaction.commit();
 			System.out.println("Enregistrement budget reussit");
@@ -626,6 +581,28 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	//Chercher budgets par code budget
+	@Override
+	public List<Budget> chercherBudget(String code) {
+		String sql = "select b from Budget b where b.code like '" + code + "%'";
+		TypedQuery<Budget> query = em.createQuery(sql,Budget.class);
+		if (!query.getResultList().isEmpty()) {
+			return query.getResultList();
+		}
+		return null;
+	}
+
+	//Chercher code analytique
+	@Override
+	public List<Analytique> chercherAnalytique(String code) {
+		String sql = "select a from Analytique a where a.id like '" + code + "%'";
+		TypedQuery<Analytique> query = em.createQuery(sql,Analytique.class);
+		if (!query.getResultList().isEmpty()) {
+			return query.getResultList();
 		}
 		return null;
 	}
@@ -680,12 +657,13 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 
 		return null;
 	}
+	
+	
 
 	//Enregistrement opération divers
 	@Override
 	public boolean saveOperationDivers(String date, String piece,
-			String description, String compte, String compte2, double debit,
-			String analytique, String budget, int user) {
+			String description,String analytique, String budget, int user) {
 
 		// on selectionne l'utilisateur de saisie
 		Utilisateur ut = em.find(Utilisateur.class, user);
@@ -694,13 +672,13 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		Analytique anlt = saveAnalytique(analytique);
 
 		// on selectionne le compte entré en parametre
-		String sql = "select c from Account c where c.numCpt = '" + compte
+		/*String sql = "select c from Account c where c.numCpt = '" + compte
 				+ "'";
 		Account cmpt = (Account) em.createQuery(sql).getSingleResult();
 
 		String sql2 = "select a from Account a where a.numCpt = '" + compte2
 				+ "'";
-		Account cmpt2 = (Account) em.createQuery(sql2).getSingleResult();
+		Account cmpt2 = (Account) em.createQuery(sql2).getSingleResult();*/
 
 		// on instancie le grand livre
 		Grandlivre debiter = new Grandlivre();
@@ -710,15 +688,15 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		debiter.setDate(date);
 		debiter.setDescr(description);
 		debiter.setPiece(piece);
-		debiter.setCompte(compte);
-		debiter.setDebit(debit);
+		//debiter.setCompte(compte);
+		//debiter.setDebit(debit);
 		debiter.setUserId(ut.getNomUtilisateur());
 		debiter.setUtilisateur(ut);
-		debiter.setAccount(cmpt);
+		//debiter.setAccount(cmpt);
 		debiter.setAnalytique(anlt);
 
-		debiter.setSolde(cmpt.getSoldeProgressif() + debit);
-		cmpt.setSoldeProgressif(cmpt.getSoldeProgressif() + debit);
+		//debiter.setSolde(cmpt.getSoldeProgressif() + debit);
+		//cmpt.setSoldeProgressif(cmpt.getSoldeProgressif() + debit);
 
 		// debiter.setAccount(CodeIncrement.getAcount(em, compte));
 
@@ -726,16 +704,16 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		crediter.setDate(date);
 		crediter.setDescr(description);
 		crediter.setPiece(piece);
-		crediter.setCompte(compte2);
-		crediter.setCredit(debit);
+		//crediter.setCompte(compte2);
+		//crediter.setCredit(debit);
 		crediter.setUserId(ut.getNomUtilisateur());
 		crediter.setUtilisateur(ut);
-		crediter.setAccount(cmpt2);
+		//crediter.setAccount(cmpt2);
 		crediter.setAnalytique(anlt);
 		crediter.setBudget(bdg);
 
-		crediter.setSolde(cmpt2.getSoldeProgressif() - debit);
-		cmpt2.setSoldeProgressif(cmpt2.getSoldeProgressif() - debit);
+		//crediter.setSolde(cmpt2.getSoldeProgressif() - debit);
+		//cmpt2.setSoldeProgressif(cmpt2.getSoldeProgressif() - debit);
 		// crediter.setAccount(CodeIncrement.getAcount(em, compte2));
 
 		try {
@@ -1380,31 +1358,95 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		}		
 		return result;
 	}
-	/*  try {
-			
-			LocalDate date1 = LocalDate.parse(dateDeb);
-			LocalDate date2 = LocalDate.parse(dateFin);
-			System.out.println("date début "+date1);
-			System.out.println("date fin "+date2);
 	
-			Long val = ChronoUnit.MONTHS.between(date1, date2);			
-			
-			System.out.println("Diferrence de mois "+val + "\n");
-			
-			String mois = dateDeb.substring(0,6);    
-			
-			if(!dateDeb.equals("") && dateFin.equals("")){
-				String sql = "select sum(g.debit) from Grandlivre g join g.account a where "
-						+ " a.numCpt ";
-				Query q = em.createQuery("");
-			}
-			if(!dateDeb.equals("") && !dateFin.equals("")){
-				
-			}
-			
+	
+	//Enregistrement configuration transaction
+	@Override
+	public boolean saveConfigTransaction(int caise, int banque) {
+		Account cCaisse = em.find(Account.class, caise);
+		Account cBanque = em.find(Account.class, banque);
+		ConfigTransactionCompta conf = new ConfigTransactionCompta();
+		conf.setCaisse(cCaisse);
+		conf.setBanque(cBanque); 
+		try {
+			transaction.begin();
+			em.persist(conf); 
+			transaction.commit();
+			em.refresh(conf); 
+			System.out.println("Configuration transaction enregistré");
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-		}*/
+			return false;
+		}
+	}
 
+	//Enregistrement configuration comptable
+	@Override
+	public ConfigTransactionCompta getConfigCompta() {		
+		return em.find(ConfigTransactionCompta.class, 1);
+	}
 
+	//Ajout opération view
+	@Override
+	public boolean addOperationView(OperationView operation) {
+		try {
+			transaction.begin();
+			em.persist(operation); 
+			transaction.commit();
+			em.refresh(operation); 
+			System.out.println("Nouveau ligne d'opération view");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	//List des opérations view
+	@Override
+	public List<OperationView> listOperationView() {
+		String sql = "select o from OperationView o";
+		TypedQuery<OperationView> query = em.createQuery(sql,OperationView.class);
+		if(!query.getResultList().isEmpty())
+			return query.getResultList();
+		return null;
+	}
+
+	//vider opération view
+	@Override
+	public boolean viderOperationView() {
+		Query query = em.createNativeQuery("TRUNCATE TABLE operation_view");
+		try {
+			transaction.begin();
+			query.executeUpdate();
+			transaction.commit();
+			System.out.println("Table opération view vide");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}		
+	}
+
+	//Modifier opération view
+	@Override
+	public OperationView updateOperationView(int id, OperationView operation) {
+		OperationView op = em.find(OperationView.class, id);
+		try {
+			op.setNumCmpt(operation.getNumCmpt());
+			op.setLabel(operation.getLabel());
+			op.setCredit(operation.getCredit());
+			op.setDebit(operation.getDebit());
+			transaction.begin();
+			em.flush();
+			transaction.commit();
+			System.out.println("opération view modifié");
+			return op;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 }

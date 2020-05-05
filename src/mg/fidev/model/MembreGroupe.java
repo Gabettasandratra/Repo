@@ -3,6 +3,8 @@ package mg.fidev.model;
 import java.io.Serializable;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -19,13 +21,12 @@ public class MembreGroupe implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	private String idMembre;
-	
-	private double capitaleCredit;
-	
-	private int tauxInteretCredit;
-	
-	private String fonction;
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private int idMembre;
+		
+	@ManyToOne
+	@JoinColumn(name="id_fonction")
+	private FonctionMembreGroupe fonctionMembre;
 	
 	@ManyToOne
 	@JoinColumn(name="code_individuel")
@@ -41,45 +42,26 @@ public class MembreGroupe implements Serializable {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-
-
-	public String getIdMembre() {
+	
+	public int getIdMembre() {
 		return idMembre;
 	}
 
 
-	public void setIdMembre(String idMembre) {
+
+	public void setIdMembre(int idMembre) {
 		this.idMembre = idMembre;
 	}
 
 
-	public double getCapitaleCredit() {
-		return capitaleCredit;
+
+	public FonctionMembreGroupe getFonctionMembre() {
+		return fonctionMembre;
 	}
 
 
-	public void setCapitaleCredit(double capitaleCredit) {
-		this.capitaleCredit = capitaleCredit;
-	}
-
-
-	public int getTauxInteretCredit() {
-		return tauxInteretCredit;
-	}
-
-
-	public void setTauxInteretCredit(int tauxInteretCredit) {
-		this.tauxInteretCredit = tauxInteretCredit;
-	}
-
-
-	public String getFonction() {
-		return fonction;
-	}
-
-
-	public void setFonction(String fonction) {
-		this.fonction = fonction;
+	public void setFonctionMembre(FonctionMembreGroupe fonctionMembre) {
+		this.fonctionMembre = fonctionMembre;
 	}
 
 

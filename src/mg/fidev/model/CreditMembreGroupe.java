@@ -2,7 +2,6 @@ package mg.fidev.model;
 
 import java.io.Serializable;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,33 +14,42 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
-@Table(name="liste_rouge")
+@Table(name="montant_credit_membre")
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ListeRouge implements Serializable{
-
-	private static final long serialVersionUID = 1L;
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
-	private String date;
-	private String raison;
-	private boolean rouge;
+public class CreditMembreGroupe implements Serializable {
 	
-	@ManyToOne(cascade = CascadeType.ALL)
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private int id;
+	//montant principal par Membre
+	private double principale;
+	//montant intérêt par membres
+	private double interet;
+	//taux d'intérêt par membre
+	private int tauxInt;
+	
+	//numéro crédit
+	@ManyToOne
+	@JoinColumn(name="numCredit")
+	private DemandeCredit demandeCredit;
+	
+	//code du membre
+	@ManyToOne
 	@JoinColumn(name="codeInd")
 	private Individuel individuel;
 	
-	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name="codeGroupe")
+	//code groupe
+	@ManyToOne
+	@JoinColumn(name="codeGrp")
 	private Groupe groupe;
 
-	public ListeRouge() {
+	public CreditMembreGroupe() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	
-	
 
 	public int getId() {
 		return id;
@@ -51,20 +59,36 @@ public class ListeRouge implements Serializable{
 		this.id = id;
 	}
 
-	public String getDate() {
-		return date;
+	public double getPrincipale() {
+		return principale;
 	}
 
-	public void setDate(String date) {
-		this.date = date;
+	public void setPrincipale(double principale) {
+		this.principale = principale;
 	}
 
-	public String getRaison() {
-		return raison;
+	public double getInteret() {
+		return interet;
 	}
 
-	public void setRaison(String raison) {
-		this.raison = raison;
+	public void setInteret(double interet) {
+		this.interet = interet;
+	}
+
+	public int getTauxInt() {
+		return tauxInt;
+	}
+
+	public void setTauxInt(int tauxInt) {
+		this.tauxInt = tauxInt;
+	}
+
+	public DemandeCredit getDemandeCredit() {
+		return demandeCredit;
+	}
+
+	public void setDemandeCredit(DemandeCredit demandeCredit) {
+		this.demandeCredit = demandeCredit;
 	}
 
 	public Individuel getIndividuel() {
@@ -82,19 +106,5 @@ public class ListeRouge implements Serializable{
 	public void setGroupe(Groupe groupe) {
 		this.groupe = groupe;
 	}
-
-
-
-	public boolean isRouge() {
-		return rouge;
-	}
-
-
-
-	public void setRouge(boolean rouge) {
-		this.rouge = rouge;
-	} 
 	
-	
-
 }

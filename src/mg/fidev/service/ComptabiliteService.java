@@ -14,7 +14,9 @@ import mg.fidev.model.Account;
 import mg.fidev.model.Analytique;
 import mg.fidev.model.Budget;
 import mg.fidev.model.Compte;
+import mg.fidev.model.ConfigTransactionCompta;
 import mg.fidev.model.Grandlivre;
+import mg.fidev.model.OperationView;
 import mg.fidev.utils.AfficheBalance;
 import mg.fidev.utils.AfficheBilan;
 import mg.fidev.utils.AfficheListeCreditDeclasser;
@@ -26,29 +28,30 @@ import mg.fidev.utils.MouvementCompta;
 @SOAPBinding(parameterStyle = ParameterStyle.WRAPPED)
 public interface ComptabiliteService {
 	
-	/***
-	 * METHODE POUR AJOUTER UN NOUVEAU COMPTE COMPTA
-	 * ***/ 
 	
+	//test
 	@WebMethod
 	@WebResult(name="resultat")
 	public Compte ajoutCompte(
 			@WebParam(name = "comptes") @XmlElement(required=false,nillable=true)Compte compte,
 			@WebParam(name = "parentId") @XmlElement(required=false,nillable=true)String compteParent);
-	
+	/***
+	 * METHODE POUR AJOUTER UN NOUVEAU COMPTE COMPTA
+	 * ***/ 
 	@WebMethod
 	@WebResult(name="resultat")
 	public Account addAccount(
 			@WebParam(name = "comptes") @XmlElement(required=false,nillable=true)Account compte,
 			@WebParam(name = "parentId") @XmlElement(required=false,nillable=true)int compteParent);
 	
-	/***
-	 * LISTES DES COMPTES COMPTA
-	 * ***/
+	//test
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Compte> getComptes();
 	
+	/***
+	 * LISTES DES COMPTES COMPTA
+	 * ***/
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Account> getAccounts();
@@ -62,15 +65,14 @@ public interface ComptabiliteService {
 			@XmlElement(required=false) @WebParam(name="compte")String compte);
 	
 	
-	
+	//Supprimer compte
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean supprimerCompte(int compte);
 
 	/***
 	 * METHODE POUR AFFICHER LE GRAND LIVRE PAR UTILISATEUR EN SESSION
-	 * ***/
-	
+	 * ***/	
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Grandlivre> afficheGrandLivre(
@@ -84,10 +86,7 @@ public interface ComptabiliteService {
 	 * ***/
 	@WebMethod
 	@WebResult(name="resultat")
-	public List<Grandlivre> findGranLivre(
-			);
-	
-	
+	public List<Grandlivre> findGranLivre();
 	/***
 	 * LISTES DES COMPTES
 	 * ***/
@@ -96,14 +95,14 @@ public interface ComptabiliteService {
 	@WebResult(name="list")
 	public List<Account> listComptes();
 	
+	//CHERCHER COMPTE COMPTA 
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Account> chercheAccount(@XmlElement(required=false) @WebParam(name="compte")String compte);
 	
 	/***
 	 * AJOUT COMPTES CAISSES
-	 * ***/
-	
+	 * ***/	
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean addCompteCaisse(
@@ -155,19 +154,30 @@ public interface ComptabiliteService {
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean saveBudget(
-			@XmlElement(required=false) @WebParam(name="budget")Budget budget, 
-			@XmlElement(required=true) @WebParam(name="idCompte")int idCompte);
+			@XmlElement(required=false) @WebParam(name="budget")Budget budget);
 	
 	//Affiche list budget
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Budget> listBudget();
 	
-	//Chercher par code budget
+	//Chercher un budget par code budget
 	@WebMethod
 	@WebResult(name="resultat")
 	public Budget findBudget(
 			@XmlElement(required=false) @WebParam(name="code")String code);	
+	
+	//Chercher budgets par code budget
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Budget> chercherBudget(
+	@XmlElement(required=false) @WebParam(name="code")String code);
+	
+	//Chercher code analytique
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Analytique> chercherAnalytique(
+	@XmlElement(required=false) @WebParam(name="code")String code);
 	
 	//Affiche les codes analytiques
 	@WebMethod
@@ -181,9 +191,6 @@ public interface ComptabiliteService {
 	@XmlElement(required=true) @WebParam(name="date")String date,
 	@XmlElement(required=true) @WebParam(name="piece")String piece,
 	@XmlElement(required=true) @WebParam(name="description")String description,
-	@XmlElement(required=true) @WebParam(name="compte1")String compte,
-	@XmlElement(required=true) @WebParam(name="compte2")String compte2,
-	@XmlElement(required=true) @WebParam(name="montant")double debit,
 	@XmlElement(required=true) @WebParam(name="analytique")String analytique,
 	@XmlElement(required=true) @WebParam(name="budget")String budget,
 	@XmlElement(required=true) @WebParam(name="utilisateur")int user
@@ -265,4 +272,39 @@ public interface ComptabiliteService {
 	@XmlElement(required=false) @WebParam(name="dateDeb")String dateDeb,
 	@XmlElement(required=false) @WebParam(name="dateFin")String dateFin);
 	
+	
+	//Enregistrement configuration transaction
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean saveConfigTransaction(
+	@XmlElement(required=false) @WebParam(name="compteCaisse")int caise,
+	@XmlElement(required=false) @WebParam(name="compteBanque")int banque);
+	
+	//recupération de la configuration transaction comptable
+	@WebMethod
+	@WebResult(name="resultat")
+	public ConfigTransactionCompta getConfigCompta();
+	
+	//Ajout opération view
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean addOperationView(
+	@XmlElement(required=false) @WebParam(name="operation")OperationView operation);
+	
+	//List des opérations view
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<OperationView> listOperationView();
+	
+	//vider opération view
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean viderOperationView();
+	
+	//Modifier opération view
+	@WebMethod
+	@WebResult(name="resultat")
+	public OperationView updateOperationView(
+	@XmlElement(required=false) @WebParam(name="id")int id,
+	@XmlElement(required=false) @WebParam(name="operation")OperationView operation);
 }

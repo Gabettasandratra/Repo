@@ -30,15 +30,19 @@ public class ConfigGarantieCredit implements Serializable {
 	
 	private boolean garantieBaseMontantCredit;
 
-	private boolean garantieGrpOblig;
-
 	private boolean garantieIndOblig;
 
 	private boolean garantIndOblig;
 
-	private double percentMontantGrp;
+	private int percentMontantGrp;
 
-	private double percentMontantInd;
+	private int percentMontantInd;
+	
+	private int pourcentageGarant;
+	
+	private int pourcentageGarantieInd;
+	
+	private int pourcentageGarantieGrp;
 
 	//bi-directional many-to-one association to ProduitEpargne
 	@ManyToOne
@@ -68,14 +72,6 @@ public class ConfigGarantieCredit implements Serializable {
 	public void setGarantieBaseMontantCredit(boolean garantieBaseMontantCredit) {
 		this.garantieBaseMontantCredit = garantieBaseMontantCredit;
 	}
-	
-	public boolean getGarantieGrpOblig() {
-		return this.garantieGrpOblig;
-	}
-
-	public void setGarantieGrpOblig(boolean garantieGrpOblig) {
-		this.garantieGrpOblig = garantieGrpOblig;
-	}
 	public boolean getGarantieIndOblig() {
 		return this.garantieIndOblig;
 	}
@@ -100,20 +96,44 @@ public class ConfigGarantieCredit implements Serializable {
 		this.lierEpargne = lierEpargne;
 	}
 
-	public double getPercentMontantGrp() {
+	public int getPercentMontantGrp() {
 		return percentMontantGrp;
 	}
 
-	public void setPercentMontantGrp(double percentMontantGrp) {
+	public void setPercentMontantGrp(int percentMontantGrp) {
 		this.percentMontantGrp = percentMontantGrp;
 	}
 
-	public double getPercentMontantInd() {
+	public int getPercentMontantInd() {
 		return percentMontantInd;
 	}
 
-	public void setPercentMontantInd(double percentMontantInd) {
+	public void setPercentMontantInd(int percentMontantInd) {
 		this.percentMontantInd = percentMontantInd;
+	}
+
+	public int getPourcentageGarant() {
+		return pourcentageGarant;
+	}
+
+	public void setPourcentageGarant(int pourcentageGarant) {
+		this.pourcentageGarant = pourcentageGarant;
+	}
+
+	public int getPourcentageGarantieInd() {
+		return pourcentageGarantieInd;
+	}
+
+	public void setPourcentageGarantieInd(int pourcentageGarantieInd) {
+		this.pourcentageGarantieInd = pourcentageGarantieInd;
+	}
+
+	public int getPourcentageGarantieGrp() {
+		return pourcentageGarantieGrp;
+	}
+
+	public void setPourcentageGarantieGrp(int pourcentageGarantieGrp) {
+		this.pourcentageGarantieGrp = pourcentageGarantieGrp;
 	}
 
 	public ProduitEpargne getProduitEpargne() {

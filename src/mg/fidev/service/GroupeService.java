@@ -11,8 +11,11 @@ import javax.jws.soap.SOAPBinding.ParameterStyle;
 import javax.xml.bind.annotation.XmlElement;
 
 import mg.fidev.model.Adresse;
+import mg.fidev.model.FonctionMembreGroupe;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
+import mg.fidev.model.MembreGroupe;
+import mg.fidev.model.MembreView;
 
 @WebService(name = "groupeService", targetNamespace = "http://individuel.fidev.com/", serviceName = "groupeService", portName = "groupeServicePort")
 @SOAPBinding(parameterStyle = ParameterStyle.WRAPPED)
@@ -29,7 +32,7 @@ public interface GroupeService {
 	/***
 	 * LISTES DES GROUPES
 	 * ***/
-	@WebMethod
+	@WebMethod  
 	@WebResult(name = "resultat")
 	public List<Groupe> getAllGroupe();
 	
@@ -45,7 +48,7 @@ public interface GroupeService {
 	 * ***/
 	@WebMethod
 	@WebResult(name = "resultat")
-	public String saveGroupe(@WebParam(name = "groupe")@XmlElement(required = true) Groupe goupe,
+	public String saveGroupe(@WebParam(name = "groupe")@XmlElement(required = false) Groupe goupe,
 			@WebParam(name = "adresse")@XmlElement(required = false) Adresse adresse,
 			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence);
 	
@@ -79,7 +82,8 @@ public interface GroupeService {
 	 * ***/
 	@WebMethod
 	@WebResult(name="validation")
-	public boolean transferMembre(@WebParam(name = "codeGroupe1") @XmlElement(required=true,nillable=false) String codeGrp1,
+	public boolean transferMembre(
+			@WebParam(name = "codeGroupe1") @XmlElement(required=true,nillable=false) String codeGrp1,
 			@WebParam(name = "codeGroupe2") @XmlElement(required=true,nillable=false) String codeGrp2,
 			@WebParam(name = "codeInd") @XmlElement(required=true,nillable=false) String codeInd);
 	
@@ -90,5 +94,42 @@ public interface GroupeService {
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Groupe> findByCode(@WebParam(name = "code")@XmlElement(required = true)String code);
+	
+	//Ajouter individuel au membreView
+	@WebMethod
+	@WebResult(name="validation")
+	public String addMembre(
+	@WebParam(name = "membre")@XmlElement(required = false)MembreView membre); 
+	
+	//Liste membreView
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<MembreView> getallMembreView();
+	
+	//Vider membreView
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean deleteMembreView();
+	
+	//Recupérer fonction membre groupe
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<FonctionMembreGroupe> getFonctionMembre();
+	
+	//Liste membre groupe
+	@WebMethod
+	@WebResult(name="resultat")
+	List<MembreGroupe> getMembreGroupe(
+	@WebParam(name = "code")@XmlElement(required = true)String code);
+	
+	//Transeferer membre groupe
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean tansfertMembreGroupe(
+	@WebParam(name = "id")@XmlElement(required = true)int id,
+	@WebParam(name = "codeGroupe")@XmlElement(required = false)String codeGrp,
+	@WebParam(name = "codeInd")@XmlElement(required = false)String codeInd,
+	@WebParam(name = "fonction")@XmlElement(required = false)int fonction);
+	
 
 }

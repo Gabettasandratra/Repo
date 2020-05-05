@@ -31,7 +31,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 	private static final String PERSISTENCE_UNIT_NAME = "FIDEV-Repository";
 	private static EntityManager em = Persistence.createEntityManagerFactory(
 			PERSISTENCE_UNIT_NAME).createEntityManager();
-	private static EntityTransaction transaction = em.getTransaction();
+	private static EntityTransaction transaction = em.getTransaction(); 
 
 	/***
 	 * LISTE DES CLIENTS INDIVIDUELS 
@@ -176,16 +176,20 @@ public class IndividuelServiceImpl implements IndividuelService {
 	@Override
 	public String addListeRouge(ListeRouge listerouge, String codeInd,
 			String codeGroupe) {
-
-		Individuel ind = em.find(Individuel.class, codeInd);
-		Groupe grp = em.find(Groupe.class, codeGroupe);
+		Groupe grp=null;
+		Individuel ind=null;
 		String result = "";
-		try {
-			
-			if(ind!=null){
+		try {			
+			if(!codeInd.equals("")){
+				ind = em.find(Individuel.class, codeInd);
 				listerouge.setIndividuel(ind);
-				ind.setListeRouge(true);
-			}else if(grp != null){
+				if(listerouge.isRouge() == true){
+					ind.setListeRouge(true);					
+				}else{
+					ind.setListeNoir(true);
+				}
+			}else if(!codeGroupe.equals("")){
+				grp = em.find(Groupe.class, codeGroupe);
 				listerouge.setGroupe(grp);
 			}
 			transaction.begin();
@@ -195,6 +199,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 			em.refresh(listerouge);
 			em.refresh(ind);
 			result = "Enregistrement reussit!!!";
+			System.out.println("Enregistrement reussit!!!");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -435,8 +440,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 		try {
 			ind.setListeNoir(false);
 			ind.setListeRouge(false);
-			ind.setSain(true);
-			
+			ind.setSain(true);			
 			transaction.begin();
 			em.flush();
 			transaction.commit();
@@ -447,6 +451,43 @@ public class IndividuelServiceImpl implements IndividuelService {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	@Override
+	public boolean approbationClient(String code) {
+		Individuel ind = em.find(Individuel.class, code);
+		ind.setApprouver(true);
+		try {
+			transaction.begin();
+			em.flush();
+			transaction.commit();
+			em.refresh(ind); 
+			System.out.println("Client approuvé");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public List<Individuel> getClientApprouver() {
+		TypedQuery<Individuel> q1 = em
+		.createQuery("select i from Individuel i where i.approuver = :individuel",
+						Individuel.class);
+		q1.setParameter("individuel", true);
+			
+		return q1.getResultList();
+	}
+
+	@Override
+	public List<Individuel> getClientNonApprouver() {
+		TypedQuery<Individuel> q1 = em
+				.createQuery("select i from Individuel i where i.approuver = :individuel",
+								Individuel.class);
+				q1.setParameter("individuel", false);
+					
+				return q1.getResultList();
 	}
 	
 }

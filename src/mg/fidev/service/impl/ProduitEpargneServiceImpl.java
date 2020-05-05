@@ -444,7 +444,10 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			q.setParameter("idP", idProduit);
 			q.setParameter("codeG", codeGrp);
 			
-			result = (CompteEpargne) q.getSingleResult();
+			if(q.getSingleResult() == null)
+				return null;
+			else 
+				result = (CompteEpargne) q.getSingleResult();
 			
 		}else if(codeGrp.equals("")){
 			
@@ -453,7 +456,11 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			q.setParameter("idP", idProduit);
 			q.setParameter("codeI", codeInd);
 			
-			result = (CompteEpargne) q.getSingleResult();
+			if(q.getSingleResult() == null)
+				return null;
+			else 
+				result = (CompteEpargne) q.getSingleResult();
+				
 			
 		}else{
 			return null;

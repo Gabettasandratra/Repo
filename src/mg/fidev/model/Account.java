@@ -49,6 +49,9 @@ public class Account implements Serializable {
 	
 	@Column(name="solde_progressif")
 	private double soldeProgressif;
+	
+	@Column(name="cloturer")
+	private boolean cloturer;
 
 	//private double @javax.persistence.Transient
 
@@ -71,11 +74,6 @@ public class Account implements Serializable {
 	@OneToMany(mappedBy="account",cascade=CascadeType.ALL,fetch = FetchType.LAZY)
 	@XmlTransient
 	private List<Grandlivre> granLivres;
-	
-	//relation OneToMany	
-	@OneToMany(mappedBy="account",cascade=CascadeType.ALL)
-	@XmlTransient
-	private List<Budget> budgets;
 
 	public Account() {
 	}
@@ -192,7 +190,7 @@ public class Account implements Serializable {
 
 	public List<Grandlivre> getGranLivres() {
 		return granLivres;
-	}
+	} 
 
 	public void setGranLivres(List<Grandlivre> granLivres) {
 		this.granLivres = granLivres;
@@ -206,20 +204,20 @@ public class Account implements Serializable {
 		this.isHeader = isHeader;
 	}
 
-	public List<Budget> getBudgets() {
-		return budgets;
-	}
-
-	public void setBudgets(List<Budget> budgets) {
-		this.budgets = budgets;
-	}
-
 	public List<Caisse> getCaisses() {
 		return caisses;
 	}
 
 	public void setCaisses(List<Caisse> caisses) {
 		this.caisses = caisses;
+	}
+
+	public boolean isCloturer() {
+		return cloturer;
+	}
+
+	public void setCloturer(boolean cloturer) {
+		this.cloturer = cloturer;
 	}
 	
 }

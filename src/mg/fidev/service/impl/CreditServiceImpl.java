@@ -13,8 +13,6 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import com.sun.jersey.api.uri.UriComponent.Type;
-
 import mg.fidev.model.Account;
 import mg.fidev.model.ApprobationCredit;
 import mg.fidev.model.Caisse;
@@ -32,6 +30,8 @@ import mg.fidev.model.ConfigGarantieCredit;
 import mg.fidev.model.ConfigGeneralCredit;
 import mg.fidev.model.ConfigGlCredit;
 import mg.fidev.model.ConfigPenaliteCredit;
+import mg.fidev.model.CrediGroupeView;
+import mg.fidev.model.CreditMembreGroupe;
 import mg.fidev.model.Decaissement;
 import mg.fidev.model.DemandeCredit;
 import mg.fidev.model.FicheCredit;
@@ -41,7 +41,6 @@ import mg.fidev.model.GarantieView;
 import mg.fidev.model.Grandlivre;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
-import mg.fidev.model.MembreGroupe;
 import mg.fidev.model.ProduitCredit;
 import mg.fidev.model.ProduitEpargne;
 import mg.fidev.model.Remboursement;
@@ -435,12 +434,11 @@ public class CreditServiceImpl implements CreditService {
 	@Override
 	public boolean updateDemandeCredit(String numCredit,DemandeCredit demande) {
 		
-		DemandeCredit dm = em.find(DemandeCredit.class, numCredit);
+		//DemandeCredit dm = em.find(DemandeCredit.class, numCredit);
 		
 		return false;
 	}
 
-	
 	static int getLastIndexMembre(String codeGrp){
 		String sql = "select count(*) from membre_groupe where groupe='"+codeGrp+"'";
 		Query q = em.createNativeQuery(sql);
@@ -449,195 +447,301 @@ public class CreditServiceImpl implements CreditService {
 	}
 	//Enregistrement montant crédit par membre  
 	@Override
-	public boolean addmontantMembreGroupe(String codeGrp,String codeInd, double montant, int taux) {
+	public List<CrediGroupeView> addmontantMembreGroupe(String numCredit,String codeGrp,String codeInd, 
+			double montant, double interet, int taux) {
 		
-		MembreGroupe m = new MembreGroupe();
-		int lastIndex = getLastIndexMembre(codeGrp);
-		String index = String.format("%02d", ++lastIndex);
+		List<CrediGroupeView> result = new ArrayList<CrediGroupeView>();
+		//Instance de classe CreditMembre pour enregistrer les montants par membres
+		CrediGroupeView cdm = new CrediGroupeView();
 		
-		Groupe groupe = em.find(Groupe.class, codeGrp);
-		Individuel individuel  = em.find(Individuel.class, codeInd);
+		//Instance de groupe (code goupe), crédit(numCredit), individuel(codeIndividuel)
+		/*Groupe groupe = em.find(Groupe.class, codeGrp);
+		Individuel individuel = em.find(Individuel.class, codeInd);
+		DemandeCredit dm = em.find(DemandeCredit.class, numCredit);	*/			
 		
-		try {
-			m.setIdMembre(index); 
-			m.setCapitaleCredit(montant); 
-			m.setTauxInteretCredit(taux);
-			m.setGroupe(groupe);
-			m.setIndividuel(individuel);
-			transaction.begin();
-			em.persist(m);
-			transaction.commit();
-			em.refresh(m);
-			System.out.println("montant "+montant+" ajouter au membre numero "+index);
-			return true;
-			
-		} catch (Exception e) {
-			e.printStackTrace(); 
-			return false;
-		}
+		//Vérification si le montant du crédit est déjà attribué au membre
+		String sql = "select c from CrediGroupeView c "
+				+ " where c.numCredit='"+numCredit+"' and c.codeInd='"+codeInd+"' and c.codeGrp='"+codeGrp+"'";
 		
+		Query q = em.createQuery(sql);
+		
+		if(!q.getResultList().isEmpty()){
+			System.out.println("montant déjà ajouté");	
+			return null;
+		}else{
+			try {
+				cdm.setPrincipale(montant);
+				cdm.setInteret(interet);
+				cdm.setTauxInt(taux); 
+				cdm.setCodeGrp(codeGrp);
+				cdm.setCodeInd(codeInd);
+				cdm.setNumCredit(numCredit);
+				
+				transaction.begin();
+				em.persist(cdm);
+				transaction.commit();
+				em.refresh(cdm);
+				System.out.println(montant+" ajouter au membre n° "+codeInd);	
+				//System.out.println("montant "+montant+" ajouter au membre numero "+index);
+				result .add(cdm);
+				return result;
+				
+			} catch (Exception e) {
+				e.printStackTrace(); 
+				return null;
+			}
+		}	
 	}
 
+	//Modifier montant ajouter au membre groupe
+	@Override
+	public boolean updateMontant(int id, CrediGroupeView crediGroupeView) {
+		CrediGroupeView crd = em.find(CrediGroupeView.class, id);
 		
+		crd.setInteret(crediGroupeView.getInteret());
+		crd.setPrincipale(crediGroupeView.getPrincipale());
+		crd.setTauxInt(crediGroupeView.getTauxInt());
+		crd.setCodeGrp(crediGroupeView.getCodeGrp());
+		crd.setCodeInd(crediGroupeView.getCodeInd());
+		crd.setNumCredit(crediGroupeView.getNumCredit());
+		try {
+			transaction.begin();
+			em.merge(crd);
+			transaction.commit();
+			em.refresh(crd); 
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	//Supprimer table view créditMembreView
+	@Override
+	public boolean deleteMontant() {
+		Query query = em.createNativeQuery("TRUNCATE TABLE credit_groupe_view");
+		try {
+			transaction.begin();
+			query.executeUpdate();
+			transaction.commit();
+			System.out.println("Table CreditMembreView vide");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	//Récuperer tous ce qui est dans la table créditMembreView
+	@Override
+	public List<CrediGroupeView> getAllCrediGroupeView() {
+		String sql = "select c from CrediGroupeView c";
+		return em.createQuery(sql,CrediGroupeView.class).getResultList();
+	}
+	
 	//Enregistrement demande crédit groupe
 	@Override
 	public boolean saveDemandeCreditGroupe(String idProduit, String codeGrp,
 			DemandeCredit demande, int idAgent, int user_id) {
-		//Instancie les classe necessaire
-				//Produit et utilisateur
-				ProduitCredit pdtCredit = em.find(ProduitCredit.class, idProduit);
-				//Utilisateur de saisie
-				Utilisateur user = em.find(Utilisateur.class, user_id);
-				//Agent de credit
-				Utilisateur agent = em.find(Utilisateur.class, idAgent);
+		// Instancie les classe necessaire
+		// Produit et utilisateur
+		ProduitCredit pdtCredit = em.find(ProduitCredit.class, idProduit);
+		// Utilisateur de saisie
+		Utilisateur user = em.find(Utilisateur.class, user_id);
+		// Agent de credit
+		Utilisateur agent = em.find(Utilisateur.class, idAgent);
+
+		// ajout demande credit au Fihe credit
+		FicheCredit ficheCredit = new FicheCredit();
+		// Client
+		Groupe grp = em.find(Groupe.class, codeGrp);
+
+		if (grp != null) {
+			int lastIndex = getLastIndex(codeGrp);
+			String index = String.format("%05d", ++lastIndex);
+			String ag = grp.getCodeGrp().substring(0, 2);
+
+			// information de demande credit
+			demande.setNumCredit(ag + "/" + index);
+
+			// Information calendrier d'écheance
+			// Récuperation calendrier due
+			double interet = 0;
+			List<Calpaiementdue> calend = new ArrayList<Calpaiementdue>();
+			List<CalView> calV = getAllCalView();
+			double soldCourant = ficheCredit.getSoldeCourant();
+			double totInter = ficheCredit.getInteret();
+
+			for (CalView calView : calV) {
+				Calpaiementdue cald = new Calpaiementdue();
+				cald.setDate(calView.getDate());
+				cald.setMontantComm(calView.getMontantComm());
+				cald.setMontantInt(calView.getMontantInt());
+				cald.setMontantPenal(calView.getMontantPenal());
+				cald.setMontantPrinc(calView.getMontantPrinc());
+				cald.setDemandeCredit(demande);
+				interet += calView.getMontantInt();
+				calend.add(cald);
+				// Total solde courant
+				soldCourant += calView.getMontantPrinc()
+						+ calView.getMontantInt() - calView.getMontantPenal();
+				// total intérêt
+				totInter += calView.getMontantInt();
+				// Solde total
+				double soldTotal = totInter + demande.getMontantDemande();
+
+				// ajout calendrier due au Fihe credit
+				FicheCredit fiche = new FicheCredit();
+				fiche.setDate(calView.getDate());
+				fiche.setPiece("");
+				fiche.setTransaction("Tranche due");
+				fiche.setPrincipale(calView.getMontantPrinc());
+				fiche.setInteret(calView.getMontantInt());
+				fiche.setPenalite(calView.getMontantPenal());
+				fiche.setSoldeCourant(soldCourant);
+				fiche.setTotalPrincipal(demande.getMontantDemande());
+				fiche.setTotalInteret(totInter);
+				fiche.setTotalSolde(soldTotal);
+				fiche.setNum_credit(demande.getNumCredit());
+				try {
+					transaction.begin();
+					em.persist(fiche);
+					transaction.commit();
+					em.refresh(fiche);
+					System.out.println("Fiche credit groupe enregitré");
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+			// Infomation garantie crédit
+			// Importation garatie from garantie view
+			List<GarantieCredit> garaties = new ArrayList<GarantieCredit>();
+			List<GarantieView> listGaraties = getAllGarantieView();
+			if (listGaraties != null) {
+				for (GarantieView garantieView : listGaraties) {
+					GarantieCredit gar = new GarantieCredit();
+					gar.setLever(false);
+					gar.setNomGarantie(garantieView.getNomGarantie());
+					gar.setPourcentage(garantieView.getPourcentage());
+					gar.setTypeGarantie(garantieView.getTypeGarantie());
+					gar.setValeur(garantieView.getValeur());
+					gar.setDemandeCredit(demande);
+					garaties.add(gar);
+				}
+				// Enregistrement de la garantie
+				demande.setGarantieCredits(garaties);
+			}
+			
+			// Vider table calendrier view
+			deleteCalendrier();
+			// Vider table garantie view
+			deleteGarantieVIew();
+
+			// Enregistrement Fiche credit
+			ficheCredit.setDate(demande.getDateDemande());
+			ficheCredit.setPiece("");
+			ficheCredit.setTransaction("Demande crédit");
+			ficheCredit.setPrincipale(demande.getMontantDemande());
+			ficheCredit.setInteret(interet);
+			ficheCredit.setPenalite(0);
+			ficheCredit.setSoldeCourant(0);
+			ficheCredit.setTotalPrincipal(demande.getMontantDemande());
+			ficheCredit.setTotalInteret(0);
+			ficheCredit.setTotalSolde(demande.getMontantDemande());
+			ficheCredit.setNum_credit(demande.getNumCredit());
+			
+			// Information montant crédit pour chaque membre du groupe
+			List<CreditMembreGroupe> crediMembre = new ArrayList<CreditMembreGroupe>();
+			List<CrediGroupeView> lCredGroupView = getAllCrediGroupeView();
+			for (CrediGroupeView crediGroupeView : lCredGroupView) {
+				CreditMembreGroupe membre = new CreditMembreGroupe();
+				Individuel i = em.find(Individuel.class, crediGroupeView.getCodeInd());
+				membre.setDemandeCredit(demande); 
+				membre.setGroupe(grp);
+				membre.setIndividuel(i);
+				membre.setPrincipale(crediGroupeView.getPrincipale());
+				membre.setInteret(crediGroupeView.getInteret());
+				membre.setTauxInt(crediGroupeView.getTauxInt());
+				System.out.println("Montant crédit du membre n°: "
+						+ i.getCodeInd() + " enregistré");
+				crediMembre.add(membre);
+				/*try {
+					transaction.begin();
+					em.persist(membre);
+					transaction.commit();
+					em.refresh(membre);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}*/
 				
-				//ajout demande credit au Fihe credit
-				FicheCredit ficheCredit= new FicheCredit();		
-				//Client
-				Groupe grp = em.find(Groupe.class, codeGrp);	
+			}
+
+			demande.setGroupe(grp);
+			demande.setUtilisateur(user);
+			demande.setProduitCredit(pdtCredit);
+			demande.setNbCredit(CodeIncrement.nombreCreditGrp(em,
+					grp.getCodeGrp()));
+			demande.setAgent(agent);
+			demande.setApprobationStatut("Approbation en attente");
+			demande.setCalpaiementdues(calend);
+			demande.setMontantMembres(crediMembre); 
+			demande.setInteret(interet);
+
+			
+			System.out.println("information demande crédit groupe prête");
+			try {				
+				transaction.begin();
+				em.persist(demande);
+				em.persist(ficheCredit);
+				transaction.commit();				
+				System.out.println("Demande crédit de "
+						+ demande.getNumCredit() + " enregistré");
 				
-				if(grp != null){
-					int lastIndex = getLastIndex(codeGrp);
-					String index = String.format("%05d", ++lastIndex);		
-					String ag = grp.getCodeGrp().substring(0, 2);
-					
-					//information de demande credit
-					demande.setNumCredit(ag + "/" + index);
-					
-					//Récuperation calendrier due
-					double interet = 0;
-					List<Calpaiementdue> calend = new ArrayList<Calpaiementdue>();
-					List<CalView> calV = getAllCalView();
-					double soldCourant = ficheCredit.getSoldeCourant();
-					double totInter = ficheCredit.getInteret();
-					
-					for (CalView calView : calV) {
-						Calpaiementdue cald = new Calpaiementdue();
-						cald.setDate(calView.getDate());
-						cald.setMontantComm(calView.getMontantComm());
-						cald.setMontantInt(calView.getMontantInt());
-						cald.setMontantPenal(calView.getMontantPenal());
-						cald.setMontantPrinc(calView.getMontantPrinc());
-						cald.setDemandeCredit(demande); 
-						interet += calView.getMontantInt();
-						calend.add(cald);
-						//Total solde courant
-						soldCourant += calView.getMontantPrinc() + calView.getMontantInt() - calView.getMontantPenal();
-						//total intérêt				
-						totInter += calView.getMontantInt();
-						//Solde total
-						double soldTotal = totInter + demande.getMontantDemande();
-						
-						//ajout calendrier due au Fihe credit
-						FicheCredit fiche = new FicheCredit();
-						fiche.setDate(calView.getDate()); 
-						fiche.setPiece("");
-						fiche.setTransaction("Tranche due");
-						fiche.setPrincipale(calView.getMontantPrinc()); 
-						fiche.setInteret(calView.getMontantInt()); 
-						fiche.setPenalite(calView.getMontantPenal());
-						fiche.setSoldeCourant(soldCourant);
-						fiche.setTotalPrincipal(demande.getMontantDemande());
-						fiche.setTotalInteret(totInter);
-						fiche.setTotalSolde(soldTotal); 
-						fiche.setNum_credit(demande.getNumCredit());
-						try {
-							transaction.begin();
-							em.persist(fiche);
-							transaction.commit();
-							em.refresh(fiche); 
-							System.out.println("Fiche credit groupe enregitré");
-							
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					
-					}
-					
-					//Importation garatie from garantie view
-					List<GarantieCredit> garaties = new ArrayList<GarantieCredit>();
-					List<GarantieView> listGaraties = getAllGarantieView();
-					if(listGaraties != null){
-						for (GarantieView garantieView : listGaraties) {
-							GarantieCredit gar = new GarantieCredit();
-							gar.setLever(false);
-							gar.setNomGarantie(garantieView.getNomGarantie());
-							gar.setPourcentage(garantieView.getPourcentage());
-							gar.setTypeGarantie(garantieView.getTypeGarantie());
-							gar.setValeur(garantieView.getValeur());
-							gar.setDemandeCredit(demande);
-							garaties.add(gar);
-						}
-						//Enregistrement de la garantie
-						demande.setGarantieCredits(garaties);				
-					}			
-					
-					demande.setGroupe(grp); 
-					demande.setUtilisateur(user);
-					demande.setProduitCredit(pdtCredit);
-					demande.setNbCredit(CodeIncrement.nombreCreditGrp(em, grp.getCodeGrp()));
-					demande.setAgent(agent);
-					demande.setApprobationStatut("Approbation en attente");
-					demande.setCalpaiementdues(calend);
-					demande.setInteret(interet); 
-					//Vider table calendrier view
-					deleteCalendrier();
-					//Vider table garantie view
-					deleteGarantieVIew();
-					
-					//Enregistrement Fiche credit
-					
-					ficheCredit.setDate(demande.getDateDemande()); 
-					ficheCredit.setPiece("");
-					ficheCredit.setTransaction("Demande crédit");
-					ficheCredit.setPrincipale(demande.getMontantDemande()); 
-					ficheCredit.setInteret(interet); 
-					ficheCredit.setPenalite(0);
-					ficheCredit.setSoldeCourant(0);
-					ficheCredit.setTotalPrincipal(demande.getMontantDemande());
-					ficheCredit.setTotalInteret(0);
-					ficheCredit.setTotalSolde(demande.getMontantDemande());
-					ficheCredit.setNum_credit(demande.getNumCredit());
 				
-					System.out.println("information demande crédit groupe prête");
-					try {			
-						transaction.begin();
-						em.persist(demande);
-						em.persist(ficheCredit); 
-						transaction.commit();
-						em.refresh(demande);
-						em.refresh(ficheCredit);
-											
-						System.out.println("Demande crédit de "+demande.getNumCredit()+" enregistré");
-						return true;
-					} catch (Exception e) {
-						System.err.println(e.getMessage());
-						return false;
-					}
-					
-				}	
+				em.refresh(demande);
+				em.refresh(ficheCredit);
+				return true;
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				return false;
+			}
+
+		}
 		return false;
 	}
-	
-	
-	//SAISIE inormation demande crédit
+		
+	//SAISIE information demande crédit
+	//Générer calendrier remboursement d'une demande crédit groupe
 	@Override
-	public List<CalView> demCredit(String codeInd,
+	public List<CalView> demCredit(String codeInd, String codeGrp,
 			String date_dem, double montant, double tauxInt, int nbTranche,
 			String typeTranche, int diffPaie, String modCalcul) {
 
 		List<CalView> resultat = new ArrayList<CalView>();
 		
 		DemandeCredit dmd = new DemandeCredit();
-		Individuel ind = em.find(Individuel.class, codeInd);
 		
-		int lastIndex = getLastIndex(codeInd);
-		String index = String.format("%05d", ++lastIndex);
-		
-		String ag = ind.getCodeInd().substring(0, 2);
-		dmd.setNumCredit(ag + "/" + index);
-		dmd.setIndividuel(ind);		
-		System.out.println("Demande credit pour client individuel");
+		if(!codeInd.equals("")){
+			Individuel ind = em.find(Individuel.class, codeInd);
+			int lastIndex = getLastIndex(codeInd);
+			String index = String.format("%05d", ++lastIndex);
+			
+			String ag = ind.getCodeInd().substring(0, 2);
+			dmd.setNumCredit(ag + "/" + index);
+			dmd.setIndividuel(ind);		
+			System.out.println("Demande credit pour client individuel");
+		}
+		if(!codeGrp.equals("")){
+			Groupe grp = em.find(Groupe.class, codeGrp);
+			int lastIndex = getLastIndex(codeGrp);
+			String index = String.format("%05d", ++lastIndex);
+			
+			String ag = grp.getCodeGrp().substring(0, 2);
+			dmd.setNumCredit(ag + "/" + index);
+			dmd.setGroupe(grp); 	
+			System.out.println("Demande credit pour client groupe");
+		}
 			
 			//Interet dans 1 mois en pourcentage
 			double intMens = tauxInt / 12;
@@ -793,6 +897,7 @@ public class CreditServiceImpl implements CreditService {
 	public boolean deleteCalendrier() {
 		Query query = em.createNativeQuery("TRUNCATE TABLE calendrierview");
 		try {
+			
 			transaction.begin();
 			query.executeUpdate();
 			transaction.commit();
@@ -804,8 +909,7 @@ public class CreditServiceImpl implements CreditService {
 		}
 	}
 	
-	//Liste Commission avant ou après approbation
-	
+	//Liste Commission avant ou après approbation	
 	@Override
 	public List<DemandeCredit> getCommissionAvantApprobation(boolean a) {		
 		//Si a = true on affiche les crédits payé le commission avant approbation sinon on affiche les après approbation
@@ -1130,7 +1234,6 @@ public class CreditServiceImpl implements CreditService {
 		return result;
 	}
 	
-
 	/***
 	 * DECAISSEMENT
 	 * ***/
@@ -1221,13 +1324,14 @@ public class CreditServiceImpl implements CreditService {
 		}else if(confGen.getRecalcDateEcheanceAuDecais().equalsIgnoreCase("mettre a jours les dates")){
 			System.out.println("mettre à jour le calendrier de remboursement");
 			String codeClient = "";
+			String codeGroupe = "";
 			if(dm.getIndividuel() != null){
 				codeClient = dm.getIndividuel().getCodeInd();
 			}
 			if(dm.getGroupe() != null){
-				codeClient = dm.getGroupe().getCodeGrp();
+				codeGroupe = dm.getGroupe().getCodeGrp();
 			}
-			List<CalView> lisCalView = demCredit(codeClient, date, montant, dm.getTaux()
+			List<CalView> lisCalView = demCredit(codeClient, codeGroupe, date, montant, dm.getTaux()
 					, dm.getNbTranche(), dm.getTypeTranche(), dm.getDiffPaie(), dm.getModeCalculInteret());
 			for (CalView calView : lisCalView) {
 				Calapresdebl calFinal = new Calapresdebl();
@@ -1286,7 +1390,7 @@ public class CreditServiceImpl implements CreditService {
 		//Vérifie si le numero crédit est null
 		if (dm != null) {
 			//si statut de demande eqal Approuvé ou paye apres approbation on entre
-			if (dm.getIndividuel() != null && (dm.getApprobationStatut().equalsIgnoreCase("Approuver") || dm.getApprobationStatut().equalsIgnoreCase(
+			if ((dm.getApprobationStatut().equalsIgnoreCase("Approuver") || dm.getApprobationStatut().equalsIgnoreCase(
 							"payé apres approbation"))) {
 
 				try {
@@ -1316,8 +1420,8 @@ public class CreditServiceImpl implements CreditService {
 					dm.setSolde_total(soldeTotal);
 					
 
-					//Insertion au GrandLivre
-					Account accCred;
+					//Insertion au GrandLivre        
+					Account accCred;     
 					Caisse cptCaisse = new Caisse();
 					if(!comptCaise.equalsIgnoreCase("")){
 						System.out.println("Compte caisse");
@@ -2830,12 +2934,12 @@ public class CreditServiceImpl implements CreditService {
 	@Override
 	public boolean addGarantieView(GarantieView garantie,String codeInd) {
 		try {
-			Individuel ind = em.find(Individuel.class, codeInd);
+			//Individuel ind = em.find(Individuel.class, codeInd); 
 			
 			int lastIndex = getLastIndex(codeInd);
 			String index = String.format("%05d", ++lastIndex);
 			
-			String ag = ind.getCodeInd().substring(0, 2);
+			String ag = codeInd.substring(0, 2);//ind.getCodeInd()
 			garantie.setNumCredit(ag + "/" + index);
 			transaction.begin();
 			em.persist(garantie);
@@ -3015,7 +3119,7 @@ public class CreditServiceImpl implements CreditService {
 		return null;
 	}
 
-
+	
 	/*********************************************************************************************************************************************/
 	
 	/*********************************************************************************************************************************************/

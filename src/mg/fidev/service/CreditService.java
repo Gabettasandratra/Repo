@@ -24,6 +24,7 @@ import mg.fidev.model.ConfigGarantieCredit;
 import mg.fidev.model.ConfigGeneralCredit;
 import mg.fidev.model.ConfigGlCredit;
 import mg.fidev.model.ConfigPenaliteCredit;
+import mg.fidev.model.CrediGroupeView;
 import mg.fidev.model.Decaissement;
 import mg.fidev.model.DemandeCredit;
 import mg.fidev.model.FicheCredit;
@@ -139,13 +140,6 @@ public interface CreditService {
 	@WebParam(name="numCredit") String numCredit,
 	@WebParam(name="demandeCredit") @XmlElement(required=true,nillable=false) DemandeCredit demande);
 	
-	//Ajout montant crédit par membre
-	public boolean addmontantMembreGroupe(
-	@WebParam(name="codeGroupe") @XmlElement(required=false,nillable=true)String codeGrp,
-	@WebParam(name="codeInd") @XmlElement(required=false,nillable=true)String codeInd,
-	@WebParam(name="montant") @XmlElement(required=false,nillable=true)double montant,
-	@WebParam(name="taux") @XmlElement(required=false,nillable=true)int taux);
-		
 	//Enregistrement demande crédit groupe
 	@WebMethod
 	@WebResult(name="validation")
@@ -156,11 +150,40 @@ public interface CreditService {
 	@WebParam(name="id_Agent") @XmlElement(required=true,nillable=false) int idAgent,
 	@WebParam(name="user_id") @XmlElement(required=true,nillable=false) int user_id);
 	
+	//Ajout montant crédit par membre
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CrediGroupeView> addmontantMembreGroupe(
+	@WebParam(name="numCredit") @XmlElement(required=false,nillable=true)String numCredit,		
+	@WebParam(name="codeGroupe") @XmlElement(required=false,nillable=true)String codeGrp,
+	@WebParam(name="codeInd") @XmlElement(required=false,nillable=true)String codeInd,
+	@WebParam(name="montant") @XmlElement(required=false,nillable=true)double montant,
+	@WebParam(name="interet") @XmlElement(required=false,nillable=true)double interet,
+	@WebParam(name="taux") @XmlElement(required=false,nillable=true)int taux);
+	
+	//Modifier montant
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean updateMontant(
+	@WebParam(name="id") @XmlElement(required=false,nillable=true) int id,
+	@WebParam(name="info") @XmlElement(required=false,nillable=true) CrediGroupeView crediGroupeView);
+	
+	//Supprimer données créditMembreView
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean deleteMontant();
+	
+	//recupérer Montant membre view
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CrediGroupeView> getAllCrediGroupeView();
+	
 	//générer calendrier
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<CalView> demCredit(
 	@WebParam(name="codeInd") @XmlElement(required=false,nillable=true)  String codeInd, 
+	@WebParam(name="codeGrp") @XmlElement(required=false,nillable=true)  String codeGrp, 
 	@WebParam(name="dat_dem") @XmlElement(required=true,nillable=false) String date_dem, 
 	@WebParam(name="montant") @XmlElement(required=true,nillable=false) double montant,
 	@WebParam(name="tauxInt") @XmlElement(required=true,nillable=false) double tauxInt,

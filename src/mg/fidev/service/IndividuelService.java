@@ -23,6 +23,7 @@ import mg.fidev.model.ListeRouge;
 @SOAPBinding(parameterStyle = ParameterStyle.WRAPPED)
 public interface IndividuelService {
 
+	//Enregistrement garant crédit
 	@WebMethod
 	@WebResult(name = "resultat")
 	public boolean saveGarant(
@@ -31,6 +32,7 @@ public interface IndividuelService {
 			@WebParam(name = "docIdentite") @XmlElement(required = true) Docidentite docId,
 			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence);
 	
+	//Enregistrement client individuel
 	@WebMethod
 	@WebResult(name = "resultat")
 	public String insertIndividuel(
@@ -39,10 +41,12 @@ public interface IndividuelService {
 			@WebParam(name = "docIdentite") @XmlElement(required = true) Docidentite docIdentite,
 			@WebParam(name = "adresse") @XmlElement(required = true) Adresse adresse);
 	
+	//Liste de tous les clients individuels
 	@WebMethod
 	@WebResult(name = "resultat")
 	public List<Individuel> getAllIndividuel();
 	
+	//Rapport client individuel
 	@WebMethod
 	@WebResult(name = "resultat")
 	public List<Individuel> rapportsIndividuel(
@@ -83,10 +87,12 @@ public interface IndividuelService {
 	@WebResult(name="resultat")
 	public List<Individuel> findByCode(@WebParam(name = "code")@XmlElement(required = true)String code);
 	
+	//Liste garant de crédit
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Garant> listeGarant();
 	
+	//Enregistrement droit d'inscription
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean saveDroitInscription(
@@ -94,45 +100,67 @@ public interface IndividuelService {
 			@WebParam(name="codeInd")@XmlElement(required=false,nillable=true)String codeInd,
 			@WebParam(name="codeGrp")@XmlElement(required=false,nillable=true)String codeGrp);
 	
+	//Rapport CIN
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Docidentite> rapportCIN(
 			@WebParam(name = "dateDeb")@XmlElement(required = false)String dateDeb,
 			@WebParam(name = "dateFin")@XmlElement(required = false)String dateFin);
 	
+	//Liste crédit du client en question
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<DemandeCredit> getDetailCredit(
 			@WebParam(name = "codeClient")@XmlElement(required = false)String code
 			);
 	
+	//Détail compte épargne du client
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<CompteEpargne> getDetailEpargne(
 			@WebParam(name = "codeClient")@XmlElement(required = false)String code
 			);
 	
+	//Chercher client individuel par son code d'enregistrement
 	@WebMethod
 	@WebResult(name="resultat")
 	public Individuel getOneIndividuel(
 			@WebParam(name = "codeClient")@XmlElement(required = false)String code
 			);
 	
+	//Supprimer client individuel
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean deleteIndividuel(
 			@WebParam(name = "codeClient")@XmlElement(required = false)String code
 			);
 	
+	//Vérification date de naissance du client
 	@WebMethod
 	@WebResult(name="resultat")
 	public long verifDate(
 	@WebParam(name = "dateDeb")@XmlElement(required = false)String dateDeb, 
 	@WebParam(name = "dateFin")@XmlElement(required = false)String dateFin);
 	
+	//Chager client en sain
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean changerSain(
 			@WebParam(name = "codeClient")@XmlElement(required = false)String code);
 	
+	//Approuver client
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean approbationClient(
+	@WebParam(name = "codeClient")@XmlElement(required = false)String code);
+	
+	//Liste client approuvé
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Individuel> getClientApprouver();
+	
+	//Liste client non approuvé
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Individuel> getClientNonApprouver();
 }

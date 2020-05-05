@@ -1,16 +1,21 @@
 package mg.fidev.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.jws.WebService;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Adresse;
+import mg.fidev.model.FonctionMembreGroupe;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
+import mg.fidev.model.MembreGroupe;
+import mg.fidev.model.MembreView;
 import mg.fidev.service.GroupeService;
 import mg.fidev.utils.CodeIncrement;
 
@@ -84,31 +89,54 @@ public class GroupeServiceImpl implements GroupeService {
 	/***
 	 * ENREGISTREMENT DE NOUVEAU GROUPE
 	 * ***/
-
+	@SuppressWarnings("unused")
 	@Override
 	public String saveGroupe(Groupe groupe,Adresse adresse, String codeAgence) {
 
-		Individuel ind = new Individuel();
 		String result = "";
 		groupe.setCodeGrp(CodeIncrement.getCodeGrp(em, codeAgence));
 		groupe.setAdresse(adresse);
-		if(groupe.getIndividuels() != null){
+		/*if(groupe.getIndividuels() != null){
 			ind.setGroupe(groupe);
+		}*/
+		List<MembreGroupe> membres = new ArrayList<MembreGroupe>();
+		List<MembreView> mview = getallMembreView();
+		for (MembreView membreView : mview) {
+			MembreGroupe m = new MembreGroupe();  
+			Individuel ind = em.find(Individuel.class, membreView.getCodeInd());
+			String sql = "select f from FonctionMembreGroupe f where f.nomFonction='"+membreView.getFonction()+"'";
+			FonctionMembreGroupe f = (FonctionMembreGroupe) em.createQuery(sql).getSingleResult();
+			m.setFonctionMembre(f);
+			m.setIndividuel(ind); 
+			m.setGroupe(groupe); 
+			membres.add(m);
+			ind.setGroupe(groupe);
+			try {
+				transaction.begin();
+				em.merge(ind);
+				transaction.commit();
+				em.refresh(ind); 
+				System.out.println("table individuel à jour");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-
-		try {
-			transaction.begin();
-			em.persist(adresse);			
-			transaction.commit();
-			transaction.begin();
-			em.persist(groupe);
-			//em.merge(ind);
-			transaction.commit();
-			result = "success";
-			//em.refresh(groupe);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if(mview == null){
 			result = "erreur";
+		}else{
+			groupe.setMembres(membres); 
+			try {
+				transaction.begin();
+				em.persist(adresse);	
+				em.persist(groupe);
+				//em.merge(ind);
+				transaction.commit();
+				result = "success";
+				//em.refresh(groupe);
+			} catch (Exception e) {
+				e.printStackTrace();
+				result = "erreur";
+			}			
 		}
 		return result;
 	}
@@ -116,7 +144,7 @@ public class GroupeServiceImpl implements GroupeService {
 	@Override
 	public List<Individuel> getListeMembreGroupe(String nomGroupe) {
 		TypedQuery<Groupe> q1 = em.createQuery(
-				"select g from Groupe g where g.nomGroupe = :groupe",
+				"select g from Groupe g where g.codeGrp = :groupe",
 				Groupe.class);
 		q1.setParameter("groupe", nomGroupe);
 		Groupe groupe = q1.getSingleResult();
@@ -242,6 +270,119 @@ public class GroupeServiceImpl implements GroupeService {
 		else System.out.println("Auccun client trouvé!!!");
 		
 		return null;
+	}
+	//Ajouter au membre view
+	@Override
+	public String addMembre(MembreView membre) {
+		String result = "";
+		boolean ok = false;
+		if(membre.getFonction().equalsIgnoreCase("Président")){
+			String sql = "select m from MembreView m where m.fonction = 'Président'";
+			Query q = em.createQuery(sql);
+			if(q.getResultList().isEmpty()){
+				ok = true;
+			}
+			else{
+				ok = false;
+				result = "La fonction Président doit ajouter une seule fois!!!";
+			}
+		}else if
+		(membre.getFonction().equalsIgnoreCase("Secrétaire")){
+			String sql = "select m from MembreView m where m.fonction = 'Secrétaire'";
+			Query q = em.createQuery(sql);
+			if(q.getResultList().isEmpty()){
+				ok = true;
+			}
+			else{
+				ok = false;
+				result = "La fonction Secrétaire doit ajouter une seule fois!!!";
+			}
+		}
+		else if
+		(membre.getFonction().equalsIgnoreCase("Trésorier")){
+			String sql = "select m from MembreView m where m.fonction = 'Trésorier'";
+			Query q = em.createQuery(sql);
+			if(q.getResultList().isEmpty()){
+				ok = true;
+			}
+			else{
+				ok = false;
+				result = "La fonction Trésorier doit ajouter une seule fois!!!";
+			}
+		}
+		else{
+			ok = true;
+		}
+		
+		if(ok == true){
+			try {
+				transaction.begin();
+				em.persist(membre);
+				transaction.commit();
+				em.refresh(membre);
+				System.out.println("Membre ajouté");
+				result =  "Membre ajouté!!!";
+			} catch (Exception e) {
+				e.printStackTrace();
+				result ="Erreur enregistrement";
+			}						
+		}
+		return result;
+	}
+	//liste membre view
+	@Override
+	public List<MembreView> getallMembreView() {
+		String sql = "select m from MembreView m";
+		return em.createQuery(sql,MembreView.class).getResultList();
+	}
+	//Vider membre view
+	@Override
+	public boolean deleteMembreView() {
+		Query query = em.createNativeQuery("TRUNCATE TABLE membre_view");
+		try {
+			
+			transaction.begin();
+			query.executeUpdate();
+			transaction.commit();
+			System.out.println("Table membre_view vide");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	@Override
+	public List<FonctionMembreGroupe> getFonctionMembre() {
+		String sql = "select f from FonctionMembreGroupe f";
+		return em.createQuery(sql,FonctionMembreGroupe.class).getResultList();
+	}
+	@Override
+	public List<MembreGroupe> getMembreGroupe(String code) {
+		String sql = "select m from MembreGroupe m join m.groupe g where g.codeGrp ='"+code+"'";
+		TypedQuery<MembreGroupe> query = em.createQuery(sql,MembreGroupe.class);
+		if(!query.getResultList().isEmpty())
+			return query.getResultList();
+		return null;
+	}
+	@Override
+	public boolean tansfertMembreGroupe(int id, String codeGrp, String codeInd,
+			int fonction) {
+		MembreGroupe m = em.find(MembreGroupe.class, id);
+		Groupe g = em.find(Groupe.class, codeGrp);
+		FonctionMembreGroupe f = em.find(FonctionMembreGroupe.class, fonction);
+		m.setGroupe(g);
+		m.setFonctionMembre(f);
+		try {
+			transaction.begin();
+			em.flush();
+			transaction.commit();
+			em.refresh(m); 
+			System.out.println("Membre transférer");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 }

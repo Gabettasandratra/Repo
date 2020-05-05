@@ -66,7 +66,6 @@ public class Groupe implements Serializable {
 	//bi-directional many-to-one association to Adresse
 	@ManyToOne(cascade= CascadeType.ALL)
 	@JoinColumn(name="idAdresse")
-	@XmlTransient
 	private Adresse adresse;
 
 	//bi-directional many-to-one association to Individuel
@@ -86,6 +85,19 @@ public class Groupe implements Serializable {
 	@XmlTransient
 	private List<DroitInscription> droitInscription;
 
+	//Montant credit par membre groupe
+	@OneToMany(mappedBy="groupe")
+	@XmlTransient
+	private List<CreditMembreGroupe> montantMembres;
+	
+	//Relation to membreGroupe
+	@OneToMany(mappedBy="groupe",cascade= CascadeType.ALL)
+	@XmlTransient
+	private List<MembreGroupe> membres;
+	
+	public Groupe() {
+	}
+
 	public List<ListeRouge> getListeRouge() {
 		return listeRouge;
 	}
@@ -100,9 +112,6 @@ public class Groupe implements Serializable {
 
 	public void setDroitInscription(List<DroitInscription> droitInscription) {
 		this.droitInscription = droitInscription;
-	}
-
-	public Groupe() {
 	}
 
 	public String getCodeGrp() {
@@ -274,5 +283,21 @@ public class Groupe implements Serializable {
 	public void setCompteDat(List<CompteDAT> compteDat) {
 		this.compteDat = compteDat;
     }
-	
+
+	public List<CreditMembreGroupe> getMontantMembres() {
+		return montantMembres;
+	}
+
+	public void setMontantMembres(List<CreditMembreGroupe> montantMembres) {
+		this.montantMembres = montantMembres;
+	}
+
+	public List<MembreGroupe> getMembres() {
+		return membres;
+	}
+
+	public void setMembres(List<MembreGroupe> membres) {
+		this.membres = membres;
+	}
+
 }
