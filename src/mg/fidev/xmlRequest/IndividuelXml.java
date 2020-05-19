@@ -25,7 +25,7 @@ public class IndividuelXml implements Serializable {
 	private String codeClient;
 
 	@XmlElement(name = "dateInscription", required = true)
-	private Date dateInscription;
+	private String dateInscription;
 
 	@XmlElement(name = "dateNaissance", required = true)
 	private String dateNaissance;
@@ -112,20 +112,20 @@ public class IndividuelXml implements Serializable {
 		this.codeClient = codeClient;
 	}
 
-	public Date getDateInscription() {
+	public String getDateInscription() {
 		return dateInscription;
 	}
 
-	public void setDateInscription(Date dateInscription) {
-		this.dateInscription = dateInscription;
+	public void setDateInscription(String string) {
+		this.dateInscription = string;
 	}
 
 	public String getDateNaissance() {
 		return dateNaissance;
 	}
 
-	public void setDateNaissance(String string) {
-		this.dateNaissance = string;
+	public void setDateNaissance(String date) {
+		this.dateNaissance = date;
 	}
 
 	public Date getDateSortie() {

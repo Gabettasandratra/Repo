@@ -22,9 +22,9 @@ public class FichierDocidentite implements Serializable {
 
 	private String format;
 
-	private boolean isObligatoire;
+	private byte isObligatoire;
 
-	private boolean isUnique;
+	private byte isUnique;
 
 	private int largeur;
 
@@ -57,19 +57,19 @@ public class FichierDocidentite implements Serializable {
 		this.format = format;
 	}
 
-	public boolean getIsObligatoire() {
+	public byte getIsObligatoire() {
 		return this.isObligatoire;
 	}
 
-	public void setIsObligatoire(boolean isObligatoire) {
+	public void setIsObligatoire(byte isObligatoire) {
 		this.isObligatoire = isObligatoire;
 	}
 
-	public boolean getIsUnique() {
+	public byte getIsUnique() {
 		return this.isUnique;
 	}
 
-	public void setIsUnique(boolean isUnique) {
+	public void setIsUnique(byte isUnique) {
 		this.isUnique = isUnique;
 	}
 

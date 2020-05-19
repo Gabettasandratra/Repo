@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.List;
 
 
@@ -11,6 +17,8 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Adresse.findAll", query="SELECT a FROM Adresse a")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Adresse implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -33,16 +41,23 @@ public class Adresse implements Serializable {
 	private int distanceAgence;
 
 	//bi-directional many-to-one association to Entreprise
-	@OneToMany(mappedBy="adresse")
+	@OneToMany(mappedBy="adresse",cascade= CascadeType.ALL)
+	@XmlTransient
 	private List<Entreprise> entreprises;
 
 	//bi-directional many-to-one association to Groupe
-	@OneToMany(mappedBy="adresse")
+	@OneToMany(mappedBy="adresse",cascade= CascadeType.ALL)
+	@XmlTransient
 	private List<Groupe> groupes;
 
 	//bi-directional many-to-one association to Individuel
-	@OneToMany(mappedBy="adresse")
+	@OneToMany(mappedBy="adresse",cascade= CascadeType.ALL)
+	@XmlTransient
 	private List<Individuel> individuels;
+	
+	@OneToMany(mappedBy="adresse",cascade= CascadeType.ALL)
+	@XmlTransient
+	private List<Garant> garants;
 
 	public Adresse() {
 	}
@@ -177,4 +192,12 @@ public class Adresse implements Serializable {
 		return individuel;
 	}
 
+	public List<Garant> getGarants() {
+		return garants;
+	}
+
+	public void setGarants(List<Garant> garants) {
+		this.garants = garants;
+	}
+	
 }

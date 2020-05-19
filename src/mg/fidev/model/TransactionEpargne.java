@@ -1,7 +1,12 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -11,13 +16,14 @@ import javax.persistence.*;
 @Entity
 @Table(name="transaction_epargne")
 @NamedQuery(name="TransactionEpargne.findAll", query="SELECT t FROM TransactionEpargne t")
+@XmlRootElement(name="transEp")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class TransactionEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="id_transaction_ep")
-	private int idTransactionEp;
+	@Column(name="tcode_ep")
+	private String idTransactionEp;
 
 	@Column(name="date_transaction")
 	private String dateTransaction;
@@ -26,18 +32,29 @@ public class TransactionEpargne implements Serializable {
 
 	private double montant;
 
-	@Column(name="pièce_compta")
-	private String pièceCompta;
+	@Column(name="piece_compta")
+	private String pieceCompta;
 
 	private double solde;
 
 	@Column(name="type_trans_ep")
 	private String typeTransEp;
-
+	
+	@Column(name="type_paiement",nullable=false,length=50)
+	private String typePaie;
+	@Column(name="val_paie",nullable=true,length=50)
+	private String valPaie;
+	@Column(name="comm_retrait")
+	private double commRet;
+	@Column(name="comm_trans")
+	private double commTrans;
+	@Column(name="commPrelev")
+	private double penalPrelev;
 	//bi-directional many-to-one association to CompteCaisse
 	@ManyToOne
-	@JoinColumn(name="Compte_caissenom_cpt_caisse")
-	private CompteCaisse compteCaisse;
+	@JoinColumn(name="id_caisse")
+	@XmlTransient
+	private Caisse caisse;
 
 	//bi-directional many-to-one association to CompteEpargne
 	@ManyToOne
@@ -47,11 +64,11 @@ public class TransactionEpargne implements Serializable {
 	public TransactionEpargne() {
 	}
 
-	public int getIdTransactionEp() {
+	public String getIdTransactionEp() {
 		return this.idTransactionEp;
 	}
 
-	public void setIdTransactionEp(int idTransactionEp) {
+	public void setIdTransactionEp(String idTransactionEp) {
 		this.idTransactionEp = idTransactionEp;
 	}
 
@@ -79,12 +96,52 @@ public class TransactionEpargne implements Serializable {
 		this.montant = montant;
 	}
 
-	public String getPièceCompta() {
-		return this.pièceCompta;
+	public String getPieceCompta() {
+		return this.pieceCompta;
 	}
 
-	public void setPièceCompta(String pièceCompta) {
-		this.pièceCompta = pièceCompta;
+	public void setPieceCompta(String pieceCompta) {
+		this.pieceCompta = pieceCompta;
+	}
+
+	public String getTypePaie() {
+		return typePaie;
+	}
+
+	public void setTypePaie(String typePaie) {
+		this.typePaie = typePaie;
+	}
+
+	public String getValPaie() {
+		return valPaie;
+	}
+
+	public void setValPaie(String valPaie) {
+		this.valPaie = valPaie;
+	}
+
+	public double getCommRet() {
+		return commRet;
+	}
+
+	public void setCommRet(double commRet) {
+		this.commRet = commRet;
+	}
+
+	public double getCommTrans() {
+		return commTrans;
+	}
+
+	public void setCommTrans(double commTrans) {
+		this.commTrans = commTrans;
+	}
+
+	public double getPenalPrelev() {
+		return penalPrelev;
+	}
+
+	public void setPenalPrelev(double penalPrelev) {
+		this.penalPrelev = penalPrelev;
 	}
 
 	public double getSolde() {
@@ -102,13 +159,13 @@ public class TransactionEpargne implements Serializable {
 	public void setTypeTransEp(String typeTransEp) {
 		this.typeTransEp = typeTransEp;
 	}
-
-	public CompteCaisse getCompteCaisse() {
-		return this.compteCaisse;
+	
+	public Caisse getCaisse() {
+		return caisse;
 	}
 
-	public void setCompteCaisse(CompteCaisse compteCaisse) {
-		this.compteCaisse = compteCaisse;
+	public void setCaisse(Caisse caisse) {
+		this.caisse = caisse;
 	}
 
 	public CompteEpargne getCompteEpargne() {
@@ -116,12 +173,23 @@ public class TransactionEpargne implements Serializable {
 	}
 
 	public void setCompteEpargne(CompteEpargne compteEpargne) {
-		if(compteEpargne.getSolde() == 0){
-			if(this.getTypeTransEp().equals("OU")){
-				compteEpargne.setSolde(montant);
+		if(compteEpargne.getIsActif()){
+			if(this.getTypeTransEp().equals("DE")){
+				compteEpargne.setSolde(compteEpargne.getSolde() + montant);
 				if(compteEpargne.getSolde() != 0){
+					this.setSolde(compteEpargne.getSolde());
 					this.setMontant(montant);
-					this.setSolde(montant);
+					this.compteEpargne = compteEpargne;
+				}
+				else{
+					System.err.println("Erreur de transaction");
+				}
+			}
+			else if(this.getTypeTransEp().equals("RE")){
+				compteEpargne.setSolde(compteEpargne.getSolde() - montant);
+				if(compteEpargne.getSolde() != 0){
+					this.setSolde(compteEpargne.getSolde());
+					this.setMontant(montant);
 					this.compteEpargne = compteEpargne;
 				}
 				else{
@@ -129,28 +197,8 @@ public class TransactionEpargne implements Serializable {
 				}
 			}
 		}
-		else if(this.getTypeTransEp().equals("DE")){
-			compteEpargne.setSolde(compteEpargne.getSolde() + montant);
-			if(compteEpargne.getSolde() != 0){
-				this.setSolde(compteEpargne.getSolde());
-				this.setMontant(montant);
-				this.compteEpargne = compteEpargne;
-			}
-			else{
-				System.err.println("Erreur de transaction");
-			}
-		}
-		else if(this.getTypeTransEp().equals("RE")){
-			compteEpargne.setSolde(compteEpargne.getSolde() - montant);
-			if(compteEpargne.getSolde() != 0){
-				this.setSolde(compteEpargne.getSolde());
-				this.setMontant(montant);
-				this.compteEpargne = compteEpargne;
-			}
-			else{
-				System.err.println("Erreur de transaction");
-			}
-		}
+		else
+			System.err.println("Compte inactif");
 	}
 
 }

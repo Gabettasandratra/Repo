@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.List;
 
 
@@ -11,6 +17,8 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Fonction.findAll", query="SELECT f FROM Fonction f")
+@XmlRootElement(name="fonction")
+@XmlAccessorType(XmlAccessType.FIELD) 
 public class Fonction implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -21,21 +29,21 @@ public class Fonction implements Serializable {
 	private String libelleFonction;
 
 	//bi-directional many-to-many association to Acces
-	@ManyToMany
-	@JoinTable(
-		name="fonction_acces"
-		, joinColumns={
-			@JoinColumn(name="FonctionidFonction")
-			}
-		, inverseJoinColumns={
-			@JoinColumn(name="AccesidAcces")
-			}
-		)
+	@ManyToMany(cascade=CascadeType.ALL)
+	@JoinTable(name="fonction_acces", joinColumns={@JoinColumn(name="FonctionidFonction")}
+		, inverseJoinColumns={@JoinColumn(name="AccesidAcces")})
+	@XmlTransient
 	private List<Acces> acces;
 
 	//bi-directional many-to-one association to Utilisateur
-	@OneToMany(mappedBy="fonction")
+	@OneToMany(mappedBy="fonction",cascade=CascadeType.ALL)
+	@XmlTransient
 	private List<Utilisateur> utilisateurs;
+	
+	@OneToMany(mappedBy="fonction",cascade=CascadeType.ALL)
+	@XmlTransient
+	private List<Personnel> personnels;
+	
 
 	public Fonction() {
 	}
@@ -84,6 +92,14 @@ public class Fonction implements Serializable {
 		utilisateur.setFonction(null);
 
 		return utilisateur;
+	}
+
+	public List<Personnel> getPersonnels() {
+		return personnels;
+	}
+
+	public void setPersonnels(List<Personnel> personnels) {
+		this.personnels = personnels;
 	}
 
 }

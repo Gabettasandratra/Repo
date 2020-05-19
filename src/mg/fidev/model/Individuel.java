@@ -1,12 +1,23 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-
-import javax.persistence.*;
-
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -15,17 +26,15 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Individuel.findAll", query="SELECT i FROM Individuel i")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Individuel implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	//private String codeAgence;
-
 	@Id
-	@Column(name="codeInd")
-	private String codeClient;
+	private String codeInd;
 
-	@Temporal(TemporalType.DATE)
-	private Date dateInscription;
+	private String dateInscription;
 
 	private String dateNaissance;
 
@@ -56,6 +65,9 @@ public class Individuel implements Serializable {
 
 	private String nomConjoint;
 
+	@Column(name="code_Garant", length=15)
+	private String codeGarant;
+
 	private String numeroMobile;
 
 	private String parentAdresse;
@@ -71,13 +83,38 @@ public class Individuel implements Serializable {
 	private String sexe;
 
 	private String titre;
+	
+	@Column(name="approuver")
+	private boolean approuver;
+	
+	@Column(name="is_liste_rouge")
+	private boolean isListeRouge;
+	
+	@Column(name="is_liste_noir")
+	private boolean isListeNoir;
+
+	@Column(name="is_sain")
+	private boolean isSain;
+	
 
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="individuel")
+	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
+	
+	//Compte DAT
+	@OneToMany(mappedBy="individuel")
+	@XmlTransient
+	private List<CompteDAT> compteDat;
+
+	//bi-directional many-to-one association to DemandeCredit
+	@OneToMany(mappedBy="individuel")
+	@XmlTransient
+	private List<DemandeCredit> demandeCredits;
 
 	//bi-directional many-to-one association to Docidentite
-	@OneToMany(mappedBy="individuel")
+	@OneToMany(mappedBy="individuel",cascade = CascadeType.ALL)
+	@XmlTransient
 	private List<Docidentite> docidentites;
 
 	//bi-directional many-to-one association to Adresse
@@ -88,32 +125,47 @@ public class Individuel implements Serializable {
 	//bi-directional many-to-one association to Groupe
 	@ManyToOne
 	@JoinColumn(name="codeGrp")
+	@XmlTransient
 	private Groupe groupe;
+	
+	@OneToMany(mappedBy="codeInd")
+	@XmlTransient
+	private List<Grandlivre> grandLivre;
+	
+	@OneToMany(mappedBy="individuel",cascade = CascadeType.ALL)
+	@XmlTransient
+	private List<ListeRouge> listeRouge;
+	
+	@OneToMany(mappedBy="codeInd")
+	@XmlTransient
+	private List<DroitInscription> droitInscription;
+	
+	//Montant credit par membre groupe
+	@OneToMany(mappedBy="individuel")
+	@XmlTransient
+	private List<CreditMembreGroupe> montantMembres;
+	
+	//Relation to membreGroupe
+	@OneToMany(mappedBy="individuel")
+	@XmlTransient
+	private List<MembreGroupe> membres;
 
 	public Individuel() {
 	}
 
-	/*public String getCodeAgence() {
-		return this.codeAgence;
+	public String getCodeInd() {
+		return this.codeInd;
 	}
 
-	public void setCodeAgence(String codeAgence) {
-		this.codeAgence = codeAgence;
-	}*/
-
-	public String getCodeClient() {
-		return this.codeClient;
+	public void setCodeInd(String codeInd) {
+		this.codeInd = codeInd;
 	}
 
-	public void setCodeClient(String codeClient) {
-		this.codeClient = codeClient;
-	}
-
-	public Date getDateInscription() {
+	public String getDateInscription() {
 		return this.dateInscription;
 	}
 
-	public void setDateInscription(Date dateInscription) {
+	public void setDateInscription(String dateInscription) {
 		this.dateInscription = dateInscription;
 	}
 
@@ -122,8 +174,7 @@ public class Individuel implements Serializable {
 	}
 
 	public void setDateNaissance(String dateNaissance) {
-		LocalDate dtUtil = LocalDate.parse(dateNaissance);
-		this.dateNaissance = dtUtil.toString();
+		this.dateNaissance = dateNaissance;
 	}
 
 	public Date getDateSortie() {
@@ -229,6 +280,39 @@ public class Individuel implements Serializable {
 	public void setNomConjoint(String nomConjoint) {
 		this.nomConjoint = nomConjoint;
 	}
+	
+
+	public boolean isListeRouge() {
+		return isListeRouge;
+	}
+
+	public void setListeRouge(boolean isListeRouge) {
+		this.isListeRouge = isListeRouge;
+	}
+
+	public List<ListeRouge> getListeRouge() {
+		return listeRouge;
+	}
+
+	public void setListeRouge(List<ListeRouge> listeRouge) {
+		this.listeRouge = listeRouge;
+	}
+
+	public String getCodeGarant() {
+		return codeGarant;
+	}
+
+	public void setCodeGarant(String codeGarant) {
+		this.codeGarant = codeGarant;
+	}
+
+	public List<DroitInscription> getDroitInscription() {
+		return droitInscription;
+	}
+
+	public void setDroitInscription(List<DroitInscription> droitInscription) {
+		this.droitInscription = droitInscription;
+	}
 
 	public String getNumeroMobile() {
 		return this.numeroMobile;
@@ -293,6 +377,22 @@ public class Individuel implements Serializable {
 	public void setTitre(String titre) {
 		this.titre = titre;
 	}
+	
+	public boolean isListeNoir() {
+		return isListeNoir;
+	}
+
+	public void setListeNoir(boolean isListeNoir) {
+		this.isListeNoir = isListeNoir;
+	}
+
+	public boolean isSain() {
+		return isSain;
+	}
+
+	public void setSain(boolean isSain) {
+		this.isSain = isSain;
+	}
 
 	public List<CompteEpargne> getCompteEpargnes() {
 		return this.compteEpargnes;
@@ -314,6 +414,28 @@ public class Individuel implements Serializable {
 		compteEpargne.setIndividuel(null);
 
 		return compteEpargne;
+	}
+
+	public List<DemandeCredit> getDemandeCredits() {
+		return this.demandeCredits;
+	}
+
+	public void setDemandeCredits(List<DemandeCredit> demandeCredits) {
+		this.demandeCredits = demandeCredits;
+	}
+
+	public DemandeCredit addDemandeCredit(DemandeCredit demandeCredit) {
+		getDemandeCredits().add(demandeCredit);
+		demandeCredit.setIndividuel(this);
+
+		return demandeCredit;
+	}
+
+	public DemandeCredit removeDemandeCredit(DemandeCredit demandeCredit) {
+		getDemandeCredits().remove(demandeCredit);
+		demandeCredit.setIndividuel(null);
+
+		return demandeCredit;
 	}
 
 	public List<Docidentite> getDocidentites() {
@@ -354,4 +476,43 @@ public class Individuel implements Serializable {
 		this.groupe = groupe;
 	}
 
+	public List<Grandlivre> getGrandLivre() {
+		return grandLivre;
+	}
+
+	public void setGrandLivre(List<Grandlivre> grandLivre) {
+		this.grandLivre = grandLivre;
+	}
+
+	public List<CompteDAT> getCompteDat() {
+		return compteDat;
+	}
+
+	public void setCompteDat(List<CompteDAT> compteDat) {
+		this.compteDat = compteDat;
+	}
+
+	public List<CreditMembreGroupe> getMontantMembres() {
+		return montantMembres;
+	}
+
+	public void setMontantMembres(List<CreditMembreGroupe> montantMembres) {
+		this.montantMembres = montantMembres;
+	}
+
+	public List<MembreGroupe> getMembres() {
+		return membres;
+	}
+
+	public void setMembres(List<MembreGroupe> membres) {
+		this.membres = membres;
+	}
+
+	public boolean isApprouver() {
+		return approuver;
+	}
+
+	public void setApprouver(boolean approuver) {
+		this.approuver = approuver;
+	}
 }

@@ -9,7 +9,6 @@
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/jpa/org.eclipse.persistence.jpa.modelgen.source_2.5.1.v20130918-f2b9fc5.jar"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/jpa/org.eclipse.persistence.jpars_2.5.1.v20130918-f2b9fc5.jar"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/jpa/org.eclipse.persistence.jpars.source_2.5.1.v20130918-f2b9fc5.jar"/>
-	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/moxy/com.sun.xml.bind_2.2.0.v201004141950.jar"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/moxy/com.sun.tools.xjc_2.2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/moxy/javax.activation_1.1.0.v201108011116.jar"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/moxy/javax.mail_1.4.0.v201005080615.jar"/>
@@ -29,16 +28,43 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/lib_utils">
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/lib_utils"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/httpRestUtils"/>
+	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/json-20180813.jar"/>
+	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/jersey.jar"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/javax.ws.rs-api-2.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/jaxrs-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/javax.ws.rs.jar"/>
+	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/jBCrypt-0.4.1.jar"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/EclipsLink"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/axis.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-discovery-0.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/eclipselink.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/saaj.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/wsdl4j.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/commons-codec-1.11.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/fluent-hc-4.5.9.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/httpclient-4.5.9.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/httpclient-cache-4.5.9.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/httpclient-osgi-4.5.9.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/httpclient-win-4.5.9.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/httpcore-4.4.11.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/httpmime-4.5.9.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/jna-4.5.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/jna-platform-4.5.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/sdo/commonj.sdo_2.1.1.v201112051852.jar"/>
+	<classpathentry kind="lib" path="H:/javax.xml.soap-3.1.jar"/>
+	<classpathentry kind="lib" path="H:/javax.xml.ws-3.0-prelude.jar"/>
+	<classpathentry kind="lib" path="H:/jaxb-api-2.2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JAX-WS">
 		<attributes>
-			<attribute name="owner.project.facets" value="jpt.jaxb;#system#"/>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+			<attribute name="owner.project.facets" value="jpt.jaxb"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/STAGE/Documents/FIDEV-planing/Sandratra &amp; Miel/eclipselink-2.5.1.v20130918-f2b9fc5/eclipselink/jlib/moxy/com.sun.tools.xjc_2.2.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/STAGE/Documents/FIDEV-planing/Sandratra &amp; Miel/eclipselink-2.5.1.v20130918-f2b9fc5/eclipselink/jlib/moxy/com.sun.xml.bind_2.2.0.v201004141950.jar"/>
-	<classpathentry kind="lib" path="C:/Users/STAGE/Documents/FIDEV-planing/Sandratra &amp; Miel/eclipselink-2.5.1.v20130918-f2b9fc5/eclipselink/jlib/moxy/javax.activation_1.1.0.v201108011116.jar"/>
-	<classpathentry kind="lib" path="C:/Users/STAGE/Documents/FIDEV-planing/Sandratra &amp; Miel/eclipselink-2.5.1.v20130918-f2b9fc5/eclipselink/jlib/moxy/javax.mail_1.4.0.v201005080615.jar"/>
-	<classpathentry kind="lib" path="C:/Users/STAGE/Documents/FIDEV-planing/Sandratra &amp; Miel/eclipselink-2.5.1.v20130918-f2b9fc5/eclipselink/jlib/moxy/javax.xml.bind_2.2.0.v201105210648.jar"/>
-	<classpathentry kind="lib" path="C:/Users/STAGE/Documents/FIDEV-planing/Sandratra &amp; Miel/eclipselink-2.5.1.v20130918-f2b9fc5/eclipselink/jlib/moxy/javax.xml.stream_1.0.1.v201004272200.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

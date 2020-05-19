@@ -1,8 +1,19 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-import javax.persistence.*;
 import java.util.Date;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 
 /**
@@ -11,6 +22,8 @@ import java.util.Date;
  */
 @Entity
 @NamedQuery(name="Docidentite.findAll", query="SELECT d FROM Docidentite d")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Docidentite implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -30,9 +43,13 @@ public class Docidentite implements Serializable {
 	private String typedoc;
 
 	//bi-directional many-to-one association to Individuel
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="codeClient")
 	private Individuel individuel;
+	
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="codeGarant")
+	private Garant garant;
 
 	public Docidentite() {
 	}
@@ -92,5 +109,15 @@ public class Docidentite implements Serializable {
 	public void setIndividuel(Individuel individuel) {
 		this.individuel = individuel;
 	}
+
+	public Garant getGarant() {
+		return garant;
+	}
+
+	public void setGarant(Garant garant) {
+		this.garant = garant;
+	}
+	
+	
 
 }

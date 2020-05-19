@@ -1,13 +1,21 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-
-import javax.persistence.*;
-
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.Date;
 import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -17,6 +25,8 @@ import java.util.List;
 @Entity
 @Table(name="compte_epargne")
 @NamedQuery(name="CompteEpargne.findAll", query="SELECT c FROM CompteEpargne c")
+@XmlRootElement(name="compteEp")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CompteEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -24,9 +34,8 @@ public class CompteEpargne implements Serializable {
 	@Column(name="num_compte_ep")
 	private String numCompteEp;
 
-	@Temporal(TemporalType.DATE)
 	@Column(name="date_echeance")
-	private Date dateEcheance;
+	private String dateEcheance;
 
 	@Column(name="date_ouverture")
 	private String dateOuverture;
@@ -34,6 +43,12 @@ public class CompteEpargne implements Serializable {
 	private boolean isActif;
 
 	private double solde;
+	
+	private boolean fermer;
+	
+	private boolean comptGeler;
+	
+	private boolean pasRetrait;
 
 	//bi-directional many-to-one association to Groupe
 	@ManyToOne
@@ -55,9 +70,23 @@ public class CompteEpargne implements Serializable {
 	@JoinColumn(name="UtilisateuridUtilisateur")
 	private Utilisateur utilisateur;
 
+	//bi-directional many-to-one association to CompteFerme
+	@OneToMany(mappedBy="compteEpargne", cascade = CascadeType.ALL)
+	@XmlTransient
+	private List<CompteFerme> compteFermes;
+
 	//bi-directional many-to-one association to TransactionEpargne
-	@OneToMany(mappedBy="compteEpargne")
+	@OneToMany(mappedBy="compteEpargne", cascade = CascadeType.ALL)
+	@XmlTransient
 	private List<TransactionEpargne> transactionEpargnes;
+	
+	@OneToMany(mappedBy="compte", cascade = CascadeType.ALL)
+	@XmlTransient
+	private List<InteretEpargne> interet;
+	
+	@OneToMany(mappedBy="compteEpargne", cascade = CascadeType.ALL)
+	@XmlTransient     
+	private List<Grandlivre> grandLivre;
 
 	public CompteEpargne() {
 	}
@@ -70,11 +99,11 @@ public class CompteEpargne implements Serializable {
 		this.numCompteEp = numCompteEp;
 	}
 
-	public Date getDateEcheance() {
+	public String getDateEcheance() {
 		return this.dateEcheance;
 	}
 
-	public void setDateEcheance(Date dateEcheance) {
+	public void setDateEcheance(String dateEcheance) {
 		this.dateEcheance = dateEcheance;
 	}
 
@@ -83,8 +112,7 @@ public class CompteEpargne implements Serializable {
 	}
 
 	public void setDateOuverture(String dateOuverture) {
-		LocalDate date = LocalDate.parse(dateOuverture);
-		this.dateOuverture = date.toString();
+		this.dateOuverture = dateOuverture;
 	}
 
 	public boolean getIsActif() {
@@ -100,28 +128,41 @@ public class CompteEpargne implements Serializable {
 	}
 
 	public void setSolde(double solde) {
-		ConfigInteretProdEp confIntEp = this.getProduitEpargne().getConfigInteretProdEp();
-		double soldeMinGrp = this.getProduitEpargne().getConfigInteretProdEp().getSoldeMinGrp();
-		if(this.getIndividuel() != null){
-			if(confIntEp.getSoldeMinInd() > solde){
-				System.err.println("Solde minimum de ce produit pour un client individuel : " +
-						confIntEp.getSoldeMinInd());
-			}
-			else{
-				System.out.println("Solde accepté; client individuel");
-				this.solde = solde;
-			}
-		}
-		else if(this.getGroupe() != null){
-			if(soldeMinGrp > solde){
-				System.err.println("Solde  minimum de ce produit pour un client groupe : " +
-			soldeMinGrp);
-			}
-			else{
-				System.out.println("Solde accepté; client groupe");
-				this.solde = solde;
-			}
-		}
+		this.solde = solde;
+	}
+	
+	
+
+	public boolean isPasRetrait() {
+		return pasRetrait;
+	}
+
+	public void setPasRetrait(boolean pasRetrait) {
+		this.pasRetrait = pasRetrait;
+	}
+
+	public boolean isFermer() {
+		return fermer;
+	}
+
+	public void setFermer(boolean fermer) {
+		this.fermer = fermer;
+	}
+
+	public boolean isComptGeler() {
+		return comptGeler;
+	}
+
+	public void setComptGeler(boolean comptGeler) {
+		this.comptGeler = comptGeler;
+	}
+
+	public List<InteretEpargne> getInteret() {
+		return interet;
+	}
+
+	public void setInteret(List<InteretEpargne> interet) {
+		this.interet = interet;
 	}
 
 	public Groupe getGroupe() {
@@ -129,12 +170,7 @@ public class CompteEpargne implements Serializable {
 	}
 
 	public void setGroupe(Groupe groupe) {
-		if(groupe != null){
-			this.setNumCompteEp(groupe.getCodeClient() + "/" + this.getProduitEpargne().getIdProdEpargne());
-			this.groupe = groupe;
-		}
-		else
-			System.err.println("Groupe vide");
+		this.groupe = groupe;
 	}
 
 	public Individuel getIndividuel() {
@@ -142,20 +178,7 @@ public class CompteEpargne implements Serializable {
 	}
 
 	public void setIndividuel(Individuel individuel) {
-		int minAge = this.getProduitEpargne().getConfigProdEp().getAgeMinCpt();
-		if(individuel != null){
-			LocalDate naissanceInd = LocalDate.parse(individuel.getDateNaissance());
-			Period period = Period.between(naissanceInd, LocalDate.parse(dateOuverture));
-			if(period.getYears() < minAge){
-				System.err.println("Age minimum requise pour l'ouverture de ce compte : "+minAge+ "\n");
-			}
-			else{
-				this.setNumCompteEp(individuel.getCodeClient() + "/" + this.getProduitEpargne().getIdProdEpargne());
-				this.individuel = individuel;
-			}
-		}
-		else
-			System.err.println("Individuel vide");
+		this.individuel = individuel;
 	}
 
 	public ProduitEpargne getProduitEpargne() {
@@ -172,6 +195,28 @@ public class CompteEpargne implements Serializable {
 
 	public void setUtilisateur(Utilisateur utilisateur) {
 		this.utilisateur = utilisateur;
+	}
+
+	public List<CompteFerme> getCompteFermes() {
+		return this.compteFermes;
+	}
+
+	public void setCompteFermes(List<CompteFerme> compteFermes) {
+		this.compteFermes = compteFermes;
+	}
+
+	public CompteFerme addCompteFerme(CompteFerme compteFerme) {
+		getCompteFermes().add(compteFerme);
+		compteFerme.setCompteEpargne(this);
+
+		return compteFerme;
+	}
+
+	public CompteFerme removeCompteFerme(CompteFerme compteFerme) {
+		getCompteFermes().remove(compteFerme);
+		compteFerme.setCompteEpargne(null);
+
+		return compteFerme;
 	}
 
 	public List<TransactionEpargne> getTransactionEpargnes() {
@@ -194,6 +239,18 @@ public class CompteEpargne implements Serializable {
 		transactionEpargne.setCompteEpargne(null);
 
 		return transactionEpargne;
+	}
+
+	public List<Grandlivre> getGrandLivre() {
+		return grandLivre;
+	}
+
+	public void setGrandLivre(List<Grandlivre> grandLivre) {
+		this.grandLivre = grandLivre;
+	}
+
+	public void setActif(boolean isActif) {
+		this.isActif = isActif;
 	}
 
 }

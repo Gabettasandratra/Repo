@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.Date;
 
 
@@ -11,6 +17,8 @@ import java.util.Date;
  */
 @Entity
 @NamedQuery(name="Entreprise.findAll", query="SELECT e FROM Entreprise e")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Entreprise implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -28,6 +36,7 @@ public class Entreprise implements Serializable {
 	//bi-directional many-to-one association to Adresse
 	@ManyToOne
 	@JoinColumn(name="idAdresse")
+	@XmlTransient
 	private Adresse adresse;
 
 	public Entreprise() {

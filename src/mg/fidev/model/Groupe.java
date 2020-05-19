@@ -1,11 +1,18 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-
-import javax.persistence.*;
-
-import java.util.Date;
 import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -13,62 +20,113 @@ import java.util.List;
  * 
  */
 @Entity
-@NamedQuery(name="Groupe.findAll", query="SELECT g FROM Groupe g")
+//@NamedQuery(name="Groupe.findAll", query="SELECT g FROM Groupe g")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Groupe implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	//private String codeAgence;
-
 	@Id
-	@Column(name="codeGrp")
-	private String codeClient;
-
-	@Temporal(TemporalType.DATE)
-	private Date dateInscription;
-
-	private String email;
+	private String codeGrp;
 
 	private String nomGroupe;
 
+	
+	private String dateInscription;
+
+	private String email;
+	
 	private String numeroMobile;
 
+	private String numReference;
+	
+	private String NumStat;
+	
+	private String president;
+	
+	private String secretaire;
+	
+	private String tresorier;
+	
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="groupe")
+	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 
+	//Compte DAT
+	@OneToMany(mappedBy="groupe")
+	@XmlTransient
+	private List<CompteDAT> compteDat;
+	
+	//bi-directional many-to-one association to DemandeCredit
+	@OneToMany(mappedBy="groupe")
+	@XmlTransient
+	private List<DemandeCredit> demandeCredits;
+
 	//bi-directional many-to-one association to Adresse
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade= CascadeType.ALL)
 	@JoinColumn(name="idAdresse")
 	private Adresse adresse;
 
 	//bi-directional many-to-one association to Individuel
-	@OneToMany(mappedBy="groupe")
+	@OneToMany(mappedBy="groupe",cascade= CascadeType.ALL)
+	@XmlTransient
 	private List<Individuel> individuels;
+	
+	@OneToMany(mappedBy="groupe")
+	@XmlTransient
+	private List<Grandlivre> grandLivre;
+	
+	@OneToMany(mappedBy="groupe", cascade = CascadeType.ALL)
+	@XmlTransient
+	private List<ListeRouge> listeRouge;
+	
+	@OneToMany(mappedBy="groupe")
+	@XmlTransient
+	private List<DroitInscription> droitInscription;
 
+	//Montant credit par membre groupe
+	@OneToMany(mappedBy="groupe")
+	@XmlTransient
+	private List<CreditMembreGroupe> montantMembres;
+	
+	//Relation to membreGroupe
+	@OneToMany(mappedBy="groupe",cascade= CascadeType.ALL)
+	@XmlTransient
+	private List<MembreGroupe> membres;
+	
 	public Groupe() {
 	}
 
-	/*public String getCodeAgence() {
-		return this.codeAgence;
+	public List<ListeRouge> getListeRouge() {
+		return listeRouge;
 	}
 
-	public void setCodeAgence(String codeAgence) {
-		this.codeAgence = codeAgence;
-	}*/
-
-	public String getCodeClient() {
-		return this.codeClient;
+	public void setListeRouge(List<ListeRouge> listeRouge) {
+		this.listeRouge = listeRouge;
 	}
 
-	public void setCodeClient(String codeClient) {
-		this.codeClient = codeClient;
+	public List<DroitInscription> getDroitInscription() {
+		return droitInscription;
 	}
 
-	public Date getDateInscription() {
+	public void setDroitInscription(List<DroitInscription> droitInscription) {
+		this.droitInscription = droitInscription;
+	}
+
+	public String getCodeGrp() {
+		return this.codeGrp;
+	}
+
+	public void setCodeGrp(String codeGrp) {
+		this.codeGrp = codeGrp;
+	}
+
+	public String getDateInscription() {
 		return this.dateInscription;
 	}
 
-	public void setDateInscription(Date dateInscription) {
+	public void setDateInscription(String dateInscription) {
 		this.dateInscription = dateInscription;
 	}
 
@@ -96,6 +154,46 @@ public class Groupe implements Serializable {
 		this.numeroMobile = numeroMobile;
 	}
 
+	public String getNumReference() {
+		return numReference;
+	}
+
+	public void setNumReference(String numReference) {
+		this.numReference = numReference;
+	}
+
+	public String getNumStat() {
+		return NumStat;
+	}
+
+	public void setNumStat(String numStat) {
+		NumStat = numStat;
+	}
+
+	public String getPresident() {
+		return president;
+	}
+
+	public void setPresident(String president) {
+		this.president = president;
+	}
+
+	public String getSecretaire() {
+		return secretaire;
+	}
+
+	public void setSecretaire(String secretaire) {
+		this.secretaire = secretaire;
+	}
+
+	public String getTresorier() {
+		return tresorier;
+	}
+
+	public void setTresorier(String tresorier) {
+		this.tresorier = tresorier;
+	}
+
 	public List<CompteEpargne> getCompteEpargnes() {
 		return this.compteEpargnes;
 	}
@@ -116,6 +214,28 @@ public class Groupe implements Serializable {
 		compteEpargne.setGroupe(null);
 
 		return compteEpargne;
+	}
+
+	public List<DemandeCredit> getDemandeCredits() {
+		return this.demandeCredits;
+	}
+
+	public void setDemandeCredits(List<DemandeCredit> demandeCredits) {
+		this.demandeCredits = demandeCredits;
+	}
+
+	public DemandeCredit addDemandeCredit(DemandeCredit demandeCredit) {
+		getDemandeCredits().add(demandeCredit);
+		demandeCredit.setGroupe(this);
+
+		return demandeCredit;
+	}
+
+	public DemandeCredit removeDemandeCredit(DemandeCredit demandeCredit) {
+		getDemandeCredits().remove(demandeCredit);
+		demandeCredit.setGroupe(null);
+
+		return demandeCredit;
 	}
 
 	public Adresse getAdresse() {
@@ -146,6 +266,38 @@ public class Groupe implements Serializable {
 		individuel.setGroupe(null);
 
 		return individuel;
+	}
+
+	public List<Grandlivre> getGrandLivre() {
+		return grandLivre;
+	}
+
+	public void setGrandLivre(List<Grandlivre> grandLivre) {
+		this.grandLivre = grandLivre;
+	}
+
+	public List<CompteDAT> getCompteDat() {
+		return compteDat;
+	}
+
+	public void setCompteDat(List<CompteDAT> compteDat) {
+		this.compteDat = compteDat;
+    }
+
+	public List<CreditMembreGroupe> getMontantMembres() {
+		return montantMembres;
+	}
+
+	public void setMontantMembres(List<CreditMembreGroupe> montantMembres) {
+		this.montantMembres = montantMembres;
+	}
+
+	public List<MembreGroupe> getMembres() {
+		return membres;
+	}
+
+	public void setMembres(List<MembreGroupe> membres) {
+		this.membres = membres;
 	}
 
 }

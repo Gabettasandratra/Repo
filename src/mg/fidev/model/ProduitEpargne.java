@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
 
 import java.util.List;
 
@@ -20,7 +20,6 @@ import java.util.List;
 @Table(name="produit_epargne")
 @NamedQuery(name="ProduitEpargne.findAll", query="SELECT p FROM ProduitEpargne p")
 @XmlRootElement
-@XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ProduitEpargne implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -30,24 +29,48 @@ public class ProduitEpargne implements Serializable {
 	@XmlElement
 	private String idProdEpargne;
 
-	@XmlElement
 	private boolean etat;
 
 	@Column(name="nom_prod_epargne")
-	@XmlElement
 	private String nomProdEpargne;
 
 	//bi-directional many-to-one association to CompteEpargne
-	@OneToMany(mappedBy="produitEpargne")
+	@OneToMany(mappedBy="produitEpargne",cascade=CascadeType.REMOVE)
+	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
+	
+	//Compte DAT
+	@OneToMany(mappedBy="produitEpargne",cascade=CascadeType.REMOVE)
+	@XmlTransient
+	private List<CompteDAT> compteDat;
+
+	//bi-directional many-to-one association to ConfigGarantieCredit
+	@OneToMany(mappedBy="produitEpargne",cascade=CascadeType.REMOVE)
+	@XmlTransient
+	private List<ConfigGarantieCredit> configGarantieCredits;
+
+	//bi-directional many-to-one association to ConfigGlEpargne
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configGLepId")
+	private ConfigGlEpargne configGlEpargne;
 
 	//bi-directional many-to-one association to ConfigInteretProdEp
-	@ManyToOne(cascade = CascadeType.PERSIST)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configIntProId")
 	private ConfigInteretProdEp configInteretProdEp;
+	
+	//Config GL produit DAT
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configGlDat")
+	private ConfigGLDAT configGlDat;
+	
+	//Config Général produit DAT
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configGeneralDat")
+	private ConfigGeneralDAT configGeneralDat;
 
 	//bi-directional many-to-one association to ConfigProdEp
-	@ManyToOne(cascade = CascadeType.PERSIST)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configProdId")
 	private ConfigProdEp configProdEp;
 
@@ -105,6 +128,36 @@ public class ProduitEpargne implements Serializable {
 		return compteEpargne;
 	}
 
+	public List<ConfigGarantieCredit> getConfigGarantieCredits() {
+		return this.configGarantieCredits;
+	}
+
+	public void setConfigGarantieCredits(List<ConfigGarantieCredit> configGarantieCredits) {
+		this.configGarantieCredits = configGarantieCredits;
+	}
+
+	public ConfigGarantieCredit addConfigGarantieCredit(ConfigGarantieCredit configGarantieCredit) {
+		getConfigGarantieCredits().add(configGarantieCredit);
+		configGarantieCredit.setProduitEpargne(this);
+
+		return configGarantieCredit;
+	}
+
+	public ConfigGarantieCredit removeConfigGarantieCredit(ConfigGarantieCredit configGarantieCredit) {
+		getConfigGarantieCredits().remove(configGarantieCredit);
+		configGarantieCredit.setProduitEpargne(null);
+
+		return configGarantieCredit;
+	}
+
+	public ConfigGlEpargne getConfigGlEpargne() {
+		return this.configGlEpargne;
+	}
+
+	public void setConfigGlEpargne(ConfigGlEpargne configGlEpargne) {
+		this.configGlEpargne = configGlEpargne;
+	}
+
 	public ConfigInteretProdEp getConfigInteretProdEp() {
 		return this.configInteretProdEp;
 	}
@@ -121,12 +174,36 @@ public class ProduitEpargne implements Serializable {
 		this.configProdEp = configProdEp;
 	}
 
+	public ConfigGLDAT getConfigGlDat() {
+		return configGlDat;
+	}
+
+	public void setConfigGlDat(ConfigGLDAT configGlDat) {
+		this.configGlDat = configGlDat;
+	}
+
+	public ConfigGeneralDAT getConfigGeneralDat() {
+		return configGeneralDat;
+	}
+
+	public void setConfigGeneralDat(ConfigGeneralDAT configGeneralDat) {
+		this.configGeneralDat = configGeneralDat;
+	}
+
 	public TypeEpargne getTypeEpargne() {
 		return this.typeEpargne;
 	}
 
 	public void setTypeEpargne(TypeEpargne typeEpargne) {
 		this.typeEpargne = typeEpargne;
+	}
+
+	public List<CompteDAT> getCompteDat() {
+		return compteDat;
+	}
+
+	public void setCompteDat(List<CompteDAT> compteDat) {
+		this.compteDat = compteDat;
 	}
 
 }

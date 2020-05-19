@@ -5,8 +5,9 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
 
 import java.util.List;
 
@@ -18,19 +19,21 @@ import java.util.List;
 @Entity
 @NamedQuery(name="Acces.findAll", query="SELECT a FROM Acces a")
 @XmlRootElement
-@XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Acces implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@XmlElement
 	private int idAcces;
 
+	@XmlElement
 	private String titreAcces;
 
 	//bi-directional many-to-many association to Fonction
 	@ManyToMany(mappedBy="acces")
+	@XmlTransient
 	private List<Fonction> fonctions;
 
 	public Acces() {

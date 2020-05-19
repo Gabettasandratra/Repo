@@ -1,7 +1,13 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import java.util.List;
 
 
@@ -11,6 +17,8 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Agence.findAll", query="SELECT a FROM Agence a")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Agence implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -23,8 +31,17 @@ public class Agence implements Serializable {
 
 	//bi-directional many-to-many association to Utilisateur
 	@ManyToMany(mappedBy="agences")
+	@XmlTransient
 	private List<Utilisateur> utilisateurs;
-
+	
+	@OneToMany(mappedBy="agence")
+	@XmlTransient
+	private List<Personnel> personnels;
+	
+	@OneToMany(mappedBy="agence")
+	@XmlTransient
+	private List<Grandlivre> grandLivre;
+	
 	public Agence() {
 	}
 
@@ -60,4 +77,19 @@ public class Agence implements Serializable {
 		this.utilisateurs = utilisateurs;
 	}
 
+	public List<Personnel> getPersonnels() {
+		return personnels;
+	}
+
+	public void setPersonnels(List<Personnel> personnels) {
+		this.personnels = personnels;
+	}
+
+	public List<Grandlivre> getGrandLivre() {
+		return grandLivre;
+	}
+
+	public void setGrandLivre(List<Grandlivre> grandLivre) {
+		this.grandLivre = grandLivre;
+	}	
 }

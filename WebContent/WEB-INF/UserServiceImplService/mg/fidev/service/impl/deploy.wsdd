@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Use this file to deploy some handlers/chains and services      --><!-- Two ways to do this:                                           --><!--   java org.apache.axis.client.AdminClient deploy.wsdd          --><!--      after the axis server is running                          --><!-- or                                                             --><!--   java org.apache.axis.utils.Admin client|server deploy.wsdd   --><!--      from the same directory that the Axis engine runs         --><deployment xmlns="http://xml.apache.org/axis/wsdd/" xmlns:java="http://xml.apache.org/axis/wsdd/providers/java">
+
+  <!-- Services from UserServiceImplService WSDL service -->
+
+  <service name="UserServiceImpl" provider="java:RPC" style="wrapped" use="literal">
+      <parameter name="wsdlTargetNamespace" value="http://impl.service.fidev.mg"/>
+      <parameter name="wsdlServiceElement" value="UserServiceImplService"/>
+      <parameter name="schemaQualified" value="http://impl.service.fidev.mg,http://xml.apache.org/xml-soap,http://model.fidev.mg"/>
+      <parameter name="wsdlServicePort" value="UserServiceImpl"/>
+      <parameter name="className" value="mg.fidev.service.impl.UserServiceImpl"/>
+      <parameter name="wsdlPortType" value="UserServiceImpl"/>
+      <parameter name="typeMappingVersion" value="1.2"/>
+      <operation xmlns:operNS="http://impl.service.fidev.mg" xmlns:retNS="http://impl.service.fidev.mg" xmlns:rtns="http://impl.service.fidev.mg" xmlns:tns="http://impl.service.fidev.mg" name="getAcces" qname="operNS:getAcces" returnQName="retNS:getAccesReturn" returnType="rtns:ArrayOf_xsd_anyType" returnItemQName="tns:item" soapAction="">
+        <parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" xmlns:pns="http://impl.service.fidev.mg" qname="pns:userName" type="tns:int"/>
+      </operation>
+      <operation xmlns:operNS="http://impl.service.fidev.mg" xmlns:retNS="http://impl.service.fidev.mg" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="fermerCompteClient" qname="operNS:fermerCompteClient" returnQName="retNS:fermerCompteClientReturn" returnType="rtns:boolean" soapAction="">
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:dateFermeture" type="tns:dateTime"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:fraisCloture" type="tns:double"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:raison" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:numRecu" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:numCompte" type="tns:string"/>
+      </operation>
+      <operation xmlns:operNS="http://impl.service.fidev.mg" xmlns:retNS="http://impl.service.fidev.mg" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="transactionCompte" qname="operNS:transactionCompte" returnQName="retNS:transactionCompteReturn" returnType="rtns:boolean" soapAction="">
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:typeTransac" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:dateTransac" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:montant" type="tns:double"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:description" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:pieceCompta" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:nomCptCaisse" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:numCptEp" type="tns:string"/>
+      </operation>
+      <operation xmlns:operNS="http://impl.service.fidev.mg" xmlns:retNS="http://impl.service.fidev.mg" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="creerCompteClient" qname="operNS:creerCompteClient" returnQName="retNS:creerCompteClientReturn" returnType="rtns:boolean" soapAction="">
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:dateOuverture" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:dateEcheance" type="tns:dateTime"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:idProduitEp" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:individuelId" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:groupeId" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:userId" type="tns:int"/>
+      </operation>
+      <operation xmlns:operNS="http://impl.service.fidev.mg" xmlns:retNS="http://impl.service.fidev.mg" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="insertUser" qname="operNS:insertUser" returnQName="retNS:insertUserReturn" returnType="rtns:boolean" soapAction="">
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:nomUser" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:loginUser" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:mdpUser" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:mdpConf" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:genreUser" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:telUser" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://impl.service.fidev.mg" xmlns:itns="http://impl.service.fidev.mg" qname="pns:listCptCaisse" type="tns:ArrayOf_xsd_anyType" itemQName="itns:item"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:fonctionId" type="tns:int"/>
+      </operation>
+      <operation xmlns:operNS="http://impl.service.fidev.mg" xmlns:retNS="http://impl.service.fidev.mg" xmlns:rtns="http://model.fidev.mg" name="authentifie" qname="operNS:authentifie" returnQName="retNS:authentifieReturn" returnType="rtns:Utilisateur" soapAction="">
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:loginUser" type="tns:string"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:mdpUser" type="tns:string"/>
+      </operation>
+      <operation xmlns:operNS="http://impl.service.fidev.mg" xmlns:retNS="http://impl.service.fidev.mg" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="ajoutCptCaisse" qname="operNS:ajoutCptCaisse" returnQName="retNS:ajoutCptCaisseReturn" returnType="rtns:boolean" soapAction="">
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://model.fidev.mg" qname="pns:cptCaisse" type="tns:CompteCaisse"/>
+        <parameter xmlns:pns="http://impl.service.fidev.mg" xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="pns:numCptCompta" type="tns:int"/>
+      </operation>
+      <parameter name="allowedMethods" value="fermerCompteClient insertUser ajoutCptCaisse transactionCompte getAcces creerCompteClient authentifie"/>
+
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;getAcces" type="java:mg.fidev.service.impl.GetAcces" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;ajoutCptCaisse" type="java:mg.fidev.service.impl.AjoutCptCaisse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;fermerCompteClientResponse" type="java:mg.fidev.service.impl.FermerCompteClientResponse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;creerCompteClient" type="java:mg.fidev.service.impl.CreerCompteClient" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://model.fidev.mg" qname="ns:CompteCaisse" type="java:mg.fidev.model.CompteCaisse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://model.fidev.mg" qname="ns:Account" type="java:mg.fidev.model.Account" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;getAccesResponse" type="java:mg.fidev.service.impl.GetAccesResponse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;insertUserResponse" type="java:mg.fidev.service.impl.InsertUserResponse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;authentifieResponse" type="java:mg.fidev.service.impl.AuthentifieResponse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;ajoutCptCaisseResponse" type="java:mg.fidev.service.impl.AjoutCptCaisseResponse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://model.fidev.mg" qname="ns:Utilisateur" type="java:mg.fidev.model.Utilisateur" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;insertUser" type="java:mg.fidev.service.impl.InsertUser" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;transactionCompte" type="java:mg.fidev.service.impl.TransactionCompte" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;creerCompteClientResponse" type="java:mg.fidev.service.impl.CreerCompteClientResponse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;fermerCompteClient" type="java:mg.fidev.service.impl.FermerCompteClient" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;authentifie" type="java:mg.fidev.service.impl.Authentifie" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <arrayMapping xmlns:ns="http://impl.service.fidev.mg" xmlns:cmp-ns="http://www.w3.org/2001/XMLSchema" qname="ns:ArrayOf_xsd_anyType" type="java:java.lang.Object[]" innerType="cmp-ns:anyType" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://impl.service.fidev.mg" qname="ns:&gt;transactionCompteResponse" type="java:mg.fidev.service.impl.TransactionCompteResponse" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+      <typeMapping xmlns:ns="http://model.fidev.mg" qname="ns:Fonction" type="java:mg.fidev.model.Fonction" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle=""/>
+  </service>
+</deployment>

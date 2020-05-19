@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://impl.service.fidev.mg" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://impl.service.fidev.mg" xmlns:intf="http://impl.service.fidev.mg" xmlns:tns1="http://model.fidev.mg" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema elementFormDefault="qualified" targetNamespace="http://impl.service.fidev.mg" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://model.fidev.mg"/>
+   <import namespace="http://xml.apache.org/xml-soap"/>
+   <element name="getAcces">
+    <complexType>
+     <sequence>
+      <element name="userName" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getAccesResponse">
+    <complexType>
+     <sequence>
+      <element name="getAccesReturn" type="impl:ArrayOf_xsd_anyType"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="ArrayOf_xsd_anyType">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="xsd:anyType"/>
+    </sequence>
+   </complexType>
+   <element name="fermerCompteClient">
+    <complexType>
+     <sequence>
+      <element name="dateFermeture" type="xsd:dateTime"/>
+      <element name="fraisCloture" type="xsd:double"/>
+      <element name="raison" type="xsd:string"/>
+      <element name="numRecu" type="xsd:string"/>
+      <element name="numCompte" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="fermerCompteClientResponse">
+    <complexType>
+     <sequence>
+      <element name="fermerCompteClientReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="transactionCompte">
+    <complexType>
+     <sequence>
+      <element name="typeTransac" type="xsd:string"/>
+      <element name="dateTransac" type="xsd:string"/>
+      <element name="montant" type="xsd:double"/>
+      <element name="description" type="xsd:string"/>
+      <element name="pieceCompta" type="xsd:string"/>
+      <element name="nomCptCaisse" type="xsd:string"/>
+      <element name="numCptEp" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="transactionCompteResponse">
+    <complexType>
+     <sequence>
+      <element name="transactionCompteReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="creerCompteClient">
+    <complexType>
+     <sequence>
+      <element name="dateOuverture" type="xsd:string"/>
+      <element name="dateEcheance" type="xsd:dateTime"/>
+      <element name="idProduitEp" type="xsd:string"/>
+      <element name="individuelId" type="xsd:string"/>
+      <element name="groupeId" type="xsd:string"/>
+      <element name="userId" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="creerCompteClientResponse">
+    <complexType>
+     <sequence>
+      <element name="creerCompteClientReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="insertUser">
+    <complexType>
+     <sequence>
+      <element name="nomUser" type="xsd:string"/>
+      <element name="loginUser" type="xsd:string"/>
+      <element name="mdpUser" type="xsd:string"/>
+      <element name="mdpConf" type="xsd:string"/>
+      <element name="genreUser" type="xsd:string"/>
+      <element name="telUser" type="xsd:string"/>
+      <element name="listCptCaisse" type="impl:ArrayOf_xsd_anyType"/>
+      <element name="fonctionId" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="insertUserResponse">
+    <complexType>
+     <sequence>
+      <element name="insertUserReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="authentifie">
+    <complexType>
+     <sequence>
+      <element name="loginUser" type="xsd:string"/>
+      <element name="mdpUser" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="authentifieResponse">
+    <complexType>
+     <sequence>
+      <element name="authentifieReturn" type="tns1:Utilisateur"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="ajoutCptCaisse">
+    <complexType>
+     <sequence>
+      <element name="cptCaisse" type="tns1:CompteCaisse"/>
+      <element name="numCptCompta" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="ajoutCptCaisseResponse">
+    <complexType>
+     <sequence>
+      <element name="ajoutCptCaisseReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+  </schema>
+  <schema elementFormDefault="qualified" targetNamespace="http://xml.apache.org/xml-soap" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://model.fidev.mg"/>
+   <import namespace="http://impl.service.fidev.mg"/>
+   <complexType name="Vector">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="xsd:anyType"/>
+    </sequence>
+   </complexType>
+  </schema>
+  <schema elementFormDefault="qualified" targetNamespace="http://model.fidev.mg" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://xml.apache.org/xml-soap"/>
+   <import namespace="http://impl.service.fidev.mg"/>
+   <complexType name="Fonction">
+    <sequence>
+     <element name="acces" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="idFonction" type="xsd:int"/>
+     <element name="libelleFonction" nillable="true" type="xsd:string"/>
+     <element name="utilisateurs" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+    </sequence>
+   </complexType>
+   <complexType name="Utilisateur">
+    <sequence>
+     <element name="agences" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="commissionCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="compteCaisses" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="compteEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="decaissements" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="demandeCredits" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="fonction" nillable="true" type="tns1:Fonction"/>
+     <element name="genreUser" nillable="true" type="xsd:string"/>
+     <element name="idUtilisateur" type="xsd:int"/>
+     <element name="loginUtilisateur" nillable="true" type="xsd:string"/>
+     <element name="mdpUtilisateur" nillable="true" type="xsd:string"/>
+     <element name="nomUtilisateur" nillable="true" type="xsd:string"/>
+     <element name="remboursements" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="telUser" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="Account">
+    <sequence>
+     <element name="account" nillable="true" type="tns1:Account"/>
+     <element name="accounts" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="compteCaisses" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="hlevel" type="xsd:int"/>
+     <element name="isActive" type="xsd:boolean"/>
+     <element name="isHeader" type="xsd:boolean"/>
+     <element name="label" nillable="true" type="xsd:string"/>
+     <element name="numCpt" nillable="true" type="xsd:string"/>
+     <element name="tkey" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <complexType name="CompteCaisse">
+    <sequence>
+     <element name="account" nillable="true" type="tns1:Account"/>
+     <element name="nomCptCaisse" nillable="true" type="xsd:string"/>
+     <element name="transactionEpargnes" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+     <element name="utilisateurs" nillable="true" type="impl:ArrayOf_xsd_anyType"/>
+    </sequence>
+   </complexType>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="creerCompteClientRequest">
+
+      <wsdl:part element="impl:creerCompteClient" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="authentifieRequest">
+
+      <wsdl:part element="impl:authentifie" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="authentifieResponse">
+
+      <wsdl:part element="impl:authentifieResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="fermerCompteClientResponse">
+
+      <wsdl:part element="impl:fermerCompteClientResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getAccesResponse">
+
+      <wsdl:part element="impl:getAccesResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="transactionCompteResponse">
+
+      <wsdl:part element="impl:transactionCompteResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="fermerCompteClientRequest">
+
+      <wsdl:part element="impl:fermerCompteClient" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="insertUserResponse">
+
+      <wsdl:part element="impl:insertUserResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="ajoutCptCaisseResponse">
+
+      <wsdl:part element="impl:ajoutCptCaisseResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="insertUserRequest">
+
+      <wsdl:part element="impl:insertUser" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="ajoutCptCaisseRequest">
+
+      <wsdl:part element="impl:ajoutCptCaisse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="transactionCompteRequest">
+
+      <wsdl:part element="impl:transactionCompte" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="creerCompteClientResponse">
+
+      <wsdl:part element="impl:creerCompteClientResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getAccesRequest">
+
+      <wsdl:part element="impl:getAcces" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:portType name="UserServiceImpl">
+
+      <wsdl:operation name="getAcces">
+
+         <wsdl:input message="impl:getAccesRequest" name="getAccesRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:getAccesResponse" name="getAccesResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="fermerCompteClient">
+
+         <wsdl:input message="impl:fermerCompteClientRequest" name="fermerCompteClientRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:fermerCompteClientResponse" name="fermerCompteClientResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="transactionCompte">
+
+         <wsdl:input message="impl:transactionCompteRequest" name="transactionCompteRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:transactionCompteResponse" name="transactionCompteResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="creerCompteClient">
+
+         <wsdl:input message="impl:creerCompteClientRequest" name="creerCompteClientRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:creerCompteClientResponse" name="creerCompteClientResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="insertUser">
+
+         <wsdl:input message="impl:insertUserRequest" name="insertUserRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:insertUserResponse" name="insertUserResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="authentifie">
+
+         <wsdl:input message="impl:authentifieRequest" name="authentifieRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:authentifieResponse" name="authentifieResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="ajoutCptCaisse">
+
+         <wsdl:input message="impl:ajoutCptCaisseRequest" name="ajoutCptCaisseRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:ajoutCptCaisseResponse" name="ajoutCptCaisseResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="UserServiceImplSoapBinding" type="impl:UserServiceImpl">
+
+      <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="getAcces">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getAccesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getAccesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="fermerCompteClient">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="fermerCompteClientRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="fermerCompteClientResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="transactionCompte">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="transactionCompteRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="transactionCompteResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="creerCompteClient">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="creerCompteClientRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="creerCompteClientResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="insertUser">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="insertUserRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="insertUserResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="authentifie">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="authentifieRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="authentifieResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="ajoutCptCaisse">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="ajoutCptCaisseRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="ajoutCptCaisseResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="UserServiceImplService">
+
+      <wsdl:port binding="impl:UserServiceImplSoapBinding" name="UserServiceImpl">
+
+         <wsdlsoap:address location="http://localhost:8080/FIDEV-Repository/services/UserServiceImpl"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>
