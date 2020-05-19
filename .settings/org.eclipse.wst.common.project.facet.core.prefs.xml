@@ -9,7 +9,7 @@
       <attribute name="provider-id" value="jaxb-user-library-provider"/>
     </node>
     <node name="platform">
-      <attribute name="platform-id" value="generic_2_2"/>
+      <attribute name="platform-id" value="eclipselink_2_5"/>
     </node>
   </facet>
   <facet id="jst.jaxrs">

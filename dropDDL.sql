@@ -1,0 +1,161 @@
+ALTER TABLE accounts DROP FOREIGN KEY FK_accounts_parent
+ALTER TABLE calapresdebl DROP FOREIGN KEY FK_calapresdebl_num_credit
+ALTER TABLE calpaiementdues DROP FOREIGN KEY FK_calpaiementdues_num_credit
+ALTER TABLE commission_credit DROP FOREIGN KEY FK_commission_credit_num_credit
+ALTER TABLE commission_credit DROP FOREIGN KEY FK_commission_credit_user_id
+ALTER TABLE compte_epargne DROP FOREIGN KEY FK_compte_epargne_UtilisateuridUtilisateur
+ALTER TABLE compte_epargne DROP FOREIGN KEY FK_compte_epargne_codeGrp
+ALTER TABLE compte_epargne DROP FOREIGN KEY FK_compte_epargne_Produit_epargneId
+ALTER TABLE compte_epargne DROP FOREIGN KEY FK_compte_epargne_codeInd
+ALTER TABLE compte_ferme DROP FOREIGN KEY FK_compte_ferme_num_compte
+ALTER TABLE comptes DROP FOREIGN KEY FK_comptes_parent_id
+ALTER TABLE config_garantie_credit DROP FOREIGN KEY FK_config_garantie_credit_produitEpargneId
+ALTER TABLE DECAISSEMENT DROP FOREIGN KEY FK_DECAISSEMENT_user_id
+ALTER TABLE DECAISSEMENT DROP FOREIGN KEY FK_DECAISSEMENT_num_credit
+ALTER TABLE demande_credit DROP FOREIGN KEY FK_demande_credit_agent
+ALTER TABLE demande_credit DROP FOREIGN KEY FK_demande_credit_codeGrp
+ALTER TABLE demande_credit DROP FOREIGN KEY FK_demande_credit_produitCredit_id
+ALTER TABLE demande_credit DROP FOREIGN KEY FK_demande_credit_codeInd
+ALTER TABLE demande_credit DROP FOREIGN KEY FK_demande_credit_user_id
+ALTER TABLE DOCIDENTITE DROP FOREIGN KEY FK_DOCIDENTITE_codeGarant
+ALTER TABLE DOCIDENTITE DROP FOREIGN KEY FK_DOCIDENTITE_codeClient
+ALTER TABLE ENTREPRISE DROP FOREIGN KEY FK_ENTREPRISE_idAdresse
+ALTER TABLE garantie_credit DROP FOREIGN KEY FK_garantie_credit_num_credit
+ALTER TABLE GRANDLIVRE DROP FOREIGN KEY FK_GRANDLIVRE_code_client
+ALTER TABLE GRANDLIVRE DROP FOREIGN KEY FK_GRANDLIVRE_code_budget
+ALTER TABLE GRANDLIVRE DROP FOREIGN KEY FK_GRANDLIVRE_code_agence
+ALTER TABLE GRANDLIVRE DROP FOREIGN KEY FK_GRANDLIVRE_num_credit
+ALTER TABLE GRANDLIVRE DROP FOREIGN KEY FK_GRANDLIVRE_num_compte_compta
+ALTER TABLE GRANDLIVRE DROP FOREIGN KEY FK_GRANDLIVRE_compte_epargne
+ALTER TABLE GRANDLIVRE DROP FOREIGN KEY FK_GRANDLIVRE_code_grp
+ALTER TABLE GRANDLIVRE DROP FOREIGN KEY FK_GRANDLIVRE_utilisateur
+ALTER TABLE GRANDLIVRE DROP FOREIGN KEY FK_GRANDLIVRE_compte_dat
+ALTER TABLE GRANDLIVRE DROP FOREIGN KEY FK_GRANDLIVRE_code_analytique
+ALTER TABLE GROUPE DROP FOREIGN KEY FK_GROUPE_idAdresse
+ALTER TABLE INDIVIDUEL DROP FOREIGN KEY FK_INDIVIDUEL_codeGrp
+ALTER TABLE INDIVIDUEL DROP FOREIGN KEY FK_INDIVIDUEL_idAdresse
+ALTER TABLE produit_credit DROP FOREIGN KEY FK_produit_credit_configGarantie_id
+ALTER TABLE produit_credit DROP FOREIGN KEY FK_produit_credit_configGL2Id
+ALTER TABLE produit_credit DROP FOREIGN KEY FK_produit_credit_configFrais_id
+ALTER TABLE produit_credit DROP FOREIGN KEY FK_produit_credit_configCreditGroup_id
+ALTER TABLE produit_credit DROP FOREIGN KEY FK_produit_credit_configGeneral_id
+ALTER TABLE produit_credit DROP FOREIGN KEY FK_produit_credit_configFraisGroupe_id
+ALTER TABLE produit_credit DROP FOREIGN KEY FK_produit_credit_configGLcredId
+ALTER TABLE produit_credit DROP FOREIGN KEY FK_produit_credit_config_id
+ALTER TABLE produit_credit DROP FOREIGN KEY FK_produit_credit_configPenaliteId
+ALTER TABLE produit_credit DROP FOREIGN KEY FK_produit_credit_configCreditInd_id
+ALTER TABLE produit_epargne DROP FOREIGN KEY FK_produit_epargne_configIntProId
+ALTER TABLE produit_epargne DROP FOREIGN KEY FK_produit_epargne_configGlDat
+ALTER TABLE produit_epargne DROP FOREIGN KEY FK_produit_epargne_Type_epargnenom_type_epargne
+ALTER TABLE produit_epargne DROP FOREIGN KEY FK_produit_epargne_configProdId
+ALTER TABLE produit_epargne DROP FOREIGN KEY FK_produit_epargne_configGLepId
+ALTER TABLE produit_epargne DROP FOREIGN KEY FK_produit_epargne_configGeneralDat
+ALTER TABLE remb_montant DROP FOREIGN KEY FK_remb_montant_num_credit
+ALTER TABLE remboursement DROP FOREIGN KEY FK_remboursement_num_credit
+ALTER TABLE remboursement DROP FOREIGN KEY FK_remboursement_user_id
+ALTER TABLE transaction_epargne DROP FOREIGN KEY FK_transaction_epargne_Compte_epargnenum_compte_ep
+ALTER TABLE transaction_epargne DROP FOREIGN KEY FK_transaction_epargne_id_caisse
+ALTER TABLE type_epargne DROP FOREIGN KEY FK_type_epargne_Cat_epargnenom_cat_epargne
+ALTER TABLE UTILISATEUR DROP FOREIGN KEY FK_UTILISATEUR_fonctionId
+ALTER TABLE VIREMENT DROP FOREIGN KEY FK_VIREMENT_numCptAcredite
+ALTER TABLE VIREMENT DROP FOREIGN KEY FK_VIREMENT_numCptAdebite
+ALTER TABLE droitinscription DROP FOREIGN KEY FK_droitinscription_codeInd
+ALTER TABLE droitinscription DROP FOREIGN KEY FK_droitinscription_codeGrp
+ALTER TABLE liste_rouge DROP FOREIGN KEY FK_liste_rouge_codeGroupe
+ALTER TABLE liste_rouge DROP FOREIGN KEY FK_liste_rouge_codeInd
+ALTER TABLE interet_epargne DROP FOREIGN KEY FK_interet_epargne_num_compte
+ALTER TABLE personnel_institution DROP FOREIGN KEY FK_personnel_institution_id_fonction
+ALTER TABLE personnel_institution DROP FOREIGN KEY FK_personnel_institution_id_agence
+ALTER TABLE garant_credit DROP FOREIGN KEY FK_garant_credit_idAdresse
+ALTER TABLE garant_credit DROP FOREIGN KEY FK_garant_credit_numCredit
+ALTER TABLE compte_dat DROP FOREIGN KEY FK_compte_dat_codeGrp
+ALTER TABLE compte_dat DROP FOREIGN KEY FK_compte_dat_Produit_epargneId
+ALTER TABLE compte_dat DROP FOREIGN KEY FK_compte_dat_codeInd
+ALTER TABLE compte_dat DROP FOREIGN KEY FK_compte_dat_UtilisateuridUtilisateur
+ALTER TABLE caisse DROP FOREIGN KEY FK_caisse_id_compte
+ALTER TABLE membre_groupe DROP FOREIGN KEY FK_membre_groupe_code_individuel
+ALTER TABLE membre_groupe DROP FOREIGN KEY FK_membre_groupe_code_groupe
+ALTER TABLE membre_groupe DROP FOREIGN KEY FK_membre_groupe_id_fonction
+ALTER TABLE approbationCredit DROP FOREIGN KEY FK_approbationCredit_num_credit
+ALTER TABLE montant_credit_membre DROP FOREIGN KEY FK_montant_credit_membre_codeGrp
+ALTER TABLE montant_credit_membre DROP FOREIGN KEY FK_montant_credit_membre_codeInd
+ALTER TABLE montant_credit_membre DROP FOREIGN KEY FK_montant_credit_membre_numCredit
+ALTER TABLE config_transaction_compta DROP FOREIGN KEY FK_config_transaction_compta_compteCaisse
+ALTER TABLE config_transaction_compta DROP FOREIGN KEY FK_config_transaction_compta_compteBanque
+ALTER TABLE fonction_acces DROP FOREIGN KEY FK_fonction_acces_FonctionidFonction
+ALTER TABLE fonction_acces DROP FOREIGN KEY FK_fonction_acces_AccesidAcces
+ALTER TABLE utilisateur_agence DROP FOREIGN KEY FK_utilisateur_agence_AgencecodeAgence
+ALTER TABLE utilisateur_agence DROP FOREIGN KEY FK_utilisateur_agence_UtilisateuridUtilisateur
+ALTER TABLE utilisateur_compte_caisse DROP FOREIGN KEY utilisateurcomptecaisseCompte_caissenom_cpt_caisse
+ALTER TABLE utilisateur_compte_caisse DROP FOREIGN KEY utilisateur_compte_caisse_UtilisateuridUtilisateur
+DROP TABLE ACCES
+DROP TABLE accounts
+DROP TABLE ADRESSE
+DROP TABLE AGENCE
+DROP TABLE calapresdebl
+DROP TABLE calpaiementdues
+DROP TABLE cat_epargne
+DROP TABLE commission_credit
+DROP TABLE compte_epargne
+DROP TABLE compte_ferme
+DROP TABLE comptes
+DROP TABLE config_credit
+DROP TABLE config_credit_individuel
+DROP TABLE config_frais_credit
+DROP TABLE config_garantie_credit
+DROP TABLE config_general_credit
+DROP TABLE config_gl_credit
+DROP TABLE config_gl_epargne
+DROP TABLE config_interet_prod_ep
+DROP TABLE config_penalite_credit
+DROP TABLE config_prod_ep
+DROP TABLE DECAISSEMENT
+DROP TABLE demande_credit
+DROP TABLE DOCIDENTITE
+DROP TABLE ENTREPRISE
+DROP TABLE fichier_docidentite
+DROP TABLE fichier_langue
+DROP TABLE fichier_niveauetude
+DROP TABLE fichier_regiongeo
+DROP TABLE fichier_titre
+DROP TABLE FONCTION
+DROP TABLE garantie_credit
+DROP TABLE GRANDLIVRE
+DROP TABLE GROUPE
+DROP TABLE INDIVIDUEL
+DROP TABLE produit_credit
+DROP TABLE produit_epargne
+DROP TABLE remb_montant
+DROP TABLE remboursement
+DROP TABLE transaction_epargne
+DROP TABLE type_epargne
+DROP TABLE UTILISATEUR
+DROP TABLE VIREMENT
+DROP TABLE config_credit_group
+DROP TABLE droitinscription
+DROP TABLE liste_rouge
+DROP TABLE config_frais_groupe
+DROP TABLE interet_epargne
+DROP TABLE analytique
+DROP TABLE budget
+DROP TABLE personnel_institution
+DROP TABLE garant_credit
+DROP TABLE calendrierView
+DROP TABLE config_general_dat
+DROP TABLE config_GL_DAT
+DROP TABLE compte_dat
+DROP TABLE caisse
+DROP TABLE Garantie_view
+DROP TABLE fiche_credit
+DROP TABLE config_declasse
+DROP TABLE membre_groupe
+DROP TABLE approbationCredit
+DROP TABLE montant_credit_membre
+DROP TABLE credit_groupe_view
+DROP TABLE fonction_membre
+DROP TABLE membre_view
+DROP TABLE config_transaction_compta
+DROP TABLE operation_view
+DROP TABLE fonction_acces
+DROP TABLE utilisateur_agence
+DROP TABLE utilisateur_compte_caisse

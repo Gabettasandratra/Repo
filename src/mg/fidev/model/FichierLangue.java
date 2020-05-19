@@ -15,7 +15,6 @@ public class FichierLangue implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private String langue;
 
 	private String pays;
