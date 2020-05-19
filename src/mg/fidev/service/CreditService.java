@@ -140,6 +140,12 @@ public interface CreditService {
 	@WebParam(name="numCredit") String numCredit,
 	@WebParam(name="demandeCredit") @XmlElement(required=true,nillable=false) DemandeCredit demande);
 	
+	//Supprimer un crédit
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean deleteCredit(
+	@WebParam(name="numCredit") @XmlElement(required=true,nillable=false) String numCred);
+	
 	//Enregistrement demande crédit groupe
 	@WebMethod
 	@WebResult(name="validation")
@@ -161,7 +167,7 @@ public interface CreditService {
 	@WebParam(name="interet") @XmlElement(required=false,nillable=true)double interet,
 	@WebParam(name="taux") @XmlElement(required=false,nillable=true)int taux);
 	
-	//Modifier montant
+	//Modifier montant crédit d'une membre 
 	@WebMethod
 	@WebResult(name="validation")
 	public boolean updateMontant(
@@ -271,6 +277,7 @@ public interface CreditService {
 	@WebParam(name="piece") @XmlElement(required=true,nillable=false)String piece,
 	@XmlElement(required=false) @WebParam(name="numTel")String numTel, 
 	@XmlElement(required=false) @WebParam(name="numCheq")String numCheq,
+	@XmlElement(required=false) @WebParam(name="numCompte")String numCompte,
 	@WebParam(name="comptCaisse") @XmlElement(required=false,nillable=true)String comptCaise,
 	@WebParam(name="num_credit")String numCredit,
 	@WebParam(name="id_utilisateur")int userId);
@@ -373,13 +380,24 @@ public interface CreditService {
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<GarantieCredit> getGarantieCredit(
-	@WebParam(name="numCredit")@XmlElement(required=false,nillable=true)String numCredit);
+	@WebParam(name="numCredit")@XmlElement(required=false,nillable=true)String numCredit);	
 	
 	//Rapport solde restant dû
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<AfficheSoldeRestantDu> getSoldeRestantDu(
-			@WebParam(name="date")@XmlElement(required=false,nillable=true)String date);
+	@WebParam(name="date")@XmlElement(required=false,nillable=true)String date);
+	
+	//Rapprort montant dû aujourd'hui
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Calapresdebl> getMontantDu(
+	@WebParam(name="date")@XmlElement(required=false,nillable=true)String date);
+	
+	//Rapport montant dû pour un payement futur 
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Calapresdebl> getMontantDuFutur();
 	
 	//Analyse portedeuille agent
 	@WebMethod

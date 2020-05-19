@@ -27,8 +27,6 @@ public class Decaissement implements Serializable {
 	@Id
 	private String tcode;
 
-	private boolean cash;
-
 	private double commission;
 
 	@Column(name="date_dec")
@@ -49,6 +47,11 @@ public class Decaissement implements Serializable {
 	
 	@Column(name="cpt_caisse_num")
 	private String cptCaisseNum;
+	
+	@Column(name="type_paiement",nullable=false,length=50)
+	private String typePaie;
+	@Column(name="val_paie",nullable=true,length=50)
+	private String valPaie;
 
 	//bi-directional many-to-one association to DemandeCredit
 	@ManyToOne
@@ -67,7 +70,6 @@ public class Decaissement implements Serializable {
 			String piece, float pocFee, float stationnary,
 			float tdf, float totvat) {
 		super();
-		this.cash = cash;
 		this.commission = commission;
 		this.dateDec = dateDec;
 		this.piece = piece;
@@ -83,14 +85,6 @@ public class Decaissement implements Serializable {
 
 	public void setTcode(String tcode) {
 		this.tcode = tcode;
-	}
-
-	public boolean getCash() {
-		return this.cash;
-	}
-
-	public void setCash(boolean cash) {
-		this.cash = cash;
 	}
 
 	public double getCommission() {
@@ -179,6 +173,22 @@ public class Decaissement implements Serializable {
 
 	public void setUtilisateur(Utilisateur utilisateur) {
 		this.utilisateur = utilisateur;
+	}
+
+	public String getTypePaie() {
+		return typePaie;
+	}
+
+	public void setTypePaie(String typePaie) {
+		this.typePaie = typePaie;
+	}
+
+	public String getValPaie() {
+		return valPaie;
+	}
+
+	public void setValPaie(String valPaie) {
+		this.valPaie = valPaie;
 	}
 
 }

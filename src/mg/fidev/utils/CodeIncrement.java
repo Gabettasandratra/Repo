@@ -28,7 +28,7 @@ public class CodeIncrement {
 		Query q = em.createNativeQuery(sql);
 		int result = Integer.parseInt(q.getSingleResult().toString());
 		return result;
-	}
+	} 
 	
 	///	Générer le code de client individuel
 	public static String getCodeInd(EntityManager em, String agence){
@@ -174,7 +174,7 @@ public class CodeIncrement {
 		}			
 		
 		return nb;
-	}
+	}  
 	
 	//Chercher compte comptable dans la table account
 	 public static Account getAcount(EntityManager em,String numCompte){

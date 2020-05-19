@@ -66,7 +66,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 
 
 	/***
-	 * ENREGISTREMENT INDIVIDUEL
+	 * ENREGISTREMENT CLIENT INDIVIDUEL
 	 * ***/
 	@Override
 	public String insertIndividuel(Individuel individuel, String codeAgence,
@@ -109,7 +109,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 			transaction.commit();
 			em.refresh(individuel);
 			em.refresh(docIdentite);
-			System.out.println("Insertion nouveau client individuel avec succès");
+			System.out.println("Insertion nouveau client individuel");
 			return "Succes";
 		} catch (Exception e) {
 			System.err.println("Erreur insertion individuel "+e.getMessage());
@@ -118,7 +118,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 	}
 
 	/***
-	 * ENREGISTREMENT DE NOUVEAU GARANT
+	 * ENREGISTREMENT GARANT
 	 * ***/
 	@Override
 	public boolean saveGarant(Individuel individuel, Adresse adresse, Docidentite docId, String codeAgence) {
@@ -209,7 +209,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 	}
 
 	/***
-	 * AFFICHAGE LISTE ROUGE
+	 * AFFICHE LISTE ROUGE
 	 * ***/
 	@Override
 	public List<ListeRouge> afficheListeRouge(String agence,String dateDeb,String dateFin) {
@@ -250,7 +250,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 		List<Individuel> result = query.getResultList();
 		
 		if(!result.isEmpty())return result;
-		else System.out.println("Auccun client trouvé!!!");
+		else System.out.println("Aucun client trouvé!!!");
 		
 		return null;
 	}

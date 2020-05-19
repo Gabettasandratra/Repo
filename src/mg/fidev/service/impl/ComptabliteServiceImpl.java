@@ -659,8 +659,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 	}
 	
 	
-
-	//Enregistrement opération divers
+	//Enregistrement opération divers comptable
 	@Override
 	public boolean saveOperationDivers(String date, String piece,
 			String description,String analytique, String budget, int user) {
@@ -670,67 +669,76 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 
 		Budget bdg = em.find(Budget.class, budget);
 		Analytique anlt = saveAnalytique(analytique);
-
-		// on selectionne le compte entré en parametre
-		/*String sql = "select c from Account c where c.numCpt = '" + compte
-				+ "'";
-		Account cmpt = (Account) em.createQuery(sql).getSingleResult();
-
-		String sql2 = "select a from Account a where a.numCpt = '" + compte2
-				+ "'";
-		Account cmpt2 = (Account) em.createQuery(sql2).getSingleResult();*/
-
-		// on instancie le grand livre
+		
+		//Information grand livre
 		Grandlivre debiter = new Grandlivre();
-		Grandlivre crediter = new Grandlivre();
-
 		debiter.setTcode(CodeIncrement.genTcode(em));
 		debiter.setDate(date);
 		debiter.setDescr(description);
 		debiter.setPiece(piece);
-		//debiter.setCompte(compte);
-		//debiter.setDebit(debit);
 		debiter.setUserId(ut.getNomUtilisateur());
 		debiter.setUtilisateur(ut);
-		//debiter.setAccount(cmpt);
 		debiter.setAnalytique(anlt);
-
-		//debiter.setSolde(cmpt.getSoldeProgressif() + debit);
-		//cmpt.setSoldeProgressif(cmpt.getSoldeProgressif() + debit);
-
-		// debiter.setAccount(CodeIncrement.getAcount(em, compte));
-
+		debiter.setBudget(bdg); 
+		
+		Grandlivre crediter = new Grandlivre();
 		crediter.setTcode(CodeIncrement.genTcode(em));
 		crediter.setDate(date);
 		crediter.setDescr(description);
 		crediter.setPiece(piece);
-		//crediter.setCompte(compte2);
-		//crediter.setCredit(debit);
 		crediter.setUserId(ut.getNomUtilisateur());
 		crediter.setUtilisateur(ut);
-		//crediter.setAccount(cmpt2);
 		crediter.setAnalytique(anlt);
-		crediter.setBudget(bdg);
+		crediter.setBudget(bdg); 
 
-		//crediter.setSolde(cmpt2.getSoldeProgressif() - debit);
-		//cmpt2.setSoldeProgressif(cmpt2.getSoldeProgressif() - debit);
-		// crediter.setAccount(CodeIncrement.getAcount(em, compte2));
-
+		List<OperationView> listOperation = listOperationView();
+		
+		for (OperationView operationView : listOperation) {
+			//On test la valeur de credit et debit dans l'opération view
+			//si valeur de credit est égal à 0 donc l'opération est débit
+		
+			if(operationView.getCredit() == 0){
+				
+				Account compte1 = CodeIncrement.getAcount(em, operationView.getNumCmpt());
+							
+				debiter.setDebit(operationView.getDebit());
+				debiter.setAccount(compte1);
+				debiter.setSolde(compte1.getSoldeProgressif() + operationView.getDebit());
+				compte1.setSoldeProgressif(compte1.getSoldeProgressif() + operationView.getDebit());			
+			
+			}
+			
+			if(operationView.getDebit() == 0){
+				
+				Account compte2 = CodeIncrement.getAcount(em, operationView.getNumCmpt());
+					
+				crediter.setCredit(operationView.getCredit());
+				crediter.setAccount(compte2);
+				crediter.setSolde(compte2.getSoldeProgressif() - operationView.getCredit());
+				compte2.setSoldeProgressif(compte2.getSoldeProgressif() - operationView.getCredit());
+				
+			}	
+			
+		}	
+		
 		try {
 			transaction.begin();
 			em.persist(crediter);
 			em.persist(debiter);
 			em.flush();
 			transaction.commit();
-			System.out.println("Enregistrement reussit");
+			System.out.println("Enregistrement opération reussit");
+			//On va vider l'opération view après l'enregistrement
+			//viderOperationView();
 			return true;
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("Erreur enregistrement");
+			System.out.println("Erreur enregistrement débit");
 			return false;
 		}
-
+		
+		//return false;
 	}
 
 	//Get grand livre budgétaire
