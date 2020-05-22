@@ -29,7 +29,7 @@ public class Grandlivre implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private String id;
+	private int id;
 	
 	private boolean cloture;
 
@@ -143,14 +143,16 @@ public class Grandlivre implements Serializable {
 		this.account = account;
 	}
 
-	public String getId() {
-		return this.id;
+	
+	
+	public int getId() {
+		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(int id) {
 		this.id = id;
 	}
-	
+
 	public double getSolde() {
 		return solde;
 	}

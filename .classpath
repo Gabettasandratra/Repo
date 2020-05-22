@@ -17,19 +17,11 @@
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/joda-time-2.9.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/commons-beanutils-1.9.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/commons-logging-1.2.jar"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/lib-jpa">
-		<attributes>
-			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
-			<attribute name="owner.project.facets" value="jpt.jpa"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/lib_utils"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/httpRestUtils"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/json-20180813.jar"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/jersey.jar"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
@@ -37,7 +29,6 @@
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/jaxrs-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/javax.ws.rs.jar"/>
 	<classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/jBCrypt-0.4.1.jar"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/EclipsLink"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/axis.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-discovery-0.2.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-logging.jar"/>
@@ -57,14 +48,14 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/jna-4.5.2.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/lib/jna-platform-4.5.2.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/sdo/commonj.sdo_2.1.1.v201112051852.jar"/>
-	<classpathentry kind="lib" path="H:/javax.xml.soap-3.1.jar"/>
-	<classpathentry kind="lib" path="H:/javax.xml.ws-3.0-prelude.jar"/>
-	<classpathentry kind="lib" path="H:/jaxb-api-2.2.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JAX-WS">
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/ECLIPSELINK 2.5">
 		<attributes>
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
-			<attribute name="owner.project.facets" value="jpt.jaxb"/>
+			<attribute name="owner.project.facets" value="jpt.jpa;jpt.jaxb"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/library_required/javax.xml.soap-3.1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/library_required/javax.xml.ws-3.0-prelude.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/library_required/jaxb-api-2.2.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
