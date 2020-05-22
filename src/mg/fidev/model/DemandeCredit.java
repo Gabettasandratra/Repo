@@ -133,7 +133,7 @@ public class DemandeCredit implements Serializable {
 	private List<Garant>  garants;
 	
 	//Relation to approbation
-	@OneToMany(mappedBy="demandeCredit")
+	@OneToMany(mappedBy="demandeCredit",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<ApprobationCredit> approbations;
 	

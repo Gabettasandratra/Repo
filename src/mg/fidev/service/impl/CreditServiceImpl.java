@@ -20,6 +20,7 @@ import mg.fidev.model.CalView;
 import mg.fidev.model.Calapresdebl;
 import mg.fidev.model.Calpaiementdue;
 import mg.fidev.model.CommissionCredit;
+import mg.fidev.model.CompteEpargne;
 import mg.fidev.model.ConfigCredit;
 import mg.fidev.model.ConfigCreditGroup;
 import mg.fidev.model.ConfigCreditIndividuel;
@@ -44,6 +45,7 @@ import mg.fidev.model.Individuel;
 import mg.fidev.model.ProduitCredit;
 import mg.fidev.model.ProduitEpargne;
 import mg.fidev.model.Remboursement;
+import mg.fidev.model.TransactionEpargne;
 import mg.fidev.model.Utilisateur;
 import mg.fidev.service.CreditService;
 import mg.fidev.utils.AfficheSoldeRestantDu;
@@ -52,7 +54,7 @@ import mg.fidev.utils.ClientAgent;
 import mg.fidev.utils.CodeIncrement;
 
 @WebService(name = "creditProduitService", targetNamespace = "http://fidev.mg.creditProduitService", serviceName = "creditProduitService", portName = "creditServicePort", endpointInterface = "mg.fidev.service.CreditService")
-public class CreditServiceImpl implements CreditService { 
+public class CreditServiceImpl implements CreditService {  
 	
 	
 	private static final String PERSISTENCE_UNIT_NAME = "FIDEV-Repository";
@@ -65,7 +67,7 @@ public class CreditServiceImpl implements CreditService {
 						/*********************** CRUD SUR PRODUITS CREDIT ****************************/
 	
 	/***********************************************************************************************************************************************/
-	
+	 
 	
 	
 	/**
@@ -231,6 +233,33 @@ public class CreditServiceImpl implements CreditService {
 	
 	
 	/********************************************************DEMANDE CREDIT*************************************************************************/
+	
+	//Modifier demande crédit
+	@Override
+	public boolean updateDemandeCredit(String numCredit,DemandeCredit demande) {
+		
+		//DemandeCredit dm = em.find(DemandeCredit.class, numCredit);
+		
+		return false;
+	}
+
+	//Supprimer un crédit
+	@Override
+	public boolean deleteCredit(String numCred) {
+		DemandeCredit dm = em.find(DemandeCredit.class, numCred);
+		try {
+			transaction.begin();
+			em.remove(dm);
+			transaction.commit();
+			em.refresh(dm);
+			System.out.println("Crédit supprimé");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Erreur suppression crédit");
+			return false;
+		}
+	}
 	
 	/**
 	 * Methode pour recuperer le dernier index d'un num crédit
@@ -431,20 +460,14 @@ public class CreditServiceImpl implements CreditService {
 	}
 	
 
-	@Override
-	public boolean updateDemandeCredit(String numCredit,DemandeCredit demande) {
-		
-		//DemandeCredit dm = em.find(DemandeCredit.class, numCredit);
-		
-		return false;
-	}
-
+	
 	static int getLastIndexMembre(String codeGrp){
 		String sql = "select count(*) from membre_groupe where groupe='"+codeGrp+"'";
 		Query q = em.createNativeQuery(sql);
 		int result = Integer.parseInt(q.getSingleResult().toString());
 		return result;
 	}
+	
 	//Enregistrement montant crédit par membre  
 	@Override
 	public List<CrediGroupeView> addmontantMembreGroupe(String numCredit,String codeGrp,String codeInd, 
@@ -531,6 +554,7 @@ public class CreditServiceImpl implements CreditService {
 			return false;
 		}
 	}
+	
 	//Récuperer tous ce qui est dans la table créditMembreView
 	@Override
 	public List<CrediGroupeView> getAllCrediGroupeView() {
@@ -748,7 +772,7 @@ public class CreditServiceImpl implements CreditService {
 			
 			//Montant d'interet par mois
 			double intTot = (montant * intMens) / 100;
-
+ 
 			//Interet principale
 			double montDuJr =  montant / nbTranche;//(int)
 			
@@ -1240,7 +1264,7 @@ public class CreditServiceImpl implements CreditService {
 	@SuppressWarnings("unused")
 	@Override
 	public String saveDecaisement(String date,String typePaie, double montant, double commission, double papeterie, 
-			String piece, String numCheque, String numTel,String comptCaise,String numCredit, int userId) {
+			String piece, String numCheque, String numTel, String numCompte,String comptCaise,String numCredit, int userId) {
 		
 		Utilisateur ut = em.find(Utilisateur.class, userId);
 		DemandeCredit dm = em.find(DemandeCredit.class, numCredit);
@@ -1252,6 +1276,8 @@ public class CreditServiceImpl implements CreditService {
 		
 		///	pour incrémenter le tcode dans la table grandlivre
 		String indexTcode = CodeIncrement.genTcode(em);
+		
+		//Enregistrement calendrier après deblocage
 		List<Calapresdebl> calRembAprDebl = new ArrayList<Calapresdebl>();
 		
 		//Suppression des calendrier dues au fiche crédit
@@ -1274,7 +1300,7 @@ public class CreditServiceImpl implements CreditService {
 		double soldCourant = 0;
 		double totInter = 0;*/
 		
-		//Tester si mettre à jour la date remboursement ou pas
+		//Tester si on va mettre à jour la date remboursement ou pas
 		if(confGen.getRecalcDateEcheanceAuDecais().equalsIgnoreCase("ne pas mettre a jours les dates")){
 			System.out.println("Ne pas mettre à jour le calendrier de remboursement");
 			List<Calpaiementdue> calDue = dm.getCalpaiementdues();
@@ -1377,6 +1403,7 @@ public class CreditServiceImpl implements CreditService {
 			}
 		}
 		
+		//Enregistrement grand livre et table decaissement
 		//Solde Demander
 		Grandlivre debit = new Grandlivre();
 		//Solde Decaissé
@@ -1395,30 +1422,21 @@ public class CreditServiceImpl implements CreditService {
 
 				try {
 					//Total solde à décaissé = montant approuvé - (commission + papeterie)
-					double soldeDecais = (dm.getMontantApproved()-(commission+papeterie));				
+					double soldeDecais = (dm.getMontantApproved()-(commission+papeterie));			
 					
 					//Interet Total 
-					//Interet dans 1 mois en %
-					double interAnnuel = 0.0;
-					
-						if(dm.getIndividuel() != null){
-							interAnnuel = confInds.getTauxInteretAnnuel();
-						}else if(dm.getGroupe() != null){
-							interAnnuel = dm.getProduitCredit().getConfigCreditGroupe().getInteretAnnuel();
-						}
-					
+					//Interet annuel
+					/*double interAnnuel = dm.getTaux();
 					double intMensuel = interAnnuel / 12;					
 					
 					//Montant d'interet par mois
-					double intTot = (dm.getMontantApproved() * intMensuel) / 100;
+					double intTot = (dm.getMontantApproved() * dm.getInteret()) / 100;					
+					//Solde Total = Montant Approuvé + Interet Total*/
+					double soldeTotal = dm.getMontantApproved() + dm.getInteret();
 					
-					//Solde Total = Montant Approuvé + Interet Total
-					double soldeTotal = dm.getMontantApproved() + intTot;
-					
-					dm.setInteret_total(intTot);
+					dm.setInteret_total(dm.getInteret());
 					dm.setPrincipale_total(dm.getMontantApproved());
-					dm.setSolde_total(soldeTotal);
-					
+					dm.setSolde_total(soldeTotal);					
 
 					//Insertion au GrandLivre        
 					Account accCred;     
@@ -1430,6 +1448,8 @@ public class CreditServiceImpl implements CreditService {
 						accCred = CodeIncrement.getAcount(em, cptC);//cptCaisse.getAccount(); 
 						System.out.println("Compte crédité "+accCred.getNumCpt());
 						decais.setCptCaisseNum(cptC);
+						decais.setTypePaie("Cash");
+						decais.setValPaie(cptC);
 						credit1.setCompte(cptC);
 						credit1.setAccount(accCred);
 						
@@ -1446,7 +1466,25 @@ public class CreditServiceImpl implements CreditService {
 						credit1.setSolde(sds);
 						accCred.setSoldeProgressif(sds);
 						
+						decais.setTypePaie("Cheque");
+						decais.setValPaie(numCheque);
+						
 					}else if(typePaie.equalsIgnoreCase("mobile")){
+						accCred = CodeIncrement.getAcount(em, confGL.getCptCheque());
+						credit1.setAccount(accCred);
+						
+						double sds = accCred.getSoldeProgressif() - dm.getMontantApproved();
+						credit1.setSolde(sds);
+						accCred.setSoldeProgressif(sds); 
+						
+						decais.setTypePaie("Mobile");
+						decais.setValPaie(numTel);
+						
+					}else if(typePaie.equalsIgnoreCase("epargne")){
+						//Compte du client en question
+						CompteEpargne cptEp = em.find(CompteEpargne.class, numCompte);						
+						TransactionEpargne trans = new TransactionEpargne();  	
+			
 						accCred = CodeIncrement.getAcount(em, confGL.getCptCheque());
 						credit1.setAccount(accCred);
 						
@@ -1454,7 +1492,37 @@ public class CreditServiceImpl implements CreditService {
 						credit1.setSolde(sds);
 						accCred.setSoldeProgressif(sds);
 						
+						decais.setTypePaie("Transfert épargne");
+						decais.setValPaie(numCompte);
+						
+						//Initialisation des informations de transaction
+						trans.setDateTransaction(date);
+						trans.setTypeTransEp("DE");
+						trans.setMontant(montant);
+						trans.setDescription("Dépôt via Crédit numéro "+dm.getNumCredit());
+						trans.setPieceCompta(piece);
+						trans.setIdTransactionEp(indexTcode);
+						trans.setCompteEpargne(cptEp);
+						trans.setTypePaie("transfert épargne");
+						trans.setValPaie(dm.getNumCredit());
+						
+						double tr = cptEp.getSolde() + montant;
+						cptEp.setSolde(tr);
+						
+						try {  
+							transaction.begin();
+							em.persist(trans);
+							em.merge(cptEp);
+							transaction.commit();
+							em.refresh(cptEp); 
+							em.refresh(trans); 
+							System.out.println("Depôt du compte "+cptEp.getNumCompteEp() +" a été effectuer");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
+					
+					
 					//decais.setTcode(decaissement.getTcode());
 
 					decais.setTcode(indexTcode);
@@ -1588,7 +1656,7 @@ public class CreditServiceImpl implements CreditService {
 				}
 
 			} else {
-				result = "Desolé, Vous ne pouvez pas decaisser cet demande!!!";
+				result = "Desolé, Vous ne pouvez pas decaisser ce crédit!!!";
 			}
 
 		}
@@ -1672,7 +1740,7 @@ public class CreditServiceImpl implements CreditService {
 			//Verifie si le crédit est déjà remboursé ou pas
 			if (dm.getSolde_total() != 0) {//>	
 									
-				//initialisation de la valeur du capital à ajouter dans le grand livre
+				//initialisation de la valeur du capital,intérêt à ajouter dans le grand livre
 				double capitals = 0.0;
 				double inters = 0.0;
 				double tots = 0.0;
@@ -1728,7 +1796,7 @@ public class CreditServiceImpl implements CreditService {
 						if (qr.getResultList().isEmpty()) {
 							montRembourser = montant;
 						} else {
-							double derRestPaie = (double)qr.getSingleResult();
+							double derRestPaie = (double)qr.getFirstResult();
 							montRembourser = montant + derRestPaie;								
 							System.out.println("montant reste au dernière paiement : "+ derRestPaie);
 						}
@@ -3035,6 +3103,47 @@ public class CreditServiceImpl implements CreditService {
 			return result;
 		}
 		return null;
+	}
+	
+	////Rapprort montant dû aujourd'hui
+	@Override
+	public List<Calapresdebl> getMontantDu(String date) {
+		
+		String sql = "select c from Calapresdebl c where c.date='"+date+"' and c.payer='false'";
+		TypedQuery<Calapresdebl> query = em.createQuery(sql,Calapresdebl.class);
+		if(!query.getResultList().isEmpty())
+			return query.getResultList();
+		return null;
+	}
+	
+	//Select distinct numéro crédit dans calendrier après déblocage(Calapresdebl)
+	static List<DemandeCredit> getDistinctCredit(){
+		String sql = "select distinct c.demandeCredit from Calapresdebl c";
+		TypedQuery<DemandeCredit> query = em.createQuery(sql,DemandeCredit.class);
+		if(!query.getResultList().isEmpty())
+			return query.getResultList();
+		return null;
+	}
+	
+	//Rapport montant dû pour un payement futur 
+	@Override
+	public List<Calapresdebl> getMontantDuFutur() {
+	  List<DemandeCredit> dm = getDistinctCredit();
+	  List<Calapresdebl> result = new ArrayList<Calapresdebl>();
+	
+	  for (DemandeCredit demandeCredit : dm) {
+		  Calapresdebl cl = new Calapresdebl();
+		  String sql ="select c from Calapresdebl c join c.demandeCredit d where "
+		  + "c.date=(select min(i.date) from Calapresdebl i join i.demandeCredit dm where i.payer='false' and "
+		  + " dm.numCredit='"+demandeCredit.getNumCredit()+"') and c.payer='false' and d.numCredit='"+demandeCredit.getNumCredit()+"'";
+		  Query query = em.createQuery(sql);
+		  if(!query.getResultList().isEmpty()){
+			  cl = (Calapresdebl) query.getSingleResult();
+			  result.add(cl);			  				  
+		  }
+			  
+	  }
+	  return result;
 	}
 
 	//Analyse portefeuille par agent de credit
