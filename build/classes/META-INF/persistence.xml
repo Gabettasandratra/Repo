@@ -70,6 +70,7 @@
 		<class>mg.fidev.model.MembreView</class>
 		<class>mg.fidev.model.ConfigTransactionCompta</class>
 		<class>mg.fidev.model.OperationView</class>
+		<class>mg.fidev.model.JourFerier</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/base_old"/>
 			<property name="javax.persistence.jdbc.user" value="root"/>

@@ -459,7 +459,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 		ind.setApprouver(true);
 		try {
 			transaction.begin();
-			em.flush();
+			em.merge(ind);
 			transaction.commit();
 			em.refresh(ind); 
 			System.out.println("Client approuvé");
@@ -473,8 +473,9 @@ public class IndividuelServiceImpl implements IndividuelService {
 	@Override
 	public List<Individuel> getClientApprouver() {
 		TypedQuery<Individuel> q1 = em
-		.createQuery("select i from Individuel i where i.approuver = :individuel",
+		.createQuery("select i from Individuel i where i.approuver = :ap and i.estClientIndividuel = :individuel",
 						Individuel.class);
+		q1.setParameter("ap", true);
 		q1.setParameter("individuel", true);
 			
 		return q1.getResultList();
@@ -483,9 +484,10 @@ public class IndividuelServiceImpl implements IndividuelService {
 	@Override
 	public List<Individuel> getClientNonApprouver() {
 		TypedQuery<Individuel> q1 = em
-				.createQuery("select i from Individuel i where i.approuver = :individuel",
+				.createQuery("select i from Individuel i where i.approuver = :individuel and i.estClientIndividuel = :ap",
 								Individuel.class);
 				q1.setParameter("individuel", false);
+				q1.setParameter("ap", true);
 					
 				return q1.getResultList();
 	}

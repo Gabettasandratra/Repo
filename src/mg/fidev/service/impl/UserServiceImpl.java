@@ -14,6 +14,7 @@ import mg.fidev.model.Account;
 import mg.fidev.model.Agence;
 import mg.fidev.model.Caisse;
 import mg.fidev.model.Fonction;
+import mg.fidev.model.JourFerier;
 import mg.fidev.model.Personnel;
 import mg.fidev.model.Utilisateur;
 import mg.fidev.service.UserService;
@@ -113,6 +114,79 @@ public class UserServiceImpl implements UserService {
 			return false;
 		}
 	}
+	
+	//Chercher tous les utilisateurs
+	@Override
+	public List<Utilisateur> getAllUser() {		
+		String sql = "select u from Utilisateur u";		
+		TypedQuery<Utilisateur> query = em.createQuery(sql,Utilisateur.class);			
+		return query.getResultList();
+	}
+
+	//Chercher un utilisateur par identifiant
+	@Override
+	public Utilisateur findUser(int id) {
+		Utilisateur ut = em.find(Utilisateur.class, id);
+		return ut;
+	}
+
+	//Modifier utilisateur
+	
+	@Override
+	public Utilisateur updateProfilUser(int idUser, String nomUser, String loginUser, String genreUser,
+			String telUser, String photo, int fonctionId) {
+		
+		//Instance classe fonction
+		Fonction f = em.find(Fonction.class, fonctionId);
+		//Chercher l'utilisateur 
+		Utilisateur user = findUser(idUser);
+		
+		user.setNomUtilisateur(nomUser);
+		user.setLoginUtilisateur(loginUser);
+		user.setTelUser(telUser);
+		user.setGenreUser(genreUser);
+		if(!photo.equalsIgnoreCase(""))
+			user.setPhoto(photo);
+		user.setFonction(f);
+		try {
+			transaction.begin();
+			em.merge(user);
+			transaction.commit();
+			em.refresh(user);
+			System.out.println("Modification profil utilisateur réussit");
+			return user;			
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Erreur modification");
+			return null;
+		}
+	}
+
+	//Supprimer utilisateur
+	@Override
+	public boolean deleteUser(int id) {
+		try {
+			Utilisateur ut = em.find(Utilisateur.class, id);
+			transaction.begin();
+			em.remove(ut);
+			transaction.commit();
+			return true;
+			//em.refresh(ut); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	//Liste utilisateurs par fonction en paramètre
+	@Override
+	public List<Utilisateur> getUser(String nomFonction) {
+		String sql = "select u from Utilisateur u join u.fonction f where f.libelleFonction='"+nomFonction+"'";
+		TypedQuery<Utilisateur> query = em.createQuery(sql,Utilisateur.class);
+		if(!query.getResultList().isEmpty())
+			return query.getResultList();
+		return null;
+	}
 
 	///	Méthode pour avoir les accès d'un utilisateur quelconque
 	@Override
@@ -200,54 +274,71 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
-	@Override
-	public List<Utilisateur> getAllUser() {		
-		String sql = "select u from Utilisateur u";		
-		TypedQuery<Utilisateur> query = em.createQuery(sql,Utilisateur.class);			
-		return query.getResultList();
-	}
+	
 
+	//Ajout jour férié
 	@Override
-	public Utilisateur findUser(int id) {
-		Utilisateur ut = em.find(Utilisateur.class, id);
-		return ut;
-	}
-
-	@Override
-	public Utilisateur updateUser(Utilisateur ut) {
-		Utilisateur user = findUser(ut.getIdUtilisateur());
-		user = ut;
-		transaction.begin();
-		em.flush();
-		transaction.commit();
-		em.refresh(user);
-		return user;
-	}
-
-	@Override
-	public boolean deleteUser(int id) {
+	public boolean addJourFerie(JourFerier jourFerier) {
 		try {
-			Utilisateur ut = em.find(Utilisateur.class, id);
 			transaction.begin();
-			em.remove(ut);
+			em.persist(jourFerier);
 			transaction.commit();
+			em.refresh(jourFerier); 
+			System.out.println("Jour Férié ajouté");
 			return true;
-			//em.refresh(ut); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	//List jours fériés (fonction local)
+	public static List<JourFerier> listJoursFerier(){
+		String sql = "select j from JourFerier j order by j.date asc";
+		TypedQuery<JourFerier> query = em.createQuery(sql,JourFerier.class);
+		if(!query.getResultList().isEmpty())
+			return query.getResultList();
+		return null;
+	}
+	
+	//List jours fériés
+	@Override
+	public List<JourFerier> getJoursFerier() {
+		return listJoursFerier();
+	}
+
+	//Modifier jour férié
+	@Override
+	public boolean editJourFerie(JourFerier jourFerier) {
+		try {
+			JourFerier j = em.find(JourFerier.class, jourFerier.getId());
+			j.setDescription(jourFerier.getDescription());
+			j.setDate(jourFerier.getDate());
+			transaction.begin();
+			em.merge(j);
+			transaction.commit();
+			System.out.println("Jour Férié modifié");
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
 
-	//Liste utilisateurs par fonction en paramètre
+	//Supprimer jour férié
 	@Override
-	public List<Utilisateur> getUser(String nomFonction) {
-		String sql = "select u from Utilisateur u join u.fonction f where f.libelleFonction='"+nomFonction+"'";
-		TypedQuery<Utilisateur> query = em.createQuery(sql,Utilisateur.class);
-		if(!query.getResultList().isEmpty())
-			return query.getResultList();
-		return null;
+	public boolean deleteJourFerier(int id) {
+		try {
+			JourFerier j = em.find(JourFerier.class, id);
+			transaction.begin();
+			em.remove(j);
+			transaction.commit();
+			System.out.println("Jour Férié supprimé");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
-
 
 }

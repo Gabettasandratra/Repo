@@ -32,10 +32,10 @@ public class DemandeCredit implements Serializable {
 	@Column(name="num_credit")
 	private String numCredit;
 	
-	private int nbCredit;
+	private int nbCredit; 
 
 	@Column(name="date_demande")
-	private String dateDemande;
+	private String dateDemande;  
 
 	@Column(name="montant_demande")
 	private double montantDemande;
@@ -61,6 +61,9 @@ public class DemandeCredit implements Serializable {
 	@Column(name="commission")
 	private boolean commission;
 	
+	@Column(name="approuver")
+	private boolean approuver;
+	
 	@Column(name="taux")
 	private double taux;
 	
@@ -74,14 +77,22 @@ public class DemandeCredit implements Serializable {
 	private int diffPaie;
 	
 	@Column(name="modeCalculInteret")
-	private String modeCalculInteret;
-	
+	private String modeCalculInteret;	
 	
 	private double solde_total;
 	
 	private double principale_total;
 	
 	private double interet_total;
+	
+	@Column(name="type_rechelonne")
+	private String typeRechelonne;
+	
+	@Column(name="nombre_rechelonne")
+	private int nombreRechelonne;
+	
+	@Column(name="motif_rechelonne")
+	private String motifRechelonne;
 
 	/******************************************************************************************************************************/
 									/**********************RELEATION ONE TO MANY********************************/
@@ -89,7 +100,7 @@ public class DemandeCredit implements Serializable {
 	
 	//CALENDRIER GENERER AU DEMANDE 
 	//bi-directional one-to-many association to Calpaiementdue
-	@OneToMany(mappedBy="demandeCredit", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy="demandeCredit", cascade = CascadeType.REMOVE)
 	@XmlTransient
 	private List<Calpaiementdue> calpaiementdues;
 	
@@ -119,7 +130,7 @@ public class DemandeCredit implements Serializable {
 
 	//CALENDRIER GENERER AU DEBLOCAGE
 	//bi-directional one-to-many association to Calapresdebl
-	@OneToMany(mappedBy="demandeCredit",cascade= CascadeType.ALL)
+	@OneToMany(mappedBy="demandeCredit",cascade= CascadeType.REMOVE)
 	@XmlTransient
 	private List<Calapresdebl> calapresdebls;
 	
@@ -218,6 +229,14 @@ public class DemandeCredit implements Serializable {
 		this.commission = commission;
 	}
 
+	public boolean isApprouver() {
+		return approuver;
+	}
+
+	public void setApprouver(boolean approuver) {
+		this.approuver = approuver;
+	}
+
 	public String getAppBy() {
 		return this.appBy;
 	}
@@ -289,7 +308,30 @@ public class DemandeCredit implements Serializable {
 	public void setInteret_total(double interet_total) {
 		this.interet_total = interet_total;
 	}
+	
+	public String getTypeRechelonne() {
+		return typeRechelonne;
+	}
 
+	public void setTypeRechelonne(String typeRechelonne) {
+		this.typeRechelonne = typeRechelonne;
+	}
+
+	public int getNombreRechelonne() {
+		return nombreRechelonne;
+	}
+
+	public void setNombreRechelonne(int nombreRechelonne) {
+		this.nombreRechelonne = nombreRechelonne;
+	}
+
+	public String getMotifRechelonne() {
+		return motifRechelonne;
+	}
+
+	public void setMotifRechelonne(String motifRechelonne) {
+		this.motifRechelonne = motifRechelonne;
+	}
 
 	public List<Calpaiementdue> getCalpaiementdues() {
 		return this.calpaiementdues;
@@ -544,6 +586,7 @@ public class DemandeCredit implements Serializable {
 	public void setInteret(double interet) {
 		this.interet = interet;
 	}
+	
 
 	public String getDateApprobation() {
 		return dateApprobation;

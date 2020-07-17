@@ -42,6 +42,19 @@ public class ApprobationCredit implements Serializable{
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	
+	public ApprobationCredit(String dateAp, String personeAp,
+			String description, double montantApprouver,
+			DemandeCredit demandeCredit) {
+		super();
+		this.dateAp = dateAp;
+		this.personeAp = personeAp;
+		this.description = description;
+		this.montantApprouver = montantApprouver;
+		this.demandeCredit = demandeCredit;
+	}
+
+
 
 	public int getId() {
 		return id;

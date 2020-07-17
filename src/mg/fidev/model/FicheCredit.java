@@ -44,12 +44,51 @@ public class FicheCredit implements Serializable {
 	
 	private double totalSolde;
 	
+	private boolean paie;
+	
 	@Column(name="num_credit")
 	private String num_credit;
 	
 	public FicheCredit() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+
+	public FicheCredit(String date, String transaction, String piece,
+			double principale, double interet, double penalite,
+			double soldeCourant, double totalPrincipal, double totalInteret,
+			double totalSolde, String num_credit) {
+		super();
+		this.date = date;
+		this.transaction = transaction;
+		this.piece = piece;
+		this.principale = principale;
+		this.interet = interet;
+		this.penalite = penalite;
+		this.soldeCourant = soldeCourant;
+		this.totalPrincipal = totalPrincipal;
+		this.totalInteret = totalInteret;
+		this.totalSolde = totalSolde;
+		this.num_credit = num_credit;
+	}
+	
+	public FicheCredit(String date, String transaction, String piece,
+			double principale, double interet, double penalite,
+			double soldeCourant, double totalPrincipal, double totalInteret,
+			double totalSolde, String num_credit, boolean paie) {
+		super();
+		this.date = date;
+		this.transaction = transaction;
+		this.piece = piece;
+		this.principale = principale;
+		this.interet = interet;
+		this.penalite = penalite;
+		this.soldeCourant = soldeCourant;
+		this.totalPrincipal = totalPrincipal;
+		this.totalInteret = totalInteret;
+		this.totalSolde = totalSolde;
+		this.num_credit = num_credit;
+		this.paie = paie;
 	}
 
 	public int getId() {
@@ -148,6 +187,13 @@ public class FicheCredit implements Serializable {
 	public void setTotalSolde(double totalSolde) {
 		this.totalSolde = totalSolde;
 	}
-	
+
+	public boolean isPaie() {
+		return paie;
+	}
+
+	public void setPaie(boolean paie) {
+		this.paie = paie;
+	}
 	
 }

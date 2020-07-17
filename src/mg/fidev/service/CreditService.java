@@ -78,7 +78,13 @@ public interface CreditService {
 	//chercher par numéro crédit
 	@WebMethod
 	@WebResult(name="resultat")
-	public List<DemandeCredit> chercherCredit(@WebParam(name = "mc") String mc);
+	public List<DemandeCredit> chercherCredit(@WebParam(name = "mc") String mc, @WebParam(name = "statu") String statu);
+	
+	//chercher crédit par stituation
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<DemandeCredit> findSituationCredit(
+			@WebParam(name = "approbation") boolean ap, @WebParam(name = "commission") boolean comm);
 	
 	/**
 	 * Methode Pour Chercher Produit Par Mot Clé
@@ -115,7 +121,9 @@ public interface CreditService {
 	@WebResult(name = "validation")
 	public String deleteProduitCredit(@WebParam(name="idProduitCredit") String id);
 	
+	//-----------------------------------------------------------------------------
 	
+	/******************************** Demande crédit Individuel *******************************/
 	//Enregistrement DEMANDE CREDIT 	
 	@WebMethod
 	@WebResult(name="validation")
@@ -146,6 +154,23 @@ public interface CreditService {
 	public boolean deleteCredit(
 	@WebParam(name="numCredit") @XmlElement(required=true,nillable=false) String numCred);
 	
+	//-------------------------------------------------------------------------------------
+	
+	/********************************* Calendrier crédit ***********************************/
+	//Get calendrier crédit
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Calpaiementdue> getCalendrierCredit(
+	@WebParam(name="numCred") @XmlElement(required=true,nillable=false) String numCred);
+	
+	//Modification calendrier crédit
+	@WebMethod
+	@WebResult(name="resultat")
+	public Calpaiementdue updateCalendrierCredit(
+	@WebParam(name="cal") @XmlElement(required=false,nillable=true) Calpaiementdue cal);
+	
+	//-------------------------------------------------------------------------------------
+	/*********************************Demande crédit groupe*******************************/
 	//Enregistrement demande crédit groupe
 	@WebMethod
 	@WebResult(name="validation")
@@ -184,6 +209,9 @@ public interface CreditService {
 	@WebResult(name="resultat")
 	public List<CrediGroupeView> getAllCrediGroupeView();
 	
+	//-------------------------------------------------------------------------------------
+	
+	/*************************** Saisie demande *****************************************/
 	//générer calendrier
 	@WebMethod
 	@WebResult(name="resultat")
@@ -199,6 +227,9 @@ public interface CreditService {
 	@WebParam(name="modCalcul") @XmlElement(required=false,nillable=true) String modCalcul
 	);
 	
+	//---------------------------------------------------------------------------------------
+	
+	/************************************ Calendrier View **********************************/
 	//modification calendrier
 	@WebMethod
 	@WebResult(name="validation")
@@ -216,6 +247,8 @@ public interface CreditService {
 	@WebResult(name="resultat")
 	public List<CalView> getAllCalView();
 	
+	//-----------------------------------------------------------------------------------------
+	/**********************************Garantie crédit****************************************/
 	//Ajouter garantie
 	@WebMethod
 	@WebResult(name="validation")
@@ -240,6 +273,9 @@ public interface CreditService {
 	@WebResult(name="resultat")
 	public List<GarantieView> getAllGarantieView();
 		
+	//-----------------------------------------------------------------------------------
+	
+	/********************************** Commission crédit *****************************/
 	//COMMISSION CREDIT 
 	@WebMethod
 	@WebResult(name = "validation")
@@ -254,6 +290,8 @@ public interface CreditService {
 	@WebParam(name="userId") @XmlElement(required=true,nillable=false) int userId,
 	@WebParam(name="cptCaisse") @XmlElement(required=true,nillable=false) String nomCptCaisse);
 
+	//-----------------------------------------------------------------------------------
+	/************************************* Approbation crédit **************************/
 	//APPROBATION CREDIT
 	@WebMethod
 	@WebResult(name="resultat")
@@ -265,7 +303,10 @@ public interface CreditService {
 			@WebParam(name="montantApp") @XmlElement(required=true,nillable=false) double montantApp,
 			@WebParam(name="statut") @XmlElement(required=true,nillable=false) String stat_demande);
 	
-	//DECAISSEMENT
+	//-----------------------------------------------------------------------------------
+	/*********************DECAISSEMENT*************************/
+	
+	//Save decaissement
 	@WebMethod
 	@WebResult(name="resultat")
 	public String saveDecaisement(
@@ -281,7 +322,32 @@ public interface CreditService {
 	@WebParam(name="comptCaisse") @XmlElement(required=false,nillable=true)String comptCaise,
 	@WebParam(name="num_credit")String numCredit,
 	@WebParam(name="id_utilisateur")int userId);
-
+	
+	//Chercher décaissement par clé primaire
+	@WebMethod
+	@WebResult(name="resultat")
+	public Decaissement getUniqueDecaissement(@WebParam(name="code") @XmlElement(required=true,nillable=false)String code);
+	
+	//Afficher tous les décaissements
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Decaissement> getAllDecaissement();
+	
+	//update decaissement {@WebParam(name="tcode") String tcode, }
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean updateDecaissement(
+		@WebParam(name="decaisse") Decaissement decaissement,
+		@WebParam(name="typePaie") @XmlElement(required=true,nillable=false)String typePaie,
+		@XmlElement(required=false) @WebParam(name="numTel")String numTel, 
+		@XmlElement(required=false) @WebParam(name="numCheq")String numCheq,
+		@XmlElement(required=false) @WebParam(name="numCompte")String numCompte,
+		@WebParam(name="comptCaisse") @XmlElement(required=false,nillable=true)String comptCaise,
+		@WebParam(name="userUpdate")int userUpdate,
+		@WebParam(name="numCred")String numCred);
+	
+	//-----------------------------------------------------------------------------------
+	/********************************* Remboursement crédit ****************************/
 	//REMBOURSEMENT
 	@WebMethod
 	@WebResult(name="resultat")
@@ -313,8 +379,17 @@ public interface CreditService {
 	public List<String> getMontaRemb(@WebParam(name="numCredit") String numCredit
 			,@WebParam(name="date") String date);
 	
+	//-----------------------------------------------------------------------------------
+	/******************************* Rééchelonnement remboursement *********************************/
+	//
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean reechelonnerCredit(
+			@WebParam(name="numCred") String numCred, @WebParam(name="typeDate") String type, @WebParam(name="nb") int nombre, @WebParam(name="motif") String motif);
 	
-	/**************************************RAPPORT SUR CREDIT********************************************/
+	//-----------------------------------------------------------------------------------
+	
+	/******************************* RAPPORT SUR CREDIT *********************************/
 	
 	//HISTORIQUE REMBOURSEMENT CREDIT
 	@WebMethod
@@ -500,7 +575,7 @@ public interface CreditService {
 	public boolean configPenalite(@WebParam(name="configPenalite") @XmlElement(required=false,nillable=true) ConfigPenaliteCredit confPen, 
 			@WebParam(name= "idProduit") @XmlElement(required=true,nillable=false) String idProduit);
 	
-	
+	public List<CalView> testCal();
 	
 /*	@WebMethod
 	@WebResult(name="historique_demande")

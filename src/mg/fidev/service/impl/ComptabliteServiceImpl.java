@@ -11,10 +11,13 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Account;
+import mg.fidev.model.Agence;
 import mg.fidev.model.Analytique;
 import mg.fidev.model.Budget;
 import mg.fidev.model.Caisse;
 import mg.fidev.model.Compte;
+import mg.fidev.model.CompteDAT;
+import mg.fidev.model.CompteEpargne;
 import mg.fidev.model.ConfigGlCredit;
 import mg.fidev.model.ConfigTransactionCompta;
 import mg.fidev.model.DemandeCredit;
@@ -40,6 +43,111 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 	private static EntityManager em = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME).createEntityManager();
 	private static EntityTransaction transaction = em.getTransaction();
 	
+	
+	//Enregistrement transaction debit, credit pour Crédit
+	public static void saveImputationLoan(String indexTcode, String date, String description, String piece, double credit,
+			double debit, Utilisateur ut, Individuel ind, Groupe grp, DemandeCredit dm, Agence ag, Account ac){
+		System.out.println("Imputation pour crédit");
+		double sd = 0;	
+		if(debit > 0.0){
+			sd = ac.getSoldeProgressif() + debit;
+			System.out.println("Transaction débit");
+		}
+		if(credit > 0.0){
+			sd = ac.getSoldeProgressif() - credit;
+			System.out.println("Transaction crédit");			
+		}
+								
+		ac.setSoldeProgressif(sd);	
+		
+		Grandlivre g = new 
+		 Grandlivre(indexTcode, date, description , piece, credit, debit, sd, 
+					ut, dm.getIndividuel(), null, dm, null, ac);
+		System.out.println("Account numéro :"+ ac.getNumCpt());
+		try {
+			transaction.begin();
+			em.flush();
+			em.persist(g);
+			transaction.commit();
+			em.refresh(g); 
+			System.out.println("Transaction enregistré");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Erreur enregistrement debit loan");
+		}
+		
+	}
+	
+	//Enregistrement transaction debit, credit pour Epargne
+	public static void saveImputationEpargne(String indexTcode, String date, String description, String piece, double credit,
+			double debit, Utilisateur ut, Individuel ind, Groupe grp, CompteEpargne cpt, Agence ag, Account ac){
+		System.out.println("Imputation pour épargne");
+		double sd = 0;	
+		if(debit > 0.0){
+			sd = ac.getSoldeProgressif() + debit;
+			System.out.println("Transaction débit");
+		}
+		if(credit > 0.0){
+			sd = ac.getSoldeProgressif() - credit;
+			System.out.println("Transaction crédit");			
+		}
+								
+		ac.setSoldeProgressif(sd);	
+		
+		Grandlivre g = new 
+			Grandlivre(indexTcode, date, description, piece, credit, debit, sd, ut,
+					ind, grp, ag, cpt, ac)	;
+		
+		System.out.println("Account numéro :"+ ac.getNumCpt());
+		try {
+			transaction.begin();
+			em.flush();
+			em.persist(g);
+			transaction.commit();
+			em.refresh(g); 
+			System.out.println("Transaction enregistré");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Erreur enregistrement debit loan");
+		}
+		
+	}
+	
+	//Enregistrement transaction debit, credit pour Dépôt à terme 
+	public static void saveImputationDAT(String indexTcode, String date, String description, String piece, double credit,
+			double debit, Utilisateur ut, Individuel ind, Groupe grp, CompteDAT dat, Agence ag, Account ac){
+		System.out.println("Imputation pour épargne");
+		double sd = 0;	
+
+		if(debit > 0.0){
+			sd = ac.getSoldeProgressif() + debit;
+			System.out.println("Transaction débit");
+		}
+		if(credit > 0.0){
+			sd = ac.getSoldeProgressif() - credit;
+			System.out.println("Transaction crédit");			
+		}
+								
+		ac.setSoldeProgressif(sd);	
+		
+		Grandlivre g = new 
+			Grandlivre(indexTcode, date, description, piece, credit, debit, sd, ut,
+					ind, grp, ag, dat, ac)	;
+		
+		System.out.println("Account numéro :"+ ac.getNumCpt());
+		try {
+			transaction.begin();
+			em.flush();
+			em.persist(g);
+			transaction.commit();
+			em.refresh(g); 
+			System.out.println("Transaction enregistré");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Erreur enregistrement imputation");
+		}
+		
+	}
 	
 	//FONCTION QUI AFFICHE LE GRAND LIVRE 
 	@Override

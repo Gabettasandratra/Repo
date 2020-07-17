@@ -84,6 +84,9 @@ public class Individuel implements Serializable {
 
 	private String titre;
 	
+	@Column(name="photo")
+	private String photo;
+	
 	@Column(name="approuver")
 	private boolean approuver;
 	
@@ -94,8 +97,7 @@ public class Individuel implements Serializable {
 	private boolean isListeNoir;
 
 	@Column(name="is_sain")
-	private boolean isSain;
-	
+	private boolean isSain;	
 
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="individuel")
@@ -378,6 +380,14 @@ public class Individuel implements Serializable {
 		this.titre = titre;
 	}
 	
+	public String getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+
 	public boolean isListeNoir() {
 		return isListeNoir;
 	}

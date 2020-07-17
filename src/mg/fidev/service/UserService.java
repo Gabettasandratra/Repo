@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlElement;
 import mg.fidev.model.Agence;
 import mg.fidev.model.Caisse;
 import mg.fidev.model.Fonction;
+import mg.fidev.model.JourFerier;
 import mg.fidev.model.Personnel;
 import mg.fidev.model.Utilisateur;
 
@@ -81,8 +82,14 @@ public interface UserService {
 	
 	@WebMethod
 	@WebResult(name="resultat")
-	public Utilisateur updateUser(
-			@XmlElement(required=true) @WebParam(name="utilisateur")Utilisateur ut);
+	public Utilisateur updateProfilUser(
+			@XmlElement(required=true) @WebParam(name="idUser") int idUser,
+			@XmlElement(required=true) @WebParam(name="nomUser") String nomUser,
+			@XmlElement(required=true) @WebParam(name="loginUser") String loginUser,
+			@XmlElement(required=true) @WebParam(name="genreUser") String genreUser,
+			@XmlElement(required=true) @WebParam(name="telUser") String telUser,
+			@XmlElement(required=true) @WebParam(name="photo") String photo,
+			@XmlElement(required=true) @WebParam(name="fonction") int fonctionId);
 	
 	@WebMethod
 	@WebResult(name="validation")
@@ -94,5 +101,28 @@ public interface UserService {
 	@WebResult(name="resultat")
 	public List<Utilisateur> getUser(
 	@XmlElement(required=true) @WebParam(name="fonction")String nomFonction);
+
+	//Liste Jours Feriés
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<JourFerier> getJoursFerier();
+	
+	//Ajout jour férié
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean addJourFerie(
+	@XmlElement(required=true) @WebParam(name="jourFerier")JourFerier jourFerier);
+	
+	//Modification jour férié
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean editJourFerie(
+	@XmlElement(required=true) @WebParam(name="jourFerier")JourFerier jourFerier);
+
+	//Supprimer utilisateur
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean deleteJourFerier(
+			@XmlElement(required=true) @WebParam(name="id")int id);
 	
 }

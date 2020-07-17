@@ -68,6 +68,11 @@ public class Utilisateur implements Serializable {
 	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
 	@XmlTransient
 	private List<Decaissement> decaissements;
+	
+	//bi-directional many-to-one association to Decaissement
+	@OneToMany(mappedBy="userUpdate",cascade=CascadeType.ALL)
+	@XmlTransient
+	private List<Decaissement> update;
 
 	//bi-directional many-to-one association to DemandeCredit demande saisissé
 	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
@@ -236,6 +241,14 @@ public class Utilisateur implements Serializable {
 		decaissement.setUtilisateur(null);
 
 		return decaissement;
+	}
+	
+	public List<Decaissement> getUpdate() {
+		return this.update;
+	}
+
+	public void setUpdate(List<Decaissement> update) {
+		this.update = update;
 	}
 
 	public List<DemandeCredit> getDemandeCredits() {

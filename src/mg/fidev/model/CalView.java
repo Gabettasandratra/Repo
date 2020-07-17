@@ -39,6 +39,17 @@ public class CalView implements Serializable {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	
+	public CalView(String date, float montantComm, float montantInt,
+			float montantPenal, double montantPrinc, String numCred) {
+		super();
+		this.date = date;
+		this.montantComm = montantComm;
+		this.montantInt = montantInt;
+		this.montantPenal = montantPenal;
+		this.montantPrinc = montantPrinc;
+		this.numCred = numCred;
+	}
 
 	public int getRowId() {
 		return rowId;
@@ -55,7 +66,7 @@ public class CalView implements Serializable {
 	public void setDate(String date) {
 		this.date = date;
 	}
-
+	
 	public float getMontantComm() {
 		return montantComm;
 	}

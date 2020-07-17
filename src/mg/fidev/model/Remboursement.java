@@ -30,50 +30,49 @@ public class Remboursement implements Serializable {
 	//@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Id
 	private String tcode;
+	//@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="date_remb")
+	private String dateRemb;
+	
+	private String piece;
 
-	private float cheqcomm;
+	private double montant_paye;
+	
+	private double principal;
+	
+	private double interet;
+
+	private double restaPaie;
+	
+	@Column(name="solde")
+	private double solde;
 	
 	@Column(name="typeAction")
 	private String typeAction;
 	
 	@Column(name="nbEcheance")
 	private int nbEcheance;
-	
+
 	@Column(name="typePaie")
 	private String typePaie;
+
+	//@Column(name="cpt_caisse_num")
+	//private String cptCaisseNum;
 	
 	@Column(name="valPaie")
 	private String valPaie;
-	
-	@Column(name="solde")
-	private double solde;
-	
+
 	@Column(name="totalPrincipale")
 	private double totalPrincipale;
 	
 	@Column(name="totalInteret")
 	private double totalInteret;
 
-	@Column(name="cpt_caisse_num")
-	private String cptCaisseNum;
-
-	//@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="date_remb")
-	private String dateRemb;
-
-	private float overpay;
-
-	private String piece;
-
 	private float stationery;
 	
-	private double restaPaie;
-	
-	private double montant_paye;
-	
-	private double principal;
-	
-	private double interet;
+	private float cheqcomm;
+
+	private float overpay;
 
 	//bi-directional many-to-one association to DemandeCredit
 	@ManyToOne
@@ -87,6 +86,34 @@ public class Remboursement implements Serializable {
 	private Utilisateur utilisateur;
 
 	public Remboursement() {
+	}
+
+	public Remboursement(String tcode, String dateRemb, String piece,
+			double montant_paye, double principal, double interet,
+			double restaPaie, double solde, String typeAction, int nbEcheance,
+			String typePaie, String valPaie, double totalPrincipale,
+			double totalInteret, float stationery, float cheqcomm,
+			float overpay, DemandeCredit demandeCredit, Utilisateur utilisateur) {
+		super();
+		this.tcode = tcode;
+		this.dateRemb = dateRemb;
+		this.piece = piece;
+		this.montant_paye = montant_paye;
+		this.principal = principal;
+		this.interet = interet;
+		this.restaPaie = restaPaie;
+		this.solde = solde;
+		this.typeAction = typeAction;
+		this.nbEcheance = nbEcheance;
+		this.typePaie = typePaie;
+		this.valPaie = valPaie;
+		this.totalPrincipale = totalPrincipale;
+		this.totalInteret = totalInteret;
+		this.stationery = stationery;
+		this.cheqcomm = cheqcomm;
+		this.overpay = overpay;
+		this.demandeCredit = demandeCredit;
+		this.utilisateur = utilisateur;
 	}
 
 	public String getTcode() {
@@ -167,14 +194,6 @@ public class Remboursement implements Serializable {
 
 	public void setCheqcomm(float cheqcomm) {
 		this.cheqcomm = cheqcomm;
-	}
-
-	public String getCptCaisseNum() {
-		return this.cptCaisseNum;
-	}
-
-	public void setCptCaisseNum(String cptCaisseNum) {
-		this.cptCaisseNum = cptCaisseNum;
 	}
 
 	public float getOverpay() {

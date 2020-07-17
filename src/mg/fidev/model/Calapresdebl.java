@@ -51,6 +51,18 @@ public class Calapresdebl implements Serializable {
 	public Calapresdebl() {
 	}
 
+	public Calapresdebl(String date, float mcomm, float mint, float mpen,
+			double mprinc, boolean payer, DemandeCredit demandeCredit) {
+		super();
+		this.date = date;
+		this.mcomm = mcomm;
+		this.mint = mint;
+		this.mpen = mpen;
+		this.mprinc = mprinc;
+		this.payer = payer;
+		this.demandeCredit = demandeCredit;
+	}
+	
 	public int getRowId() {
 		return this.rowId;
 	}

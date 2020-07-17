@@ -74,8 +74,25 @@ public class CommissionCredit implements Serializable {
 		this.tdf = tdf;
 		this.totvat = totvat;
 	}
-
-
+	
+	public CommissionCredit(String tcode, boolean cash, int cheqid,
+			String datePaie, double lcomm, String statut_comm, String piece,
+			double stationery, float tdf, float totvat,
+			DemandeCredit demandeCredit, Utilisateur utilisateur) {
+		super();
+		this.tcode = tcode;
+		this.cash = cash;
+		this.cheqid = cheqid;
+		this.datePaie = datePaie;
+		this.lcomm = lcomm;
+		this.statut_comm = statut_comm;
+		this.piece = piece;
+		this.stationery = stationery;
+		this.tdf = tdf;
+		this.totvat = totvat;
+		this.demandeCredit = demandeCredit;
+		this.utilisateur = utilisateur;
+	}
 
 	public String getTcode() {
 		return this.tcode;

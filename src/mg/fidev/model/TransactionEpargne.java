@@ -63,7 +63,27 @@ public class TransactionEpargne implements Serializable {
 
 	public TransactionEpargne() {
 	}
-
+	
+	public TransactionEpargne(String idTransactionEp, String dateTransaction,
+			String description, double montant, String pieceCompta, String typeTransEp, String typePaie, String valPaie,
+			double commRet, double commTrans, double penalPrelev,
+			Caisse caisse, CompteEpargne compteEpargne) {
+		super();
+		this.idTransactionEp = idTransactionEp;
+		this.dateTransaction = dateTransaction;
+		this.description = description;
+		this.montant = montant;
+		this.pieceCompta = pieceCompta;
+		this.typeTransEp = typeTransEp;
+		this.typePaie = typePaie;
+		this.valPaie = valPaie;
+		this.commRet = commRet;
+		this.commTrans = commTrans;
+		this.penalPrelev = penalPrelev;
+		this.caisse = caisse;
+		this.compteEpargne = compteEpargne;
+	}
+	
 	public String getIdTransactionEp() {
 		return this.idTransactionEp;
 	}

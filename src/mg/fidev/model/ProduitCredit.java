@@ -136,6 +136,13 @@ public class ProduitCredit implements Serializable {
 		this.nomProdCredit = nomProdCredit;
 	}
 
+	public ProduitCredit(String idProdCredit, boolean etat,	String nomProdCredit) {
+		super();
+		this.idProdCredit = idProdCredit;
+		this.etat = etat;
+		this.nomProdCredit = nomProdCredit;
+	}
+
 	public String getIdProdCredit() {
 		return this.idProdCredit;
 	}

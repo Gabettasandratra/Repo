@@ -55,6 +55,19 @@ public class GarantieCredit implements Serializable {
 	public GarantieCredit() {
 	}
 
+	public GarantieCredit(String typeGarantie, String nomGarantie,
+			double valeur, double pourcentage, boolean lever,
+			String raisonLever, DemandeCredit demandeCredit) {
+		super();
+		this.typeGarantie = typeGarantie;
+		this.nomGarantie = nomGarantie;
+		this.valeur = valeur;
+		this.pourcentage = pourcentage;
+		this.lever = lever;
+		this.raisonLever = raisonLever;
+		this.demandeCredit = demandeCredit;
+	}
+
 	public int getRowId() {
 		return this.rowId;
 	}

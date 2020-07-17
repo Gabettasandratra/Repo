@@ -30,25 +30,25 @@ public class Grandlivre implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private String id;
-	
-	private boolean cloture;
 
+	private String tcode;
+	
 	private String compte;
 
-	private double credit;
-
 	private String date;
+
+	private String descr;
+	
+	private String piece;
+
+	private double credit;
 
 	private double debit;
 	
 	@Column(name="solde")
 	private double solde;
 
-	private String descr;
-
-	private String piece;
-
-	private String tcode;
+	private boolean cloture;
 
 	private String tiers;
 
@@ -97,49 +97,67 @@ public class Grandlivre implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="code_analytique")
 	private Analytique analytique;
-	
-	
+		
 	public Grandlivre() {
 	}
-
-	public Grandlivre(String compte, double credit, String date, double debit,
-			double solde, String descr, String piece, String tcode,
-			String userId, Utilisateur utilisateur, Individuel codeInd,
-			Groupe groupe, DemandeCredit demandeCredit ) {
+	
+	public Grandlivre(String tcode, String date, String descr, String piece,
+			double credit, double debit, double solde, Utilisateur utilisateur,
+			Individuel codeInd, Groupe groupe, DemandeCredit demandeCredit,
+			Agence agence, Account account) {
 		super();
-		this.compte = compte;
-		this.credit = credit;
+		this.tcode = tcode;
 		this.date = date;
-		this.debit = debit;
-		this.solde = solde;
 		this.descr = descr;
 		this.piece = piece;
-		this.tcode = tcode;
-		this.userId = userId;
+		this.credit = credit;
+		this.debit = debit;
+		this.solde = solde;
 		this.utilisateur = utilisateur;
 		this.codeInd = codeInd;
 		this.groupe = groupe;
 		this.demandeCredit = demandeCredit;
+		this.agence = agence;
+		this.account = account;
+	}
+
+	public Grandlivre(String tcode, String date, String descr, String piece,
+			double credit, double debit, double solde, Utilisateur utilisateur,
+			Individuel codeInd, Groupe groupe, Agence agence,
+			CompteEpargne compteEpargne, Account account) {
+		super();
+		this.tcode = tcode;
+		this.date = date;
+		this.descr = descr;
+		this.piece = piece;
+		this.credit = credit;
+		this.debit = debit;
+		this.solde = solde;
+		this.utilisateur = utilisateur;
+		this.codeInd = codeInd;
+		this.groupe = groupe;
+		this.agence = agence;
+		this.compteEpargne = compteEpargne;
+		this.account = account;
 	}
 	
-	public Grandlivre(String compte, double credit, String date, double debit,
-			double solde, String descr, String piece, String tcode,
-			String userId, Utilisateur utilisateur, Individuel codeInd,
-			Groupe groupe, DemandeCredit demandeCredit, Account account) {
+	public Grandlivre(String tcode, String date, String descr, String piece,
+			double credit, double debit, double solde, Utilisateur utilisateur,
+			Individuel codeInd, Groupe groupe, Agence agence,
+			CompteDAT compteDat, Account account) {
 		super();
-		this.compte = compte;
-		this.credit = credit;
+		this.tcode = tcode;
 		this.date = date;
-		this.debit = debit;
-		this.solde = solde;
 		this.descr = descr;
 		this.piece = piece;
-		this.tcode = tcode;
-		this.userId = userId;
+		this.credit = credit;
+		this.debit = debit;
+		this.solde = solde;
 		this.utilisateur = utilisateur;
 		this.codeInd = codeInd;
 		this.groupe = groupe;
-		this.demandeCredit = demandeCredit;
+		this.agence = agence;
+		this.compteDat = compteDat;
 		this.account = account;
 	}
 

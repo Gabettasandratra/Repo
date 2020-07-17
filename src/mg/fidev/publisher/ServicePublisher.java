@@ -20,7 +20,26 @@ public class ServicePublisher {
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/credit", new CreditServiceImpl());
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/comptabilite", new ComptabliteServiceImpl());
 		System.out.println("-- Service Online --");
+		/*LocalDate localDate = LocalDate.now();
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		//String d = "2020-04-12";
+		//System.out.println(d.substring(8, 10)); 
+		try {
+			System.out.println("Local date = "+ localDate);
+			System.out.println("Local date to string = "+ localDate.toString());
+			java.util.Date d = simpleDateFormat.parse(localDate.toString());
+			System.out.println("Date = "+d);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 		
+		double montant = 500;
+		System.out.println("Montant à rembourser = "+montant);
+		double interet = 500 - 200;
+		montant = interet;
+		System.out.println("rest paye int = "+interet);
+		double principal = montant - 300;		
+		System.out.println("rest paye principal = "+principal);*/
 	}
 }
 

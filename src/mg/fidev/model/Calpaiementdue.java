@@ -32,6 +32,10 @@ public class Calpaiementdue implements Serializable {
 	private int rowId;
 
 	private String date;
+	
+	/*@Temporal(TemporalType.DATE)
+	@Column(name="dat")
+	private Date dat;*/
 
 	private float montantComm;
 
@@ -48,7 +52,18 @@ public class Calpaiementdue implements Serializable {
 
 	public Calpaiementdue() {
 	}
-
+	
+	public Calpaiementdue(String date, float montantComm, float montantInt,
+			float montantPenal, double montantPrinc, DemandeCredit demandeCredit) {
+		super();
+		this.date = date;
+		this.montantComm = montantComm;
+		this.montantInt = montantInt;
+		this.montantPenal = montantPenal;
+		this.montantPrinc = montantPrinc;
+		this.demandeCredit = demandeCredit;
+	}
+		
 	public int getRowId() {
 		return this.rowId;
 	}
