@@ -26,22 +26,31 @@ public class Garant implements Serializable{
 	@Id
 	@Column(name="codeGarant", length=15)
 	private String codeGarant;	
+	
 	@Column(name="nom", length=100)
 	private String nom;	
+	
 	@Column(name="prenom", length=100)
 	private String prenom;	
+	
 	@Column(name="dateNais", length=15)
 	private String dateNais;
+	
 	@Column(name="date_inscription", length=15)
 	private String dateInscription;
+	
 	@Column(name="email")
 	private String email;
+	
 	@Column(name="estIndividuel")
 	private boolean estClientIndividuel;
+	
 	@Column(name="profession", length=25)
 	private String profession;
+	
 	@Column(name="sexe", length=10)
 	private String sexe;
+	
 	@Column(name="code_individuel", length=15)
 	private String codeIndividuel;
 	
@@ -73,6 +82,28 @@ public class Garant implements Serializable{
 		super();
 		// TODO Auto-generated constructor stub
 	}
+
+	public Garant(String codeGarant, String nom, String prenom,
+			String dateNais, String dateInscription, String email,
+			boolean estClientIndividuel, String profession, String sexe,
+			String codeIndividuel, List<Docidentite> docidentites,
+			Adresse adresse) {
+		super();
+		this.codeGarant = codeGarant;
+		this.nom = nom;
+		this.prenom = prenom;
+		this.dateNais = dateNais;
+		this.dateInscription = dateInscription;
+		this.email = email;
+		this.estClientIndividuel = estClientIndividuel;
+		this.profession = profession;
+		this.sexe = sexe;
+		this.codeIndividuel = codeIndividuel;
+		this.docidentites = docidentites;
+		this.adresse = adresse;
+	}
+
+
 
 	public String getCodeGarant() {
 		return codeGarant;

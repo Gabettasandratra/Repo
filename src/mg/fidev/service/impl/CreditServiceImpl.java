@@ -1185,7 +1185,7 @@ public class CreditServiceImpl implements CreditService {
 						//Initialisation des informations de transaction
 						TransactionEpargne trans = new TransactionEpargne(indexTcode, date,
 								"Dépôt via Crédit numéro "+dm.getNumCredit(), montant, piece, "DE", "transfert épargne", dm.getNumCredit(),
-								0, 0, 0, null, cptEp);  	
+								0, 0, 0, cptEp, ut);  	
 						
 						double tr = cptEp.getSolde() + montant;
 						cptEp.setSolde(tr);
@@ -1936,22 +1936,16 @@ public class CreditServiceImpl implements CreditService {
 
 		String dateCal = (String) requete.getSingleResult();
 		
-		try {
-		
+		try {	
 			LocalDate dateparm = LocalDate.parse(date);
 			LocalDate dateDu = LocalDate.parse(dateCal);
 			System.out.println(dateparm);
 			System.out.println(dateDu);
 	
-			// Verifie la difference entre la date de remboursement par rapport à la date de calandrier remboursement
-			
+			// Verifie la difference entre la date de remboursement par rapport à la date de calandrier remboursement		
 			//int val = Period.between(dateDu, dateparm).getDays();
-	        Long val = ChronoUnit.DAYS.between(dateDu,dateparm);
-
-			//Days.daysBetween
-			
-			//int v2 = Days.daysBetween(arg0, arg1);
-			System.out.println("difference entre "+dateDu+" et "+dateparm+" est "+val + "\n");
+	        Long val = ChronoUnit.DAYS.between(dateDu, dateparm);
+			System.out.println("difference entre "+ dateDu +" et "+ dateparm +" est "+ val + "\n");
 			//List<E>
 			if(val < 0){
 				String info = "Remboursement anticipative";

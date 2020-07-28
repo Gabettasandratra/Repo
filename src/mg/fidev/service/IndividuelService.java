@@ -34,8 +34,8 @@ public interface IndividuelService {
 	
 	//Enregistrement client individuel
 	@WebMethod
-	@WebResult(name = "resultat")
-	public String insertIndividuel(
+	@WebResult(name = "validation")
+	public boolean insertIndividuel(
 			@WebParam(name = "individuel") @XmlElement(required = true) Individuel individuel,
 			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence,
 			@WebParam(name = "docIdentite") @XmlElement(required = true) Docidentite docIdentite,

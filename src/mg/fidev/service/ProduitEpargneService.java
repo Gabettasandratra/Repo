@@ -180,6 +180,21 @@ public interface ProduitEpargneService {
 			@XmlElement(required=false) @WebParam(name="codeInd")String codeInd,
 			@XmlElement(required=false) @WebParam(name="codeGrp")String codeGrp);
 	
+
+	/****************************Modification compte*****************************************************/
+	//Chercher compte par numéro compte
+	@WebMethod
+	@WebResult(name="resultat")
+	public CompteEpargne findUniqueCompte(
+			@XmlElement(required=true, nillable=false) @WebParam(name="numCompte")String numCompte);
+	
+	//Enregistremeent modification compte épargne
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean updateCompte(
+			@XmlElement(required=true, nillable=false) @WebParam(name="numCompte")String numCompte,
+			@XmlElement(required=true, nillable=false) @WebParam(name="date")String date);
+	
 	/***
 	 * Transaction épargne
 	 * ***/
@@ -199,6 +214,39 @@ public interface ProduitEpargneService {
 			@XmlElement(required=true) @WebParam(name="utilisateur") int idUser
 			);
 	
+	//------------------------------------------------------------------------------------------------------
+		/****************************Modification Transaction*****************************************************/
+		//Recupère detail transaction
+		@WebMethod
+		@WebResult(name="resultat")
+		public TransactionEpargne getDetailTrans(
+				@XmlElement(required=true, nillable=false) @WebParam(name="codeTrans")String codeTrans);
+		
+		//Enregistrement modification transaction
+		@WebMethod
+		@WebResult(name="resultat")
+		public boolean updateTransaction(
+			@XmlElement(required=true) @WebParam(name="codeTrans") String codeTrans,
+			@XmlElement(required=true) @WebParam(name="typeTrans") String typeTrans,
+			@XmlElement(required=true) @WebParam(name="dateTrans") String dateTrans,
+			@XmlElement(required=true) @WebParam(name="montant") double montant,
+			@XmlElement(required=true) @WebParam(name="description") String description,
+			@XmlElement(required=true) @WebParam(name="piece") String pieceCompta,
+			@XmlElement(required=true) @WebParam(name="typPaie")String typPaie,
+			@XmlElement(required=false) @WebParam(name="numTel")String numTel, 
+			@XmlElement(required=false) @WebParam(name="numCheq")String numCheq,
+			@XmlElement(required=false) @WebParam(name="CompteCaisse") String nomCptCaisse,
+			@XmlElement(required=true) @WebParam(name="utilisateur") int idUser);
+			
+		//Suppression transaction
+		@WebMethod
+		@WebResult(name="resultat")
+		public boolean deleteTransaction(
+				@XmlElement(required=true) @WebParam(name="codeTrans") String codeTrans,
+				@XmlElement(required=true) @WebParam(name="utilisateur") int idUser);		
+		
+		//------------------------------------------------------------------------------------------------------	
+	
 	/***
 	 * Virement
 	 * ***/
@@ -216,6 +264,9 @@ public interface ProduitEpargneService {
 			@XmlElement(required=false) @WebParam(name="comptCaisse")String caisse,
 			@XmlElement(required=true) @WebParam(name="utilisateur")int user);
 	
+	//-----------------------------------------------------------------------------------------------------
+	
+	
 	/***
 	 * RAPPORT TRANSACTION
 	 * ***/
@@ -223,13 +274,11 @@ public interface ProduitEpargneService {
 	@WebResult(name="resultat")
 	public List<TransactionEpargne> rapportTransactions(
 			@XmlElement(required=false,nillable=true) @WebParam(name="dateDeb")String dateDeb,
-			@XmlElement(required=false,nillable=true) @WebParam(name="dateFin")String dateFin
-			);
+			@XmlElement(required=false,nillable=true) @WebParam(name="dateFin")String dateFin);
 	
 	/***
 	 * CHERCHER COMPTE PAR CODE CLIENT
 	 * ***/
-	
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<CompteEpargne> findByCodeCli(
@@ -338,6 +387,12 @@ public interface ProduitEpargneService {
 	public List<FicheCaisseEpargne> getFicheCaisse(
 	@WebParam(name="date") @XmlElement(required=true)String date); 
 	
+	//Get all Transaction
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<TransactionEpargne> getAllTransaction();
+	
+	//------------------------------------------------------------------------------------------------
 	//Ouvrir dépôt à terme
 	@WebMethod
 	@WebResult(name="resultat")

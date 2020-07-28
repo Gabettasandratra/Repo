@@ -19,10 +19,10 @@ public class ServicePublisher {
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/produit", new ProduitEpargneServiceImpl());
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/credit", new CreditServiceImpl());
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/comptabilite", new ComptabliteServiceImpl());
-		System.out.println("-- Service Online --");
+		System.out.println("-- Service Online --");    
 		/*LocalDate localDate = LocalDate.now();
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		//String d = "2020-04-12";
+		//String d = "2020-04-12";  
 		//System.out.println(d.substring(8, 10)); 
 		try {
 			System.out.println("Local date = "+ localDate);
@@ -42,21 +42,6 @@ public class ServicePublisher {
 		System.out.println("rest paye principal = "+principal);*/
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

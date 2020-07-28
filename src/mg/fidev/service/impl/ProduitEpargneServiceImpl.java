@@ -327,17 +327,13 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	//LIST TYPE EPARGNE
 	@Override
 	public List<TypeEpargne> getTypeEpargne() {
-		TypedQuery<TypeEpargne> q = em.createQuery("SELECT t FROM TypeEpargne t",TypeEpargne.class);
-		List<TypeEpargne> result = q.getResultList();
-		return result;
+		return em.createQuery("select t from TypeEpargne t",TypeEpargne.class).getResultList();
 	}
 	
 	//LIST CATEGORIE EPARGNE
 	@Override
 	public List<CatEpargne> getCategorieEp() {
-		TypedQuery<CatEpargne> q = em.createQuery("SELECT c FROM CatEpargne c",CatEpargne.class);
-		List<CatEpargne> result = q.getResultList();
-		return result;
+		return em.createQuery("select c from CatEpargne c",CatEpargne.class).getResultList();	
 	}
 
 	/***
@@ -459,9 +455,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			if(q.getSingleResult() == null)
 				return null;
 			else 
-				result = (CompteEpargne) q.getSingleResult();
-				
-			
+				result = (CompteEpargne) q.getSingleResult();	
 		}else{
 			return null;
 		}
@@ -469,6 +463,13 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		return result;
 	}
 
+	//Checher unique compte par numéro de compte
+	@Override
+	public CompteEpargne findUniqueCompte(String numCompte) {
+		return em.find(CompteEpargne.class, numCompte);
+	}
+	
+	
 	/***
 	 * TRASACTION EPARGNE
 	 * ***/
@@ -477,190 +478,130 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	public boolean trasactionEpargne(String typeTransac, String dateTransac,
 			double montant, String description, String pieceCompta,String typPaie,String numTel, String numCheq,
 			String nomCptCaisse, String numCptEp,int idUser) {
-		
-			//Instance de classe transaction
-			TransactionEpargne trans = new TransactionEpargne();
-			
+					
 			//UTILISATEUR DE SAISIE
-			Utilisateur ut = em.find(Utilisateur.class, idUser);
-			
-			String result="";
-			
+			Utilisateur ut = em.find(Utilisateur.class, idUser);			
 			///incrémenter le tcode dans la table grandlivre
 			String indexTcode = CodeIncrement.genTcode(em);
+			Individuel ind = null;
+			Groupe grp = null;
 			CompteEpargne cptEp = em.find(CompteEpargne.class, numCptEp);
-			
-			//Mouvement comptabilité
-			Grandlivre lDebit = new Grandlivre();
-			Grandlivre lCredit = new Grandlivre();
-			
-			//INFORMATION DEBIT
-			lDebit.setPiece(pieceCompta);
-			lDebit.setTcode(indexTcode);
-			lDebit.setDate(dateTransac);
-			lDebit.setUserId(ut.getNomUtilisateur());
-			
-			lDebit.setUtilisateur(ut);
-			lDebit.setCompteEpargne(cptEp); 
-			lDebit.setCodeInd(cptEp.getIndividuel());
-			
-			
-			//INFORMATION CREDIT
-			lCredit.setPiece(pieceCompta);
-			lCredit.setTcode(indexTcode);
-			lCredit.setDate(dateTransac);
-			lCredit.setUserId(ut.getNomUtilisateur());
-			
-			lCredit.setUtilisateur(ut);
-			lCredit.setCompteEpargne(cptEp); 
-			lCredit.setCodeInd(cptEp.getIndividuel());
-			
+			if(cptEp.getIndividuel() != null) 
+				ind = cptEp.getIndividuel();
+			if(cptEp.getGroupe() != null)
+				grp = cptEp.getGroupe();
+						
 			//Charge les configurations du compte Epargne
 			ConfigProdEp confProd = cptEp.getProduitEpargne().getConfigProdEp();
 			ConfigGlEpargne confGlEp = cptEp.getProduitEpargne().getConfigGlEpargne();
 			ConfigInteretProdEp confInter = cptEp.getProduitEpargne().getConfigInteretProdEp();
-			
+
 			String cptC = "";			
-			Caisse cptCaisse = new Caisse();
-			if(nomCptCaisse.equalsIgnoreCase("")){
-				
-			}else{
-				cptCaisse = em.find(Caisse.class, nomCptCaisse);
-				cptC = String.valueOf(cptCaisse.getAccount().getNumCpt());			
-			}
-			
-			//	Initialisation des informations de transaction
-			trans.setDateTransaction(dateTransac);
-			trans.setTypeTransEp(typeTransac);
-			trans.setMontant(montant);
-			trans.setDescription(description);
-			trans.setPieceCompta(pieceCompta);
-			trans.setIdTransactionEp(indexTcode);
-			trans.setCompteEpargne(cptEp);
-			trans.setTypePaie(typPaie);
-			
+			Caisse cptCaisse = null;
+			String vp = "";			
 			if(typPaie.equalsIgnoreCase("cash")){
-				trans.setCaisse(cptCaisse);							
+				cptCaisse = em.find(Caisse.class, nomCptCaisse);
+				cptC = String.valueOf(cptCaisse.getAccount().getNumCpt());							
+				vp = String.valueOf(cptCaisse.getAccount().getNumCpt());		
 			}else if(typPaie.equalsIgnoreCase("cheque")){
-				trans.setValPaie(numCheq);										
+				vp = numCheq;
 			}else if(typPaie.equalsIgnoreCase("mobile")){
-				trans.setValPaie(numTel);	
+				vp = numTel;
 			}
-				
+			
 			//	Enregistrement de la transaction
-			if(trans.getCompteEpargne() != null && trans.getCompteEpargne().getIsActif() == true && trans.getCompteEpargne().isFermer() == false){
+			TransactionEpargne trans = new TransactionEpargne(indexTcode, dateTransac,
+					description, montant, pieceCompta, typeTransac, typPaie, vp, 0, 0, 0, null, ut);
+			trans.setCaisse(cptCaisse);
+			
+			String result="";			
+			
+			//Test des configurations
+			if(cptEp != null && cptEp.getIsActif() == true && cptEp.isFermer() == false){
 				System.out.println("Informations sur la transaction prêtes");
 				try {
-					if(trans.getTypeTransEp().equals("DE")){
+					if(typeTransac.equalsIgnoreCase("DE")){
 						
-						TypedQuery<TransactionEpargne> quer = em.createQuery("SELECT t FROM TransactionEpargne t JOIN t.compteEpargne c"
-								+ " WHERE c.numCompteEp= :x",TransactionEpargne.class);
+						//Pour vérifier les transactions du compte épargne en paramètre
+						TypedQuery<TransactionEpargne> quer = em.createQuery("select t from TransactionEpargne t join t.compteEpargne c"
+								+ " where c.numCompteEp= :x",TransactionEpargne.class);
 						quer.setParameter("x", numCptEp);					
 						
 						//Compte comptable à débiter
-						Account accDeb;
-						lDebit.setDebit(montant);
+						Account accDeb = null;
 						
-						if(typPaie.equalsIgnoreCase("cash")){
-							
-							accDeb = cptCaisse.getAccount();
-							lDebit.setCompte(cptC);	
-							lDebit.setAccount(accDeb);
-							
-							double sdDeb = accDeb.getSoldeProgressif() + montant;
-							
-							lDebit.setSolde(sdDeb);
-							accDeb.setSoldeProgressif(sdDeb); 
-							
+						if(typPaie.equalsIgnoreCase("cash")){							
+							accDeb = cptCaisse.getAccount();							
 						}else if(typPaie.equalsIgnoreCase("cheque")){
 							accDeb = CodeIncrement.getAcount(em, confGlEp.getCptCheque());
-							lDebit.setCompte(confGlEp.getCptCheque());
-							lDebit.setAccount(accDeb);
 							
-							double sdDeb = accDeb.getSoldeProgressif() + montant;
-							
-							lDebit.setSolde(sdDeb);
-							accDeb.setSoldeProgressif(sdDeb);
-							
-						}else if(typPaie.equalsIgnoreCase("mobile")){
-							
+						}else if(typPaie.equalsIgnoreCase("mobile")){							
 							accDeb = CodeIncrement.getAcount(em, confGlEp.getChargeSMScpt());
-							
-							lDebit.setCompte(confGlEp.getChargeSMScpt());
-							lDebit.setAccount(CodeIncrement.getAcount(em, confGlEp.getChargeSMScpt()));
-							
-							double sdDeb = accDeb.getSoldeProgressif() + montant;
-							
-							lDebit.setSolde(sdDeb);
-							accDeb.setSoldeProgressif(sdDeb);
 						}
 						
 						//Compte comptable à créditer
 						Account accCred = CodeIncrement.getAcount(em, confGlEp.getEpargneInd());
-						
-						lCredit.setCredit(montant);
-						lCredit.setCompte(confGlEp.getEpargneInd());
-						lCredit.setAccount(accCred); 
-						
-						double sdCred = accCred.getSoldeProgressif() - montant;
-						lCredit.setSolde(sdCred);
-						accCred.setSoldeProgressif(sdCred); 
-						
+											
+						String desc = "";						
 						if(quer.getResultList().isEmpty()){
 							
 							if(confProd.getSoldeOverture() > montant){
-								System.out.println("Ce montant ne correspond pas,le solde d'ouverture est "+confProd.getSoldeOverture());
-								result = "Ce montant ne correspond pas,le solde d'ouverture est "+confProd.getSoldeOverture();
+								System.out.println("Le montant est supérieur au solde d'ouverture ("+confProd.getSoldeOverture()+")");
+								result = "Le montant est supérieur au solde d'ouverture ("+confProd.getSoldeOverture()+")";
 								return false;
 							}else{
-								lDebit.setDescr("Dépôt d'ouverture du compte "+numCptEp);
-								lCredit.setDescr("Dépôt d'ouverture du compte "+numCptEp);
+								desc = "Dépôt d'ouverture du compte "+numCptEp;
+								trans.setCompteEpargne(cptEp);
 								transaction.begin();
-								em.flush();
-								em.flush();
-								em.flush();
 								em.persist(trans);
-								em.persist(lCredit);
-								em.persist(lDebit);
 								transaction.commit();
 								em.refresh(trans);
+								ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, desc,
+										pieceCompta, 0, montant, ut, ind, grp, cptEp, null, accDeb);
+
+								ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, desc,
+										pieceCompta, montant, 0, ut, ind, grp, cptEp, null, accCred);
 								System.out.println("Transaction réussie");
 								result = "Transaction réussie";
 								return true;
 							}
 							
-						}else{							
-							lDebit.setDescr("Dépôt d'épargne du compte "+numCptEp);
-							lCredit.setDescr("Dépôt d'épargne du compte "+numCptEp);
+						}else{	
+							desc = "Dépôt épargne du compte "+numCptEp;
+							trans.setCompteEpargne(cptEp); 
 							transaction.begin();
-							em.flush();
-							em.flush();
-							em.flush();
 							em.persist(trans);
-							em.persist(lCredit);
-							em.persist(lDebit);
 							transaction.commit();
 							em.refresh(trans);
+							ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, desc,
+									pieceCompta, 0, montant, ut, ind, grp, cptEp, null, accDeb);
+
+							ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, desc,
+									pieceCompta, montant, 0, ut, ind, grp, cptEp, null, accCred);
 							System.out.println("Transaction réussie");
 							result = "Transaction réussie";
 							return true;							
-						}						
+						}	
 					
-					}//Si transaction est rétrait d'épargne
-					else if(trans.getTypeTransEp().equals("RE")){
+					}//Si transaction est retrait d'épargne
+					else if(typeTransac.equalsIgnoreCase("RE")){
 						//Vérifier si le compte est autorisé à faire de rétrait
-						if(trans.getCompteEpargne().isPasRetrait() == true){
-							System.out.println("Désolé,ce compte n'est pas autorisé à faire de rétrait");
-							result = "Désolé,ce compte n'est pas autorisé à faire de rétrait";
+						if(cptEp.isPasRetrait() == true){
+							
+							System.out.println("Désolé, ce compte n'est pas autorisé à faire de retrait");
+							result = "Désolé, ce compte n'est pas autorisé à faire de retrait";
 							return false;
+							
 						}else{
+							
 							double sd = cptEp.getSolde() - montant;
+							//Pour vérifier le solde minimum d'un compte
 							if(sd < confInter.getSoldeMinInd() ){
 								System.out.println("Montant superieur au montant autorisé");
 								result = "Montant superieur au montant autorisé";
 								return false;
-							}else{						
-														
+							}else{		
+								//Pour vérifier le nombre de jours entre deux retrait
 								int diff = confProd.getNbrJrMinRet(); 
 								String rq = "select max(t.dateTransaction) from TransactionEpargne t join "
 										+ " t.compteEpargne c where c.numCompteEp='"+numCptEp+"' and t.typeTransEp ='RE'";
@@ -668,128 +609,53 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 								int v = confProd.getNbrJrMinRet();
 								if(qs.getSingleResult() != null){
 									String dernierTransaction = (String)qs.getSingleResult();
-									long difDate = calcDate(dernierTransaction,dateTransac);
+									long difDate = calcDate(dernierTransaction, dateTransac);
 									v = (int)difDate;
 								}
-								System.out.println("valeur = "+v);
+								
+								System.out.println("valeur = "+ v);
 								if(diff > v){
-									int a = diff-v;
-									System.out.println("Le retrait est autorisé apres "+a+ " jours");
-									result = "Le retrait est autorisé apres "+a+ " jours";
+									int a = diff - v;
+									System.out.println("Le retrait est autorisé après "+ a + " jours");
+									result = "Le retrait est autorisé après "+ a + " jours";
 									return false;
-								}else{
-									
+								}else{									
 									//Compte comptable à créditer
-									Account acCred;
-									lCredit.setCredit(montant);
-									lCredit.setDescr("Retrait d'épargne du compte "+numCptEp);
-									
+									Account acCred = null;					
 									
 									if(typPaie.equalsIgnoreCase("cash")){
-										acCred = cptCaisse.getAccount();
-										lCredit.setCompte(cptC);
-										lCredit.setAccount(acCred);
-										
-										double soldCred = acCred.getSoldeProgressif() - montant;
-										lCredit.setSolde(soldCred);
-										acCred.setSoldeProgressif(soldCred); 									
-										
-										
+										acCred = cptCaisse.getAccount();							
 										if(confProd.getCommRetraitCash() != 0){
-											Grandlivre gl = new Grandlivre();
 											Account accGl = CodeIncrement.getAcount(em, confGlEp.getCommEpargne());
-											double sdl = accGl.getSoldeProgressif() - confProd.getCommRetraitCash();
-											
-											gl.setPiece(pieceCompta);
-											gl.setTcode(indexTcode);
-											gl.setDate(dateTransac);
-											gl.setDescr("Commission sur rétrait cash du compte "+numCptEp);
-											gl.setDebit(confProd.getCommRetraitCash());
-											gl.setCompte(confGlEp.getCommEpargne());
-											gl.setUserId(ut.getNomUtilisateur());
-											gl.setAccount(accGl);
-											gl.setSolde(sdl);
-											accGl.setSoldeProgressif(sdl); 										
-
-											gl.setUtilisateur(ut);
-											gl.setCompteEpargne(cptEp); 
-											gl.setCodeInd(cptEp.getIndividuel());
-											
-											transaction.begin();
-											em.flush();
-											em.persist(gl);
-											transaction.commit();		
+											ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Commission sur retrait cash du compte "+numCptEp, pieceCompta,
+													0, confProd.getCommRetraitCash(), ut, ind, grp, cptEp, null, accGl);
 										}
 									}else if(typPaie.equalsIgnoreCase("cheque")){
-										acCred = CodeIncrement.getAcount(em, confGlEp.getCptCheque());
-
-										lCredit.setCompte(confGlEp.getCptCheque());	
-										lCredit.setAccount(acCred);
-										
-										double soldCred = acCred.getSoldeProgressif() - montant;
-										lCredit.setSolde(soldCred);										
-										acCred.setSoldeProgressif(soldCred); 
-										
+										acCred = CodeIncrement.getAcount(em, confGlEp.getCptCheque());										
 									}else if(typPaie.equalsIgnoreCase("mobile")){
 										acCred = CodeIncrement.getAcount(em, confGlEp.getChargeSMScpt());
-										
-										lCredit.setCompte(confGlEp.getChargeSMScpt());
-										lCredit.setAccount(CodeIncrement.getAcount(em,confGlEp.getChargeSMScpt()));
-										
-										double soldCred = acCred.getSoldeProgressif() - montant;
-										lCredit.setSolde(soldCred);										
-										acCred.setSoldeProgressif(soldCred);
 									}
 									
 									//compte comptable à débiter
-									Account accDeb=CodeIncrement.getAcount(em, confGlEp.getEpargneInd());	
-									
-									double sdDeb = accDeb.getSoldeProgressif() + montant;
-									
-									lDebit.setDebit(montant);
-									lDebit.setDescr("Retrait d'épargne du compte "+numCptEp);
-									lDebit.setCompte(confGlEp.getEpargneInd());	
-									lDebit.setSolde(sdDeb);
-									accDeb.setSoldeProgressif(sdDeb); 
-									
+									Account accDeb = CodeIncrement.getAcount(em, confGlEp.getEpargneInd());	
+						
 									if(cptEp.getProduitEpargne().getTypeEpargne().getAbrev().equalsIgnoreCase("DAT")){
-										Grandlivre inter = new Grandlivre();
 										Account interDeb = CodeIncrement.getAcount(em, confGlEp.getIntPayeInd());	
-										
-										double sdInter = interDeb.getSoldeProgressif() - 0;
-										
-										inter.setPiece(pieceCompta);
-										inter.setTcode(indexTcode);
-										inter.setDate(dateTransac);
-										inter.setDescr("Intérêt sur rétrait du compte "+numCptEp);
-										inter.setDebit(0.0);
-										inter.setCompte(confGlEp.getIntPayeInd());
-										inter.setUserId(ut.getNomUtilisateur());	
-										inter.setUtilisateur(ut);
-										inter.setCompteEpargne(cptEp); 
-										inter.setCodeInd(cptEp.getIndividuel());
-										
-										inter.setAccount(interDeb);
-										
-										inter.setSolde(sdInter);
-										interDeb.setSoldeProgressif(sdInter); 
-										
-										transaction.begin();
-										em.flush();
-										em.persist(inter);
-										transaction.commit();																	
+										ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Intérêt sur rétrait du compte "+numCptEp,
+												pieceCompta, 0, montant, ut, ind, grp, cptEp, null, interDeb);
 									}								
-									
+									trans.setCompteEpargne(cptEp); 
 									transaction.begin();
-									em.flush();
-									em.flush();
-									em.flush();
 									em.persist(trans);
-									em.persist(lDebit);
-									em.persist(lCredit);
 									transaction.commit();
-									em.refresh(trans);							
-									
+									em.refresh(trans);		
+									//Enregistrement imputation
+									//Débit
+									ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Retrait d'épargne du compte "+numCptEp,
+											pieceCompta, 0, montant, ut, ind, grp, cptEp, null, accDeb);
+									//Crédit
+									ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Retrait d'épargne du compte "+numCptEp,
+											pieceCompta, montant, 0, ut, ind, grp, cptEp, null, acCred);									
 									System.out.println("Transaction réussie");							
 									result = "Transaction réussie";
 									return true;						
@@ -799,6 +665,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 						}					
 						
 					}
+					
 					return false;
 				} catch (Exception e) {
 					System.err.println(e.getMessage());
@@ -812,6 +679,241 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				return false;
 			}
 	}
+	
+	//----------------------------------------------------------------------------------------------------------
+		/********************************* Modification transaction ***********************************************/
+		//recupéré tous les transactions
+		@Override
+		public List<TransactionEpargne> getAllTransaction() {
+			String sql = "select t from TransactionEpargne t ";
+			return em.createQuery(sql, TransactionEpargne.class).getResultList();
+		}
+		
+		//Recupéré une transaction
+		@Override
+		public TransactionEpargne getDetailTrans(String codeTrans) {
+			return em.find(TransactionEpargne.class, codeTrans);
+		}
+		
+		//Enregistrement modification transaction
+		@Override
+		public boolean updateTransaction(String codeTrans, String typeTrans,
+				String dateTrans, double montant, String description,
+				String pieceCompta, String typPaie, String numTel, String numCheq,
+				String nomCptCaisse, int idUser) {
+			
+			TransactionEpargne tr = getDetailTrans(codeTrans);
+			Utilisateur ut = em.find(Utilisateur.class, idUser);
+			CompteEpargne ce = tr.getCompteEpargne();
+			Individuel ind = null;
+			Groupe grp = null;
+			if(tr.getCompteEpargne().getIndividuel() != null) 
+				ind = tr.getCompteEpargne().getIndividuel();
+			if(tr.getCompteEpargne().getGroupe() != null)
+				grp = tr.getCompteEpargne().getGroupe();
+			
+			double ancienMontant = tr.getMontant();
+			
+			//Modification imputation comptable
+			//Compte comptable à débiter
+			Account Deb = null;
+			
+			if(tr.getTypePaie().equalsIgnoreCase("cash")){							
+				Deb = tr.getCaisse().getAccount();							
+			}else if(tr.getTypePaie().equalsIgnoreCase("cheque")){
+				Deb = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getCptCheque());
+			}else if(tr.getTypePaie().equalsIgnoreCase("mobile")){							
+				Deb = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getChargeSMScpt());
+			}				
+			//Compte comptable à créditer
+			Account Cred = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getEpargneInd());
+			
+			if(tr.getTypeTransEp().equalsIgnoreCase("DE")){
+				String desc = "Modification trans. du compte "+ce.getNumCompteEp();							
+				
+				ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, desc,
+						pieceCompta, 0, (ancienMontant * -1), ut, ind, grp, ce, null, Deb);
+				
+				ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, desc,
+						pieceCompta, (ancienMontant * -1), 0, ut, ind, grp, ce, null, Cred);
+				
+			}else if(tr.getTypeTransEp().equalsIgnoreCase("RE")){
+				String desc = "Modification trans. du compte "+ce.getNumCompteEp();							
+				ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, desc,
+						pieceCompta, (ancienMontant * -1), 0, ut, ind, grp, ce, null, Deb);
+				
+				ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, desc,
+						pieceCompta, 0, (ancienMontant * -1), ut, ind, grp, ce, null, Cred);
+
+			}		
+			
+			String typ = "";
+			String vp = "";
+			
+			Caisse cptCaisse = null;
+			if(numTel.equals("") && numCheq.equals("") && nomCptCaisse.equals("")){
+				typ = tr.getTypePaie();
+				vp = tr.getValPaie();
+				cptCaisse = tr.getCaisse();
+			}else{
+				if(typPaie.equalsIgnoreCase("cash")){
+					cptCaisse = em.find(Caisse.class, nomCptCaisse);
+					typ = "cash";							
+					vp = String.valueOf(cptCaisse.getAccount().getNumCpt());		
+				}else if(typPaie.equalsIgnoreCase("cheque")){
+					vp = numCheq;
+					typ = "cheque";		
+				}else if(typPaie.equalsIgnoreCase("mobile")){
+					vp = numTel;
+					typ = "mobile";
+				}
+			}
+			
+			if(typeTrans.equals(""))
+				typeTrans = tr.getTypeTransEp();
+			
+			tr.setTypeTransEp(typeTrans);
+			tr.setDateTransaction(dateTrans);
+			tr.setDescription(description);
+			tr.setPieceCompta(pieceCompta);
+			tr.setMontant(montant);
+			tr.setTypePaie(typ);
+			tr.setValPaie(vp); 
+			tr.setUserUpdate(ut); 
+			
+
+			//Compte comptable à débiter
+			Account accDeb = null;
+			
+			if(typ.equalsIgnoreCase("cash")){							
+				accDeb = cptCaisse.getAccount();							
+			}else if(typ.equalsIgnoreCase("cheque")){
+				accDeb = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getCptCheque());
+			}else if(typ.equalsIgnoreCase("mobile")){							
+				accDeb = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getChargeSMScpt());
+			}				
+			//Compte comptable à créditer
+			Account accCred = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getEpargneInd());
+			
+			if(typeTrans.equalsIgnoreCase("DE")){
+				
+				ce.setSolde((ce.getSolde() + montant));				
+				try {
+					String nouvDesc = "Ressaisie trans. du compte "+ce.getNumCompteEp();							
+					transaction.begin();
+					em.flush();
+					em.flush();
+					transaction.commit();
+					em.refresh(tr);
+					em.refresh(ce);
+					
+					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, nouvDesc,
+							pieceCompta, 0, montant, ut, ind, grp, ce, null, accDeb);
+				
+					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, nouvDesc,
+							pieceCompta, montant, 0, ut, ind, grp, ce, null, accCred);			
+					
+					System.out.println("Modification transaction réussie");
+					return true;		
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.err.println("Erreur modification transaction");
+				}
+				
+			}else if(typeTrans.equalsIgnoreCase("RE")){
+				ce.setSolde((ce.getSolde() - montant));
+				
+				try {
+					String nouvDesc = "Ressaisie trans. du compte "+ce.getNumCompteEp();							
+					transaction.begin();
+					em.flush();
+					em.flush();
+					transaction.commit();
+					em.refresh(tr);
+					em.refresh(ce);
+					
+					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, nouvDesc,
+							pieceCompta, montant, 0, ut, ind, grp, ce, null, accDeb);
+					
+					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, nouvDesc,
+							pieceCompta, 0, montant, ut, ind, grp, ce, null, accCred);			
+					
+					System.out.println("Modification transaction réussie");
+					return true;		
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.err.println("Erreur modification transaction");
+				}
+			}		
+			
+			return false;
+		}
+		
+		
+		//Suppression transaction
+		@Override
+		public boolean deleteTransaction(String codeTrans, int idUser) {
+			TransactionEpargne tr = getDetailTrans(codeTrans);
+			Utilisateur ut = em.find(Utilisateur.class, idUser);
+			CompteEpargne ce = tr.getCompteEpargne();
+			Individuel ind = null;
+			Groupe grp = null;
+			if(tr.getCompteEpargne().getIndividuel() != null) 
+				ind = tr.getCompteEpargne().getIndividuel();
+			if(tr.getCompteEpargne().getGroupe() != null)
+				grp = tr.getCompteEpargne().getGroupe();
+			
+			//Modification imputation comptable
+			//Compte comptable à débiter
+			Account Deb = null;
+			
+			if(tr.getTypePaie().equalsIgnoreCase("cash")){							
+				Deb = tr.getCaisse().getAccount();							
+			}else if(tr.getTypePaie().equalsIgnoreCase("cheque")){
+				Deb = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getCptCheque());
+			}else if(tr.getTypePaie().equalsIgnoreCase("mobile")){							
+				Deb = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getChargeSMScpt());
+			}	
+					
+			//Compte comptable à créditer
+			Account Cred = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getEpargneInd());
+			
+			String desc = "Suppression trans. du compte "+ce.getNumCompteEp();	
+			String piece = "Supp. transaction";
+			LocalDate dt = LocalDate.now();
+			try {				
+				if(tr.getTypeTransEp().equalsIgnoreCase("DE")){
+					ce.setSolde((ce.getSolde() - tr.getMontant()));		
+					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dt.toString(), desc,
+							piece, 0, (tr.getMontant() * -1), ut, ind, grp, ce, null, Deb);
+					
+					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dt.toString(), desc,
+							piece, (tr.getMontant() * -1), 0, ut, ind, grp, ce, null, Cred);
+					
+				}else if(tr.getTypeTransEp().equalsIgnoreCase("RE")){
+					ce.setSolde((ce.getSolde() + tr.getMontant()));		
+					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dt.toString(), desc,
+							piece, (tr.getMontant() * -1), 0, ut, ind, grp, ce, null, Deb);
+					
+					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dt.toString(), desc,
+							piece, 0, (tr.getMontant() * -1), ut, ind, grp, ce, null, Cred);
+					
+				}		
+				transaction.begin();
+				em.flush();
+				em.remove(tr);
+				transaction.commit();
+				em.refresh(ce); 
+				System.out.println("Transaction supprimé!");
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.err.println("Erreur suppression transaction!");
+				return false;
+			}			
+		}
+		
+		//----------------------------------------------------------------------------------------------------------
 
 	//calcul difference entre deux date retrait
 	static long calcDate(String dateDeb, String dateFin) {
@@ -821,7 +923,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			System.out.println("dernière transaction "+date1);
 			System.out.println("date retrait "+date2);
 	
-			long val = ChronoUnit.DAYS.between(date1,date2);			
+			long val = ChronoUnit.DAYS.between(date1, date2);			
 			System.out.println(val + "\n");			
 			return val;
 		} catch (Exception e) {
@@ -1157,6 +1259,33 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		return false;
 	}
 	
+	//---------------------------------------------------------------------------------------------------
+	//Enregistrement modification compte
+	@Override
+	public boolean updateCompte(String numCompte, String date) {
+		CompteEpargne c = em.find(CompteEpargne.class, numCompte);
+		LocalDate d1 = LocalDate.parse(date);
+		LocalDate d2 = LocalDate.parse(c.getDateOuverture());
+		Long diff = ChronoUnit.DAYS.between(d2, d1);
+		if(diff <= 0){
+			c.setDateOuverture(date); 
+			try {
+				transaction.begin();
+				em.merge(c);
+				transaction.commit();
+				em.refresh(c);
+				System.out.println("Modification compte reussit");
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.err.println("Erreur modification compte");
+				return false;
+			}
+		}else{
+			return false;
+		}
+	}
+	
 	/***
 	 * CALCUL INTERET
 	 * ***/
@@ -1169,7 +1298,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 		//valeur de retour de la methode
 		List<InteretEpargne> retour = new ArrayList<InteretEpargne>();
-		//Instance de configuration intérêt du produit
+		//Instance de configuration intérêt du produit  
 		ConfigInteretProdEp confInteret = produit.getConfigInteretProdEp();
 		//ConfigGlEpargne confGL = produit.getConfigGlEpargne();
 		
@@ -1481,6 +1610,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		return retour;
 	}
 	
+	//----------------------------------------------------------------------------------------------------------
 	
   /***
   * Rapport transaction d'épargne
@@ -2025,7 +2155,6 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 		}
 		*/
-		
 		return null;
 	}
 
@@ -2771,5 +2900,6 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		result.setPenalite(penalite); 
 		return result;
 	}
+
 }
 

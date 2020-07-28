@@ -59,6 +59,17 @@ public class Utilisateur implements Serializable {
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 	
+	//bi-directional many-to-one association to TransactionEpargne
+	@OneToMany(mappedBy="utilisateur", cascade = CascadeType.ALL)
+	@XmlTransient
+	private List<TransactionEpargne> transactionEpargnes;
+	
+	//bi-directional many-to-one association to TransactionEpargne
+	@OneToMany(mappedBy="userUpdate", cascade = CascadeType.ALL)
+	@XmlTransient
+	private List<TransactionEpargne> transactions;
+	
+	
 	//Compte DAT
 	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
 	@XmlTransient
@@ -175,6 +186,14 @@ public class Utilisateur implements Serializable {
 
 	public void setTelUser(String telUser) {
 		this.telUser = telUser;
+	}
+	
+	public String getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(String photo) {
+		this.photo = photo;
 	}
 
 	public List<CommissionCredit> getCommissionCredits() {
@@ -343,12 +362,20 @@ public class Utilisateur implements Serializable {
 		this.clients = clients;
 	}
 
-	public String getPhoto() {
-		return photo;
+	public List<TransactionEpargne> getTransactionEpargnes() {
+		return transactionEpargnes;
 	}
 
-	public void setPhoto(String photo) {
-		this.photo = photo;
+	public void setTransactionEpargnes(List<TransactionEpargne> transactionEpargnes) {
+		this.transactionEpargnes = transactionEpargnes;
 	}
 
+	public List<TransactionEpargne> getTransactions() {
+		return transactions;
+	}
+
+	public void setTransactions(List<TransactionEpargne> transactions) {
+		this.transactions = transactions;
+	}
+	
 }

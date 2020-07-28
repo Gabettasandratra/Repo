@@ -2,11 +2,16 @@ package mg.fidev.model;
 
 import java.io.Serializable;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 
 /**
@@ -42,19 +47,32 @@ public class TransactionEpargne implements Serializable {
 	
 	@Column(name="type_paiement",nullable=false,length=50)
 	private String typePaie;
+	
 	@Column(name="val_paie",nullable=true,length=50)
 	private String valPaie;
+	
 	@Column(name="comm_retrait")
 	private double commRet;
+	
 	@Column(name="comm_trans")
 	private double commTrans;
+	
 	@Column(name="commPrelev")
 	private double penalPrelev;
 	//bi-directional many-to-one association to CompteCaisse
 	@ManyToOne
 	@JoinColumn(name="id_caisse")
-	@XmlTransient
 	private Caisse caisse;
+	
+	//bi-directional many-to-one association to Utilisateur
+	@ManyToOne
+	@JoinColumn(name="id_user")
+	private Utilisateur utilisateur;
+	
+	//bi-directional many-to-one association to Utilisateur
+	@ManyToOne
+	@JoinColumn(name="id_user_update")
+	private Utilisateur userUpdate;
 
 	//bi-directional many-to-one association to CompteEpargne
 	@ManyToOne
@@ -66,8 +84,7 @@ public class TransactionEpargne implements Serializable {
 	
 	public TransactionEpargne(String idTransactionEp, String dateTransaction,
 			String description, double montant, String pieceCompta, String typeTransEp, String typePaie, String valPaie,
-			double commRet, double commTrans, double penalPrelev,
-			Caisse caisse, CompteEpargne compteEpargne) {
+			double commRet, double commTrans, double penalPrelev, CompteEpargne compteEpargne, Utilisateur utilisateur) {
 		super();
 		this.idTransactionEp = idTransactionEp;
 		this.dateTransaction = dateTransaction;
@@ -80,8 +97,8 @@ public class TransactionEpargne implements Serializable {
 		this.commRet = commRet;
 		this.commTrans = commTrans;
 		this.penalPrelev = penalPrelev;
-		this.caisse = caisse;
 		this.compteEpargne = compteEpargne;
+		this.utilisateur = utilisateur;
 	}
 	
 	public String getIdTransactionEp() {
@@ -221,4 +238,20 @@ public class TransactionEpargne implements Serializable {
 			System.err.println("Compte inactif");
 	}
 
+	public Utilisateur getUtilisateur() {
+		return utilisateur;
+	}
+
+	public void setUtilisateur(Utilisateur utilisateur) {
+		this.utilisateur = utilisateur;
+	}
+
+	public Utilisateur getUserUpdate() {
+		return userUpdate;
+	}
+
+	public void setUserUpdate(Utilisateur userUpdate) {
+		this.userUpdate = userUpdate;
+	}
+	
 }

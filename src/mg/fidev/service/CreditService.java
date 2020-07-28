@@ -41,8 +41,7 @@ import mg.fidev.utils.Agent;
 @SOAPBinding(parameterStyle = ParameterStyle.WRAPPED)//style= Style.RPC
 public interface CreditService {
 	//style=Style.DOCUMENT,use=Use.LITERAL
-	
-	
+		
 	/****************************************************** CRUD SUR PRODUITS CREDIT *******************************************************************/
 	
 	/**
@@ -144,7 +143,7 @@ public interface CreditService {
 	//Modifier demande crédit
 	@WebMethod
 	@WebResult(name="validation")
-	public boolean updateDemandeCredit(
+	public boolean updateDemandeCredit(	
 	@WebParam(name="numCredit") String numCredit,
 	@WebParam(name="demandeCredit") @XmlElement(required=true,nillable=false) DemandeCredit demande);
 	

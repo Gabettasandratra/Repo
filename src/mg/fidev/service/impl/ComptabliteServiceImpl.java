@@ -49,11 +49,11 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			double debit, Utilisateur ut, Individuel ind, Groupe grp, DemandeCredit dm, Agence ag, Account ac){
 		System.out.println("Imputation pour crédit");
 		double sd = 0;	
-		if(debit > 0.0){
+		if(debit != 0.0){
 			sd = ac.getSoldeProgressif() + debit;
 			System.out.println("Transaction débit");
 		}
-		if(credit > 0.0){
+		if(credit != 0.0){
 			sd = ac.getSoldeProgressif() - credit;
 			System.out.println("Transaction crédit");			
 		}
@@ -83,11 +83,11 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			double debit, Utilisateur ut, Individuel ind, Groupe grp, CompteEpargne cpt, Agence ag, Account ac){
 		System.out.println("Imputation pour épargne");
 		double sd = 0;	
-		if(debit > 0.0){
+		if(debit != 0.0){
 			sd = ac.getSoldeProgressif() + debit;
 			System.out.println("Transaction débit");
 		}
-		if(credit > 0.0){
+		if(credit != 0.0){
 			sd = ac.getSoldeProgressif() - credit;
 			System.out.println("Transaction crédit");			
 		}
@@ -119,11 +119,11 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		System.out.println("Imputation pour épargne");
 		double sd = 0;	
 
-		if(debit > 0.0){
+		if(debit != 0.0){
 			sd = ac.getSoldeProgressif() + debit;
 			System.out.println("Transaction débit");
 		}
-		if(credit > 0.0){
+		if(credit != 0.0){
 			sd = ac.getSoldeProgressif() - credit;
 			System.out.println("Transaction crédit");			
 		}

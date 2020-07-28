@@ -69,7 +69,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 	 * ENREGISTREMENT CLIENT INDIVIDUEL
 	 * ***/
 	@Override
-	public String insertIndividuel(Individuel individuel, String codeAgence,
+	public boolean insertIndividuel(Individuel individuel, String codeAgence,
 			Docidentite docIdentite, Adresse adresse) {
 		
 		individuel.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
@@ -79,19 +79,11 @@ public class IndividuelServiceImpl implements IndividuelService {
 		try {
 			
 			if(individuel.getEstGarant() == true){
-				Garant gar = new Garant();
-				
-				gar.setCodeGarant(CodeIncrement.getCodeGar(em, codeAgence));
-				gar.setCodeIndividuel(individuel.getCodeInd());
-				gar.setDateInscription(individuel.getDateInscription());
-				gar.setDateNais(individuel.getDateNaissance());
-				gar.setEmail(individuel.getEmail());
-				gar.setEstClientIndividuel(true);
-				gar.setNom(individuel.getNomClient());
-				gar.setPrenom(individuel.getPrenomClient());
-				gar.setProfession(individuel.getProfession());
-				gar.setSexe(individuel.getSexe());
-				gar.setAdresse(adresse);
+				Garant gar = new Garant(CodeIncrement.getCodeGar(em, codeAgence), individuel.getNomClient(), individuel.getPrenomClient(),
+						individuel.getDateNaissance(),individuel.getDateInscription()
+						, individuel.getEmail(), true, individuel.getProfession(), 
+						individuel.getSexe(), individuel.getCodeInd(), null, adresse);
+					
 				docIdentite.setGarant(gar);
 				transaction.begin();
 				em.persist(gar);
@@ -110,10 +102,12 @@ public class IndividuelServiceImpl implements IndividuelService {
 			em.refresh(individuel);
 			em.refresh(docIdentite);
 			System.out.println("Insertion nouveau client individuel");
-			return "Succes";
+			//return "Succes";
+			return true;
 		} catch (Exception e) {
 			System.err.println("Erreur insertion individuel "+e.getMessage());
-			return "Error";
+			//return "Error";
+			return false;
 		}
 	}
 
@@ -243,9 +237,10 @@ public class IndividuelServiceImpl implements IndividuelService {
 	@Override
 	public List<Individuel> findByCode(String code) {
 		TypedQuery<Individuel> query = em.createQuery("SELECT i FROM Individuel i WHERE i.codeInd LIKE :code"
-				+ " AND i.estClientIndividuel = :x",Individuel.class);
+				+ " AND i.estClientIndividuel = :x AND i.approuver =:y",Individuel.class);
 		query.setParameter("code", code+"%");
 		query.setParameter("x", true);
+		query.setParameter("y", true);
 		
 		List<Individuel> result = query.getResultList();
 		
@@ -423,7 +418,11 @@ public class IndividuelServiceImpl implements IndividuelService {
 			System.out.println("date CIN "+date2);
 	
 			long val = ChronoUnit.YEARS.between(date1,date2);			
-			System.out.println(val + "\n");			
+			System.out.println(val + "\n");	
+			//if(val >= 18)
+				
+			//else
+				
 			return val;
 		} catch (Exception e) {
 			e.printStackTrace();
