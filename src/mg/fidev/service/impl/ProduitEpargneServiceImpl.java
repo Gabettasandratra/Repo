@@ -475,7 +475,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	 * ***/
 	@SuppressWarnings("unused")
 	@Override
-	public boolean trasactionEpargne(String typeTransac, String dateTransac,
+	public String trasactionEpargne(String typeTransac, String dateTransac,
 			double montant, String description, String pieceCompta,String typPaie,String numTel, String numCheq,
 			String nomCptCaisse, String numCptEp,int idUser) {
 					
@@ -514,170 +514,173 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 					description, montant, pieceCompta, typeTransac, typPaie, vp, 0, 0, 0, null, ut);
 			trans.setCaisse(cptCaisse);
 			
-			String result="";			
+			String result="";
+			
+			LocalDate now = LocalDate.now();
+			boolean cloture = ComptabliteServiceImpl.verifieCloture(dateTransac);
 			
 			//Test des configurations
-			if(cptEp != null && cptEp.getIsActif() == true && cptEp.isFermer() == false){
-				System.out.println("Informations sur la transaction prêtes");
-				try {
-					if(typeTransac.equalsIgnoreCase("DE")){
+			if(cloture != true){
+				if(cptEp != null && cptEp.getIsActif() == true && cptEp.isFermer() == false){
+					System.out.println("Informations sur la transaction prêtes");
+					try {
+						if(ind != null && (ind.isApprouver() == false || ind.isSupprimer() == true)){
+							result = "Désolé, le client numéro "+ind.getCodeInd()+" n'est plus membre de cette angence";
+						}else{
 						
-						//Pour vérifier les transactions du compte épargne en paramètre
-						TypedQuery<TransactionEpargne> quer = em.createQuery("select t from TransactionEpargne t join t.compteEpargne c"
-								+ " where c.numCompteEp= :x",TransactionEpargne.class);
-						quer.setParameter("x", numCptEp);					
-						
-						//Compte comptable à débiter
-						Account accDeb = null;
-						
-						if(typPaie.equalsIgnoreCase("cash")){							
-							accDeb = cptCaisse.getAccount();							
-						}else if(typPaie.equalsIgnoreCase("cheque")){
-							accDeb = CodeIncrement.getAcount(em, confGlEp.getCptCheque());
+						if(typeTransac.equalsIgnoreCase("DE")){
 							
-						}else if(typPaie.equalsIgnoreCase("mobile")){							
-							accDeb = CodeIncrement.getAcount(em, confGlEp.getChargeSMScpt());
-						}
-						
-						//Compte comptable à créditer
-						Account accCred = CodeIncrement.getAcount(em, confGlEp.getEpargneInd());
-											
-						String desc = "";						
-						if(quer.getResultList().isEmpty()){
+							//Pour vérifier les transactions du compte épargne en paramètre
+							TypedQuery<TransactionEpargne> quer = em.createQuery("select t from TransactionEpargne t join t.compteEpargne c"
+									+ " where c.numCompteEp= :x",TransactionEpargne.class);
+							quer.setParameter("x", numCptEp);					
 							
-							if(confProd.getSoldeOverture() > montant){
-								System.out.println("Le montant est supérieur au solde d'ouverture ("+confProd.getSoldeOverture()+")");
-								result = "Le montant est supérieur au solde d'ouverture ("+confProd.getSoldeOverture()+")";
-								return false;
-							}else{
-								desc = "Dépôt d'ouverture du compte "+numCptEp;
-								trans.setCompteEpargne(cptEp);
+							//Compte comptable à débiter
+							Account accDeb = null;
+							
+							if(typPaie.equalsIgnoreCase("cash")){							
+								accDeb = cptCaisse.getAccount();							
+							}else if(typPaie.equalsIgnoreCase("cheque")){
+								accDeb = CodeIncrement.getAcount(em, confGlEp.getCptCheque());
+								
+							}else if(typPaie.equalsIgnoreCase("mobile")){							
+								accDeb = CodeIncrement.getAcount(em, confGlEp.getChargeSMScpt());
+							}
+							
+							//Compte comptable à créditer
+							Account accCred = CodeIncrement.getAcount(em, confGlEp.getEpargneInd());
+												
+							String desc = "";						
+							if(quer.getResultList().isEmpty()){
+								
+								if(confProd.getSoldeOverture() > montant){
+									result = "Le montant est supérieur au solde d'ouverture ("+confProd.getSoldeOverture()+")";
+									//return false;
+								}else{
+									desc = "Dépôt d'ouverture du compte "+numCptEp;
+									trans.setCompteEpargne(cptEp);
+									transaction.begin();
+									em.persist(trans);
+									transaction.commit();
+									em.refresh(trans);
+									ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, desc,
+											pieceCompta, 0, montant, ut, ind, grp, cptEp, null, accDeb);
+	
+									ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, desc,
+											pieceCompta, montant, 0, ut, ind, grp, cptEp, null, accCred);
+									result = "Transaction enregistré";
+									//return true;
+								}
+								
+							}else{	
+								desc = "Dépôt épargne du compte "+numCptEp;
+								trans.setCompteEpargne(cptEp); 
 								transaction.begin();
 								em.persist(trans);
 								transaction.commit();
 								em.refresh(trans);
 								ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, desc,
 										pieceCompta, 0, montant, ut, ind, grp, cptEp, null, accDeb);
-
+	
 								ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, desc,
 										pieceCompta, montant, 0, ut, ind, grp, cptEp, null, accCred);
-								System.out.println("Transaction réussie");
-								result = "Transaction réussie";
-								return true;
-							}
-							
-						}else{	
-							desc = "Dépôt épargne du compte "+numCptEp;
-							trans.setCompteEpargne(cptEp); 
-							transaction.begin();
-							em.persist(trans);
-							transaction.commit();
-							em.refresh(trans);
-							ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, desc,
-									pieceCompta, 0, montant, ut, ind, grp, cptEp, null, accDeb);
-
-							ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, desc,
-									pieceCompta, montant, 0, ut, ind, grp, cptEp, null, accCred);
-							System.out.println("Transaction réussie");
-							result = "Transaction réussie";
-							return true;							
-						}	
-					
-					}//Si transaction est retrait d'épargne
-					else if(typeTransac.equalsIgnoreCase("RE")){
-						//Vérifier si le compte est autorisé à faire de rétrait
-						if(cptEp.isPasRetrait() == true){
-							
-							System.out.println("Désolé, ce compte n'est pas autorisé à faire de retrait");
-							result = "Désolé, ce compte n'est pas autorisé à faire de retrait";
-							return false;
-							
-						}else{
-							
-							double sd = cptEp.getSolde() - montant;
-							//Pour vérifier le solde minimum d'un compte
-							if(sd < confInter.getSoldeMinInd() ){
-								System.out.println("Montant superieur au montant autorisé");
-								result = "Montant superieur au montant autorisé";
-								return false;
-							}else{		
-								//Pour vérifier le nombre de jours entre deux retrait
-								int diff = confProd.getNbrJrMinRet(); 
-								String rq = "select max(t.dateTransaction) from TransactionEpargne t join "
-										+ " t.compteEpargne c where c.numCompteEp='"+numCptEp+"' and t.typeTransEp ='RE'";
-								Query qs = em.createQuery(rq);
-								int v = confProd.getNbrJrMinRet();
-								if(qs.getSingleResult() != null){
-									String dernierTransaction = (String)qs.getSingleResult();
-									long difDate = calcDate(dernierTransaction, dateTransac);
-									v = (int)difDate;
-								}
+								result = "Transaction enregistré";
+								//return true;							
+							}	
+						
+						}//Si transaction est retrait d'épargne
+						else if(typeTransac.equalsIgnoreCase("RE")){
+							//Vérifier si le compte est autorisé à faire de rétrait
+							if(cptEp.isPasRetrait() == true){
+								result = "Désolé, ce compte n'est pas autorisé à faire de retrait";
+								//return false;
 								
-								System.out.println("valeur = "+ v);
-								if(diff > v){
-									int a = diff - v;
-									System.out.println("Le retrait est autorisé après "+ a + " jours");
-									result = "Le retrait est autorisé après "+ a + " jours";
-									return false;
-								}else{									
-									//Compte comptable à créditer
-									Account acCred = null;					
-									
-									if(typPaie.equalsIgnoreCase("cash")){
-										acCred = cptCaisse.getAccount();							
-										if(confProd.getCommRetraitCash() != 0){
-											Account accGl = CodeIncrement.getAcount(em, confGlEp.getCommEpargne());
-											ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Commission sur retrait cash du compte "+numCptEp, pieceCompta,
-													0, confProd.getCommRetraitCash(), ut, ind, grp, cptEp, null, accGl);
-										}
-									}else if(typPaie.equalsIgnoreCase("cheque")){
-										acCred = CodeIncrement.getAcount(em, confGlEp.getCptCheque());										
-									}else if(typPaie.equalsIgnoreCase("mobile")){
-										acCred = CodeIncrement.getAcount(em, confGlEp.getChargeSMScpt());
+							}else{
+								
+								double sd = cptEp.getSolde() - montant;
+								//Pour vérifier le solde minimum d'un compte
+								if(sd < confInter.getSoldeMinInd() ){
+									result = "Montant superieur au montant autorisé";
+									//return false;
+								}else{		
+									//Pour vérifier le nombre de jours entre deux retrait
+									int diff = confProd.getNbrJrMinRet(); 
+									String rq = "select max(t.dateTransaction) from TransactionEpargne t join "
+											+ " t.compteEpargne c where c.numCompteEp='"+numCptEp+"' and t.typeTransEp ='RE'";
+									Query qs = em.createQuery(rq);
+									int v = confProd.getNbrJrMinRet();
+									if(qs.getSingleResult() != null){
+										String dernierTransaction = (String)qs.getSingleResult();
+										long difDate = calcDate(dernierTransaction, dateTransac);
+										v = (int)difDate;
 									}
 									
-									//compte comptable à débiter
-									Account accDeb = CodeIncrement.getAcount(em, confGlEp.getEpargneInd());	
+									System.out.println("valeur = "+ v);
+									if(diff > v){
+										int a = diff - v;
+										result = "Le retrait est autorisé après "+ a + " jour(s)";
+										//return false;
+									}else{									
+										//Compte comptable à créditer
+										Account acCred = null;					
+										
+										if(typPaie.equalsIgnoreCase("cash")){
+											acCred = cptCaisse.getAccount();							
+											if(confProd.getCommRetraitCash() != 0){
+												Account accGl = CodeIncrement.getAcount(em, confGlEp.getCommEpargne());
+												ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Commission sur retrait cash du compte "+numCptEp, pieceCompta,
+														0, confProd.getCommRetraitCash(), ut, ind, grp, cptEp, null, accGl);
+											}
+										}else if(typPaie.equalsIgnoreCase("cheque")){
+											acCred = CodeIncrement.getAcount(em, confGlEp.getCptCheque());										
+										}else if(typPaie.equalsIgnoreCase("mobile")){
+											acCred = CodeIncrement.getAcount(em, confGlEp.getChargeSMScpt());
+										}
+										
+										//compte comptable à débiter
+										Account accDeb = CodeIncrement.getAcount(em, confGlEp.getEpargneInd());	
+							
+										if(cptEp.getProduitEpargne().getTypeEpargne().getAbrev().equalsIgnoreCase("DAT")){
+											Account interDeb = CodeIncrement.getAcount(em, confGlEp.getIntPayeInd());	
+											ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Intérêt sur rétrait du compte "+numCptEp,
+													pieceCompta, 0, montant, ut, ind, grp, cptEp, null, interDeb);
+										}								
+										trans.setCompteEpargne(cptEp); 
+										transaction.begin();
+										em.persist(trans);
+										transaction.commit();
+										em.refresh(trans);		
+										//Enregistrement imputation
+										//Débit
+										ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Retrait d'épargne du compte "+numCptEp,
+												pieceCompta, 0, montant, ut, ind, grp, cptEp, null, accDeb);
+										//Crédit
+										ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Retrait d'épargne du compte "+numCptEp,
+												pieceCompta, montant, 0, ut, ind, grp, cptEp, null, acCred);									
+										result = "Transaction enregistré";
+										
+									}												
+								}
+							}					
+							
+						}
+						}
 						
-									if(cptEp.getProduitEpargne().getTypeEpargne().getAbrev().equalsIgnoreCase("DAT")){
-										Account interDeb = CodeIncrement.getAcount(em, confGlEp.getIntPayeInd());	
-										ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Intérêt sur rétrait du compte "+numCptEp,
-												pieceCompta, 0, montant, ut, ind, grp, cptEp, null, interDeb);
-									}								
-									trans.setCompteEpargne(cptEp); 
-									transaction.begin();
-									em.persist(trans);
-									transaction.commit();
-									em.refresh(trans);		
-									//Enregistrement imputation
-									//Débit
-									ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Retrait d'épargne du compte "+numCptEp,
-											pieceCompta, 0, montant, ut, ind, grp, cptEp, null, accDeb);
-									//Crédit
-									ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateTransac, "Retrait d'épargne du compte "+numCptEp,
-											pieceCompta, montant, 0, ut, ind, grp, cptEp, null, acCred);									
-									System.out.println("Transaction réussie");							
-									result = "Transaction réussie";
-									return true;						
-									
-								}												
-							}
-						}					
-						
+					} catch (Exception e) {
+						result = "Erreur enregistrement";
+						//return false;
 					}
-					
-					return false;
-				} catch (Exception e) {
-					System.err.println(e.getMessage());
-					result = "Erreur enregistrement";
-					return false;
 				}
-			}
-			else{
-				System.out.println("Pas de transaction autorisé, car ce compte est inactif");
-				result = "Pas de transaction autorisé, car ce compte est inactif";
-				return false;
-			}
+				else{
+					result = "Pas de transaction autorisé, car ce compte est inactif";
+					//return false;
+				}			
+		}else{
+			result = "Transaction non autorisé, les comptes a été clôturer";
+			//return false;
+		}
+			System.out.println(result);
+			return result;
 	}
 	
 	//----------------------------------------------------------------------------------------------------------
@@ -702,149 +705,179 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				String pieceCompta, String typPaie, String numTel, String numCheq,
 				String nomCptCaisse, int idUser) {
 			
-			TransactionEpargne tr = getDetailTrans(codeTrans);
-			Utilisateur ut = em.find(Utilisateur.class, idUser);
-			CompteEpargne ce = tr.getCompteEpargne();
-			Individuel ind = null;
-			Groupe grp = null;
-			if(tr.getCompteEpargne().getIndividuel() != null) 
-				ind = tr.getCompteEpargne().getIndividuel();
-			if(tr.getCompteEpargne().getGroupe() != null)
-				grp = tr.getCompteEpargne().getGroupe();
-			
-			double ancienMontant = tr.getMontant();
-			
-			//Modification imputation comptable
-			//Compte comptable à débiter
-			Account Deb = null;
-			
-			if(tr.getTypePaie().equalsIgnoreCase("cash")){							
-				Deb = tr.getCaisse().getAccount();							
-			}else if(tr.getTypePaie().equalsIgnoreCase("cheque")){
-				Deb = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getCptCheque());
-			}else if(tr.getTypePaie().equalsIgnoreCase("mobile")){							
-				Deb = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getChargeSMScpt());
-			}				
-			//Compte comptable à créditer
-			Account Cred = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getEpargneInd());
-			
-			if(tr.getTypeTransEp().equalsIgnoreCase("DE")){
-				String desc = "Modification trans. du compte "+ce.getNumCompteEp();							
-				
-				ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, desc,
-						pieceCompta, 0, (ancienMontant * -1), ut, ind, grp, ce, null, Deb);
-				
-				ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, desc,
-						pieceCompta, (ancienMontant * -1), 0, ut, ind, grp, ce, null, Cred);
-				
-			}else if(tr.getTypeTransEp().equalsIgnoreCase("RE")){
-				String desc = "Modification trans. du compte "+ce.getNumCompteEp();							
-				ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, desc,
-						pieceCompta, (ancienMontant * -1), 0, ut, ind, grp, ce, null, Deb);
-				
-				ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, desc,
-						pieceCompta, 0, (ancienMontant * -1), ut, ind, grp, ce, null, Cred);
+		TransactionEpargne tr = getDetailTrans(codeTrans);
+		Utilisateur ut = em.find(Utilisateur.class, idUser);
+		CompteEpargne ce = tr.getCompteEpargne();
+		Individuel ind = null;
+		Groupe grp = null;
+		if (tr.getCompteEpargne().getIndividuel() != null)
+			ind = tr.getCompteEpargne().getIndividuel();
+		if (tr.getCompteEpargne().getGroupe() != null)
+			grp = tr.getCompteEpargne().getGroupe();
 
-			}		
-			
+		// Test si le client n'est pas approuvé ou supprimer
+		if (ind != null
+				&& (ind.isApprouver() == false || ind.isSupprimer() == true)) {
+			return false;
+		} else {
+			/********************** Inversement Imputation comptable ******************/
+			double ancienMontant = tr.getMontant();
+
+			// Modification imputation comptable
+			// Compte comptable à débiter
+			Account Deb = null;
+
+			if (tr.getTypePaie().equalsIgnoreCase("cash")) {
+				Deb = tr.getCaisse().getAccount();
+			} else if (tr.getTypePaie().equalsIgnoreCase("cheque")) {
+				Deb = CodeIncrement.getAcount(em, ce.getProduitEpargne()
+						.getConfigGlEpargne().getCptCheque());
+			} else if (tr.getTypePaie().equalsIgnoreCase("mobile")) {
+				Deb = CodeIncrement.getAcount(em, ce.getProduitEpargne()
+						.getConfigGlEpargne().getChargeSMScpt());
+			}
+			// Compte comptable à créditer
+			Account Cred = CodeIncrement.getAcount(em, ce.getProduitEpargne()
+					.getConfigGlEpargne().getEpargneInd());
+
+			if (tr.getTypeTransEp().equalsIgnoreCase("DE")) {
+				String desc = "Modification trans. du compte "
+						+ ce.getNumCompteEp();
+
+				ComptabliteServiceImpl.saveImputationEpargne(
+						tr.getIdTransactionEp(), dateTrans, desc, pieceCompta,
+						0, (ancienMontant * -1), ut, ind, grp, ce, null, Deb);
+
+				ComptabliteServiceImpl.saveImputationEpargne(
+						tr.getIdTransactionEp(), dateTrans, desc, pieceCompta,
+						(ancienMontant * -1), 0, ut, ind, grp, ce, null, Cred);
+
+			} else if (tr.getTypeTransEp().equalsIgnoreCase("RE")) {
+				String desc = "Modification trans. du compte "
+						+ ce.getNumCompteEp();
+				ComptabliteServiceImpl.saveImputationEpargne(
+						tr.getIdTransactionEp(), dateTrans, desc, pieceCompta,
+						(ancienMontant * -1), 0, ut, ind, grp, ce, null, Deb);
+
+				ComptabliteServiceImpl.saveImputationEpargne(
+						tr.getIdTransactionEp(), dateTrans, desc, pieceCompta,
+						0, (ancienMontant * -1), ut, ind, grp, ce, null, Cred);
+
+			}
+			/*****************************************************************************************/
+
 			String typ = "";
 			String vp = "";
-			
+
 			Caisse cptCaisse = null;
-			if(numTel.equals("") && numCheq.equals("") && nomCptCaisse.equals("")){
+			if (numTel.equals("") && numCheq.equals("")
+					&& nomCptCaisse.equals("")) {
 				typ = tr.getTypePaie();
 				vp = tr.getValPaie();
 				cptCaisse = tr.getCaisse();
-			}else{
-				if(typPaie.equalsIgnoreCase("cash")){
+			} else {
+				if (typPaie.equalsIgnoreCase("cash")) {
 					cptCaisse = em.find(Caisse.class, nomCptCaisse);
-					typ = "cash";							
-					vp = String.valueOf(cptCaisse.getAccount().getNumCpt());		
-				}else if(typPaie.equalsIgnoreCase("cheque")){
+					typ = "cash";
+					vp = String.valueOf(cptCaisse.getAccount().getNumCpt());
+				} else if (typPaie.equalsIgnoreCase("cheque")) {
 					vp = numCheq;
-					typ = "cheque";		
-				}else if(typPaie.equalsIgnoreCase("mobile")){
+					typ = "cheque";
+				} else if (typPaie.equalsIgnoreCase("mobile")) {
 					vp = numTel;
 					typ = "mobile";
 				}
 			}
-			
-			if(typeTrans.equals(""))
+
+			if (typeTrans.equals(""))
 				typeTrans = tr.getTypeTransEp();
-			
+
 			tr.setTypeTransEp(typeTrans);
 			tr.setDateTransaction(dateTrans);
 			tr.setDescription(description);
 			tr.setPieceCompta(pieceCompta);
 			tr.setMontant(montant);
 			tr.setTypePaie(typ);
-			tr.setValPaie(vp); 
-			tr.setUserUpdate(ut); 
-			
+			tr.setValPaie(vp);
+			tr.setUserUpdate(ut);
 
-			//Compte comptable à débiter
+			// Compte comptable à débiter
 			Account accDeb = null;
-			
-			if(typ.equalsIgnoreCase("cash")){							
-				accDeb = cptCaisse.getAccount();							
-			}else if(typ.equalsIgnoreCase("cheque")){
-				accDeb = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getCptCheque());
-			}else if(typ.equalsIgnoreCase("mobile")){							
-				accDeb = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getChargeSMScpt());
-			}				
-			//Compte comptable à créditer
-			Account accCred = CodeIncrement.getAcount(em, ce.getProduitEpargne().getConfigGlEpargne().getEpargneInd());
-			
-			if(typeTrans.equalsIgnoreCase("DE")){
-				
-				ce.setSolde((ce.getSolde() + montant));				
+
+			if (typ.equalsIgnoreCase("cash")) {
+				accDeb = cptCaisse.getAccount();
+			} else if (typ.equalsIgnoreCase("cheque")) {
+				accDeb = CodeIncrement.getAcount(em, ce.getProduitEpargne()
+						.getConfigGlEpargne().getCptCheque());
+			} else if (typ.equalsIgnoreCase("mobile")) {
+				accDeb = CodeIncrement.getAcount(em, ce.getProduitEpargne()
+						.getConfigGlEpargne().getChargeSMScpt());
+			}
+			// Compte comptable à créditer
+			Account accCred = CodeIncrement.getAcount(em, ce
+					.getProduitEpargne().getConfigGlEpargne().getEpargneInd());
+
+			if (typeTrans.equalsIgnoreCase("DE")) {
+
+				ce.setSolde((ce.getSolde() + montant));
 				try {
-					String nouvDesc = "Ressaisie trans. du compte "+ce.getNumCompteEp();							
+					String nouvDesc = "Ressaisie trans. du compte "
+							+ ce.getNumCompteEp();
 					transaction.begin();
 					em.flush();
 					em.flush();
 					transaction.commit();
 					em.refresh(tr);
 					em.refresh(ce);
-					
-					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, nouvDesc,
-							pieceCompta, 0, montant, ut, ind, grp, ce, null, accDeb);
-				
-					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, nouvDesc,
-							pieceCompta, montant, 0, ut, ind, grp, ce, null, accCred);			
-					
+
+					ComptabliteServiceImpl.saveImputationEpargne(
+							tr.getIdTransactionEp(), dateTrans, nouvDesc,
+							pieceCompta, 0, montant, ut, ind, grp, ce, null,
+							accDeb);
+
+					ComptabliteServiceImpl.saveImputationEpargne(
+							tr.getIdTransactionEp(), dateTrans, nouvDesc,
+							pieceCompta, montant, 0, ut, ind, grp, ce, null,
+							accCred);
+
 					System.out.println("Modification transaction réussie");
-					return true;		
+					return true;
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.err.println("Erreur modification transaction");
 				}
-				
-			}else if(typeTrans.equalsIgnoreCase("RE")){
+
+			} else if (typeTrans.equalsIgnoreCase("RE")) {
 				ce.setSolde((ce.getSolde() - montant));
-				
+
 				try {
-					String nouvDesc = "Ressaisie trans. du compte "+ce.getNumCompteEp();							
+					String nouvDesc = "Ressaisie trans. du compte "
+							+ ce.getNumCompteEp();
 					transaction.begin();
 					em.flush();
 					em.flush();
 					transaction.commit();
 					em.refresh(tr);
 					em.refresh(ce);
-					
-					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, nouvDesc,
-							pieceCompta, montant, 0, ut, ind, grp, ce, null, accDeb);
-					
-					ComptabliteServiceImpl.saveImputationEpargne(tr.getIdTransactionEp(), dateTrans, nouvDesc,
-							pieceCompta, 0, montant, ut, ind, grp, ce, null, accCred);			
-					
+
+					ComptabliteServiceImpl.saveImputationEpargne(
+							tr.getIdTransactionEp(), dateTrans, nouvDesc,
+							pieceCompta, montant, 0, ut, ind, grp, ce, null,
+							accDeb);
+
+					ComptabliteServiceImpl.saveImputationEpargne(
+							tr.getIdTransactionEp(), dateTrans, nouvDesc,
+							pieceCompta, 0, montant, ut, ind, grp, ce, null,
+							accCred);
+
 					System.out.println("Modification transaction réussie");
-					return true;		
+					return true;
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.err.println("Erreur modification transaction");
 				}
-			}		
+			}
+		}		
 			
 			return false;
 		}

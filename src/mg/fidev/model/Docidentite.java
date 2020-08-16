@@ -1,7 +1,6 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -9,8 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -30,11 +27,11 @@ public class Docidentite implements Serializable {
 	@Id
 	private String numero;
 
-	@Temporal(TemporalType.DATE)
-	private Date dateEmis;
+	//@Temporal(TemporalType.DATE)
+	private String dateEmis;
 
-	@Temporal(TemporalType.DATE)
-	private Date dateExpire;
+	//@Temporal(TemporalType.DATE)
+	private String dateExpire;
 
 	private String delivrePar;
 
@@ -62,19 +59,19 @@ public class Docidentite implements Serializable {
 		this.numero = numero;
 	}
 
-	public Date getDateEmis() {
+	public String getDateEmis() {
 		return this.dateEmis;
 	}
 
-	public void setDateEmis(Date dateEmis) {
+	public void setDateEmis(String dateEmis) {
 		this.dateEmis = dateEmis;
 	}
 
-	public Date getDateExpire() {
+	public String getDateExpire() {
 		return this.dateExpire;
 	}
 
-	public void setDateExpire(Date dateExpire) {
+	public void setDateExpire(String dateExpire) {
 		this.dateExpire = dateExpire;
 	}
 

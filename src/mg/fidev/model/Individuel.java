@@ -1,7 +1,6 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -12,8 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -38,8 +35,8 @@ public class Individuel implements Serializable {
 
 	private String dateNaissance;
 
-	@Temporal(TemporalType.DATE)
-	private Date dateSortie;
+	//@Temporal(TemporalType.DATE)
+	private String dateSortie;
 
 	private String email;
 
@@ -99,6 +96,9 @@ public class Individuel implements Serializable {
 	@Column(name="is_sain")
 	private boolean isSain;	
 
+	@Column(name="supprimer")
+	private boolean supprimer;	
+
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="individuel")
 	@XmlTransient
@@ -127,8 +127,7 @@ public class Individuel implements Serializable {
 	//bi-directional many-to-one association to Groupe
 	@ManyToOne
 	@JoinColumn(name="codeGrp")
-	@XmlTransient
-	private Groupe groupe;
+	private Groupe groupe;                          
 	
 	@OneToMany(mappedBy="codeInd")
 	@XmlTransient
@@ -179,11 +178,11 @@ public class Individuel implements Serializable {
 		this.dateNaissance = dateNaissance;
 	}
 
-	public Date getDateSortie() {
+	public String getDateSortie() {
 		return this.dateSortie;
 	}
 
-	public void setDateSortie(Date dateSortie) {
+	public void setDateSortie(String dateSortie) {
 		this.dateSortie = dateSortie;
 	}
 
@@ -402,6 +401,14 @@ public class Individuel implements Serializable {
 
 	public void setSain(boolean isSain) {
 		this.isSain = isSain;
+	}
+
+	public boolean isSupprimer() {
+		return supprimer;
+	}
+
+	public void setSupprimer(boolean supprimer) {
+		this.supprimer = supprimer;
 	}
 
 	public List<CompteEpargne> getCompteEpargnes() {

@@ -37,6 +37,7 @@ public class Decaissement implements Serializable {
 
 	@Column(name="type_paiement",nullable=false,length=50)
 	private String typePaie;
+	
 	@Column(name="val_paie",nullable=true,length=50)
 	private String valPaie;
 

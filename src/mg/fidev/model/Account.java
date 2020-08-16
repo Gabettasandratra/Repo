@@ -49,11 +49,6 @@ public class Account implements Serializable {
 	
 	@Column(name="solde_progressif")
 	private double soldeProgressif;
-	
-	@Column(name="cloturer")
-	private boolean cloturer;
-
-	//private double @javax.persistence.Transient
 
 	//bi-directional many-to-one association to Account
 	@ManyToOne
@@ -74,6 +69,11 @@ public class Account implements Serializable {
 	@OneToMany(mappedBy="account",cascade=CascadeType.ALL,fetch = FetchType.LAZY)
 	@XmlTransient
 	private List<Grandlivre> granLivres;
+	
+	//Relation one to many to Cloture compte
+	@OneToMany(mappedBy="account")
+	@XmlTransient
+	private List<ClotureCompte> clotures;
 
 	public Account() {
 	}
@@ -212,12 +212,11 @@ public class Account implements Serializable {
 		this.caisses = caisses;
 	}
 
-	public boolean isCloturer() {
-		return cloturer;
+	public List<ClotureCompte> getClotures() {
+		return clotures;
 	}
 
-	public void setCloturer(boolean cloturer) {
-		this.cloturer = cloturer;
+	public void setClotures(List<ClotureCompte> clotures) {
+		this.clotures = clotures;
 	}
-	
 }

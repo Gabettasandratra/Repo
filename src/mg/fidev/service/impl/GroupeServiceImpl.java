@@ -38,13 +38,8 @@ public class GroupeServiceImpl implements GroupeService {
 		q1.setParameter("nomGroupe", nomGroupe);
 		Groupe groupe = q1.getSingleResult();
 
-		// Recupere l'individuel
-		TypedQuery<Individuel> q2 = em
-				.createQuery(
-						"select i from Individuel i where i.codeInd = :codeInd",
-						Individuel.class);
-		q2.setParameter("codeInd", codeInd);
-		Individuel individuel = q2.getSingleResult();
+		// Recupere l'individuel		
+		Individuel individuel = em.find(Individuel.class, codeInd);
 		try {
 			// on ajoute dans le groupe
 			transaction.begin();

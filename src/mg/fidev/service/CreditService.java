@@ -215,6 +215,7 @@ public interface CreditService {
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<CalView> demCredit(
+	@WebParam(name="codeCred") @XmlElement(required=false,nillable=true)  String codeCred, 
 	@WebParam(name="codeInd") @XmlElement(required=false,nillable=true)  String codeInd, 
 	@WebParam(name="codeGrp") @XmlElement(required=false,nillable=true)  String codeGrp, 
 	@WebParam(name="dat_dem") @XmlElement(required=true,nillable=false) String date_dem, 
@@ -337,7 +338,6 @@ public interface CreditService {
 	@WebResult(name="validation")
 	public boolean updateDecaissement(
 		@WebParam(name="decaisse") Decaissement decaissement,
-		@WebParam(name="typePaie") @XmlElement(required=true,nillable=false)String typePaie,
 		@XmlElement(required=false) @WebParam(name="numTel")String numTel, 
 		@XmlElement(required=false) @WebParam(name="numCheq")String numCheq,
 		@XmlElement(required=false) @WebParam(name="numCompte")String numCompte,

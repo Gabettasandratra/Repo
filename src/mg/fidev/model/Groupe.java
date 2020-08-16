@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -47,6 +48,9 @@ public class Groupe implements Serializable {
 	private String secretaire;
 	
 	private String tresorier;
+	
+	@Column(name="logo")
+	private String logo;
 	
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="groupe")
@@ -192,6 +196,14 @@ public class Groupe implements Serializable {
 
 	public void setTresorier(String tresorier) {
 		this.tresorier = tresorier;
+	}
+	
+	public String getLogo() {
+		return logo;
+	}
+
+	public void setLogo(String logo) {
+		this.logo = logo;
 	}
 
 	public List<CompteEpargne> getCompteEpargnes() {

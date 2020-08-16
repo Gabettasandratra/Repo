@@ -1,5 +1,6 @@
 package mg.fidev.service.impl;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,8 @@ import mg.fidev.model.Agence;
 import mg.fidev.model.Analytique;
 import mg.fidev.model.Budget;
 import mg.fidev.model.Caisse;
+import mg.fidev.model.Cloture;
+import mg.fidev.model.ClotureCompte;
 import mg.fidev.model.Compte;
 import mg.fidev.model.CompteDAT;
 import mg.fidev.model.CompteEpargne;
@@ -199,7 +202,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			if(!(query.getResultList().isEmpty()))
 				result = query.getResultList();
 			else
-				System.err.println("il n'y a pas de resultat");
+				System.err.println("Il n'y a pas de resultat");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -208,6 +211,30 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		return result;
 	}
 	
+	
+	//Recupère le solde d'une compte avant la date en paramètre
+	@Override
+	public double getSoldeAvant(String num, String date) {
+		
+		double tDebit = 0;
+		Query q1 = em.createQuery("select sum(g.debit) from Grandlivre g join g.account a"
+				   + " where a.numCpt='"+ num +"' and g.date < '"+ date +"'");
+		if(q1.getSingleResult() != null){
+			tDebit = (Double) q1.getSingleResult(); 
+		}
+		System.out.println("Total solde débit avant le "+ date +" est "+ (tDebit));
+		//total crédit
+		double tCredit = 0 ; 
+		Query q2 = em.createQuery("select sum(g.credit) from Grandlivre g join g.account a"
+			   + " where a.numCpt='"+ num +"' and g.date < '"+ date +"'");
+		if(q2.getSingleResult() != null){
+			tCredit = (Double)q2.getSingleResult();
+		}
+		System.out.println("Total solde crédit avant le "+ date +" est "+ (tCredit));
+		System.out.println("Total solde avant le "+ date +" est "+ (tDebit - tCredit));
+		
+		return (tDebit - tCredit);
+	}
 	
 	/***
 	 * LISTE DES DONNEES DANS GRAND LIVRE
@@ -314,7 +341,8 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			em.flush();
 			transaction.commit();
 			em.refresh(compte);
-			em.refresh(parrent);
+			if(parrent != null)
+				em.refresh(parrent); 
 			return compte;				
 		} catch (NullPointerException e) {
 			e.printStackTrace();
@@ -853,8 +881,6 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 	@Override
 	public List<Grandlivre> getGrandLivreBudget(String code, String dateDeb,
 			String dateFin) {
-		List<Grandlivre> result = new ArrayList<Grandlivre>();
-
 		String sql = "select g from Grandlivre g join g.budget b where g.budget is not null";
 
 		if (!code.equals("") || !dateDeb.equals("") || !dateFin.equals("")) {
@@ -884,10 +910,8 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		TypedQuery<Grandlivre> query = em.createQuery(sql, Grandlivre.class);
 
 		if (!query.getResultList().isEmpty()) {
-			result = query.getResultList();
-			return result;
+			return query.getResultList();
 		}
-
 		return null;
 	}
 
@@ -897,7 +921,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			String dateDeb, String dateFin) {
 		List<Grandlivre> result = new ArrayList<Grandlivre>();
 
-		String sql = "select g from Grandlivre g join g.analytique a where g.budget is null and g.analytique is not null";
+		String sql = "select g from Grandlivre g join g.analytique a where g.analytique is not null";
 
 		if (!code.equals("") || !dateDeb.equals("") || !dateFin.equals("")) {
 
@@ -991,19 +1015,13 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 	@Override
 	public List<Account> getAcountDistinct() {
 		String sql = "select distinct g.account from Grandlivre g join g.account a order by a.numCpt asc";
-		List<Account> ac = new ArrayList<Account>();
-		TypedQuery<Account> query = em.createQuery(sql, Account.class);
-		ac = query.getResultList();
-		return ac;
+		return em.createQuery(sql, Account.class).getResultList();
 	}
 	
 	static  List<Account> getDistAccount(String dateDeb,String dateFin){
 		String sql = "select distinct g.account from Grandlivre g join g.account a "
 				+ " where g.date between '"+dateDeb+"' and '"+dateFin+"' order by a.numCpt asc";
-		List<Account> ac = new ArrayList<Account>();
-		TypedQuery<Account> query = em.createQuery(sql, Account.class);
-		ac = query.getResultList();
-		return ac;
+		return em.createQuery(sql, Account.class).getResultList();
 	}
 
 	@Override
@@ -1011,7 +1029,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		
 		 List<AfficheBalance> result = new ArrayList<AfficheBalance>();
 		
-		List<Account> distinct = getDistAccount(dateDeb,dateFin);
+		List<Account> distinct = getDistAccount(dateDeb, dateFin);
 		
 		for (Account ac : distinct) {
 			AfficheBalance affiche = new AfficheBalance();
@@ -1563,6 +1581,77 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	//-------------------------------------------------------------------------------------------------------
+	/******************************** Clotur compte *******************************************/
+	@Override
+	public boolean addCloture(String dateDeb, String dateFin, String desc, int user) {
+		Cloture cl = new Cloture();
+		Utilisateur ut = em.find(Utilisateur.class, user);
+		List<Account> accounts = getDistAccount(dateDeb, dateFin);
+		
+		LocalDate now = LocalDate.now();
+		
+		cl.setDateSave(now.toString());
+		cl.setDateDebut(dateDeb);
+		cl.setDateFin(dateFin); 
+		cl.setUser(ut); 
+		if(desc.equalsIgnoreCase("Jour"))
+			cl.setJour(true);
+		else if (desc.equalsIgnoreCase("Mois"))
+			cl.setMois(true);
+		else if (desc.equalsIgnoreCase("Annee"))
+			cl.setAnnee(true);
+		try {
+			transaction.begin();
+			em.persist(cl);
+			transaction.commit();
+			em.refresh(cl);
+			for (Account account : accounts) {
+				ClotureCompte cls = new ClotureCompte();
+				cls.setCloture(cl); 
+				cls.setAccount(account);
+				cls.setSolde(account.getSoldeProgressif());
+				double sd = account.getSoldeInit() + account.getSoldeProgressif();
+				account.setSoldeInit(sd);
+				account.setSoldeProgressif(0); 
+				transaction.begin();
+				em.flush();
+				em.persist(cls); 
+				transaction.commit();
+				em.refresh(cls);
+				em.refresh(account);
+			}
+			System.out.println("Cloture "+desc+" enregistré!");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Erreur cloture");
+			return false;
+		}		
+	}
+	
+	//Chercher cloture
+	static Cloture getCloture(String date){
+		String sql ="select c from Cloture c where c.dateDebut ='"+date+"'";
+		TypedQuery<Cloture> q = em.createQuery(sql, Cloture.class);
+		if(!q.getResultList().isEmpty())
+			return q.getSingleResult();
+		else 
+			return null;
+			
+	}
+	
+	//Vérification cloture
+	public static boolean verifieCloture(String date){
+		Cloture c = getCloture(date);
+		if(c != null){
+			if(c.isJour() == true)
+				return true;
+			else 
+				return false;			
+		}else
+			return false;
 	}
 	
 }

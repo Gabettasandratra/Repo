@@ -136,10 +136,10 @@ public class CreditServiceImpl implements CreditService {
 	@Override
 	public List<DemandeCredit> chercherCredit(String mc,String statu) {
 		TypedQuery<DemandeCredit> query = em.createQuery("select d from DemandeCredit d where d.numCredit like :x"
-				+ " and (d.approbationStatut =:ap or d.approbationStatut =:ax)", DemandeCredit.class);
+				+ " and (d.approbationStatut =:ap )", DemandeCredit.class);
 		query.setParameter("x", mc+"%");
 		query.setParameter("ap",statu);
-		query.setParameter("ax","Rééchelonner");
+		//query.setParameter("ax","Rééchelonner");or d.approbationStatut =:ax
 		if(!query.getResultList().isEmpty())
 			return query.getResultList();
 		return null;
@@ -325,12 +325,12 @@ public class CreditServiceImpl implements CreditService {
 	//SAISIE information demande crédit
 		//Générer calendrier remboursement d'une demande crédit groupe
 		@Override
-		public List<CalView> demCredit(String codeInd, String codeGrp,
+		public List<CalView> demCredit(String codeCred, String codeInd, String codeGrp,
 				String date_dem, double montant, double tauxInt, int nbTranche,
 				String typeTranche, int diffPaie, String modCalcul) {
-
+           
 			List<CalView> resultat = CodeIncrement.getCalendrierPaiement
-					(codeInd, codeGrp, date_dem, montant, tauxInt, nbTranche, typeTranche, diffPaie, modCalcul);
+					(codeCred ,codeInd, codeGrp, date_dem, montant, tauxInt, nbTranche, typeTranche, diffPaie, modCalcul);
 			
 			for (CalView cal : resultat) {
 				try {
@@ -1072,8 +1072,8 @@ public class CreditServiceImpl implements CreditService {
 	/*********************************************** Décaissement ********************************************************/
 		
 	//Suppression de calendrier dues au fiche crédit
-	static void deleteFiche(String numCred){
-		String sql_fiche = "select f from FicheCredit f where f.transaction='Tranche due' "
+	static void deleteFiche(String numCred, String trans){
+		String sql_fiche = "select f from FicheCredit f where f.transaction='"+ trans +"' "
 				+ " and f.num_credit='"+numCred+"'";
 		TypedQuery<FicheCredit> query_fiche = em.createQuery(sql_fiche,FicheCredit.class);
 		for (FicheCredit ficheCredit : query_fiche.getResultList()) {
@@ -1104,7 +1104,7 @@ public class CreditServiceImpl implements CreditService {
 		///	pour incrémenter le tcode dans la table grandlivre
 		String indexTcode = CodeIncrement.genTcode(em);
 		//On supprime le calendrier dues du fiche crédit pour le mettre à jour après l'enregistrement
-		deleteFiche(dm.getNumCredit());		
+		deleteFiche(dm.getNumCredit(), "Tranche due");		
 		//On met dans la liste les calendrier après deblocage
 		//List<Calapresdebl> calRembAprDebl = new ArrayList<Calapresdebl>();		
 		FicheCredit ficheCredit = new FicheCredit();
@@ -1156,8 +1156,7 @@ public class CreditServiceImpl implements CreditService {
 						cptCaisse = em.find(Caisse.class, comptCaise);
 						String cptC = String.valueOf(cptCaisse.getAccount().getNumCpt());
 						accCred = CodeIncrement.getAcount(em, cptC);//cptCaisse.getAccount(); 
-						System.out.println("Compte crédité "+accCred.getNumCpt());
-						
+						System.out.println("Compte crédité "+accCred.getNumCpt());						
 						type = "Cash";
 						val = cptC;
 					}					
@@ -1273,7 +1272,7 @@ public class CreditServiceImpl implements CreditService {
 					}else if(confGen.getRecalcDateEcheanceAuDecais().equalsIgnoreCase("mettre a jours les dates")){
 						System.out.println("mettre à jour le calendrier de remboursement");
 									
-						List<CalView> lisCalView = demCredit(codeClient, codeGroupe, date, montant, dm.getTaux()
+						List<CalView> lisCalView = demCredit("" ,codeClient, codeGroupe, date, montant, dm.getTaux()
 								, dm.getNbTranche(), dm.getTypeTranche(), dm.getDiffPaie(), dm.getModeCalculInteret());
 						
 						for (CalView calView : lisCalView) {
@@ -1348,32 +1347,185 @@ public class CreditServiceImpl implements CreditService {
 		return em.createQuery(sql, Decaissement.class).getResultList();
 	}
 	
+	//Fonction qui supprime le calendrier de remboursement
+	static void supprCalapresDebl(String numCred){
+		String sql = "select c from Calapresdebl c join c.demandeCredit d where d.numCredit ='"+ numCred +"'";
+		TypedQuery<Calapresdebl> query = em.createQuery(sql, Calapresdebl.class);
+		for (Calapresdebl cal : query.getResultList()) {
+			try {
+				transaction.begin();
+				em.remove(cal); 
+				transaction.commit();
+				System.out.println("Calendrier n°: "+cal.getRowId()+" supprimé");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}			
+		}
+	}
+	
 	//Update décaissement
 	@Override
-	public boolean updateDecaissement(Decaissement decaissement,
-			String typePaie, String numTel, String numCheq, String numCompte,
+	public boolean updateDecaissement(Decaissement decaissement, String numTel, String numCheq, String numCompte,
 			String comptCaise, int userUpdate, String numCred) {
+		
 		//utilisateur qui modifie l'enregistrement 
-				Utilisateur ut = em.find(Utilisateur.class, userUpdate);
-				Decaissement d = em.find(Decaissement.class, decaissement.getTcode());
+		Utilisateur ut = em.find(Utilisateur.class, userUpdate);
+		Decaissement d = em.find(Decaissement.class, decaissement.getTcode());	
+		
+		//Instance client individuel & Groupe
+		Individuel ind = null;
+		Groupe grp = null;
+		String codeInd = "";
+		String codeGrp = "";
+		if(d.getDemandeCredit().getIndividuel() != null){
+			ind = d.getDemandeCredit().getIndividuel();
+			codeInd = ind.getCodeInd();
+		}
+		if(d.getDemandeCredit().getGroupe() != null){
+			grp = d.getDemandeCredit().getGroupe();
+			codeGrp = grp.getCodeGrp();
+		}
+		
+		/*************** //Inversement imputation comptable *********************/
+		double ancienMontant = d.getMontantDec();
+		Account accCred = null;
+		ConfigGlCredit confGl = d.getDemandeCredit().getProduitCredit().getConfigGlCredit();
+		
+		if(d.getTypePaie().equalsIgnoreCase("cash"))
+			accCred = CodeIncrement.getAcount(em, d.getValPaie());
+		else if(d.getTypePaie().equalsIgnoreCase("cheque"))
+			accCred = CodeIncrement.getAcount(em, confGl.getCptCheque());
+		else if(d.getTypePaie().equalsIgnoreCase("mobile")) 
+			accCred = CodeIncrement.getAcount(em, confGl.getCptCheque());
+		else if(d.getTypePaie().equalsIgnoreCase("epargne"))
+			accCred = CodeIncrement.getAcount(em, confGl.getCptCheque());	
+		
+		//Compte crédité
+		ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Modification decaissement Cr. " +d.getDemandeCredit().getNumCredit(),
+				decaissement.getPiece(), (ancienMontant * -1), 0, ut, ind, grp, d.getDemandeCredit(), null, accCred);
+		//Compte Debité
+		Account accDeb = CodeIncrement.getAcount(em, confGl.getCptPrincEnCoursInd());
+		ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Modification decaissement Cr. " +d.getDemandeCredit().getNumCredit(),
+				decaissement.getPiece(), 0, (ancienMontant * -1), ut, ind, grp, d.getDemandeCredit(), null, accDeb);
+		/****************************************************************/
+		/********************** Nouveau enregistrement *****************/
+		//Nouvel imputation
+		String typ = "";
+		String vp = "";
+		Account accCredNouv = null;
+		if(numTel.equals("") && numCheq.equals("") && numCompte.equals("") && comptCaise.equals("")){
+			typ = d.getTypePaie();
+			vp = d.getValPaie();
+		}else{
+			if(decaissement.getTypePaie().equalsIgnoreCase("cash")){
+				vp = comptCaise;
+				typ = "cash";							
+			}else if(decaissement.getTypePaie().equalsIgnoreCase("cheque")){
+				vp = numCheq;
+				typ = "cheque";		
+			}else if(decaissement.getTypePaie().equalsIgnoreCase("mobile")){
+				vp = numTel;
+				typ = "mobile";
+			}else if(decaissement.getTypePaie().equalsIgnoreCase("epargne")){
+				vp = numCompte;
+				typ = "epargne";
+			}
+		}
+		
+		if(typ.equalsIgnoreCase("cash"))						
+			accCredNouv = CodeIncrement.getAcount(em, vp);				
+		else if(typ.equalsIgnoreCase("cheque")){
+			accCredNouv = CodeIncrement.getAcount(em, confGl.getCptCheque());
+		}else if(typ.equalsIgnoreCase("mobile")){			
+			accCredNouv = CodeIncrement.getAcount(em, confGl.getCptCheque());
+		}else if(typ.equalsIgnoreCase("epargne"))
+			accCredNouv = CodeIncrement.getAcount(em, confGl.getCptCheque());
+			
+		/*********************************************************************/
+		/******************** Modification calendrier ***********************/
+		
+		if(!decaissement.getDateDec().equalsIgnoreCase(d.getDateDec())){
+			// Suppression fiche crédit
+			deleteFiche(d.getDemandeCredit().getNumCredit(), "Tranche due");
+			deleteFiche(d.getDemandeCredit().getNumCredit(), "Decaissement");
+			// Suppression calendrier remboursement
+			supprCalapresDebl(d.getDemandeCredit().getNumCredit());
+			
+			FicheCredit ficheCredit = new FicheCredit();
+			double soldCourant = ficheCredit.getSoldeCourant();
+			double totInter = ficheCredit.getInteret();
+			
+			//Nouveau calendrier
+			List<CalView> lisCalView = demCredit("", codeInd, codeGrp, decaissement.getDateDec(), decaissement.getMontantDec(),
+					d.getDemandeCredit().getTaux(), d.getDemandeCredit().getNbTranche(), d.getDemandeCredit().getTypeTranche(),
+					d.getDemandeCredit().getDiffPaie(), d.getDemandeCredit().getModeCalculInteret());
+			
+			for (CalView calView : lisCalView) {
 				
+				Calapresdebl calFinal = new Calapresdebl(calView.getDate(), calView.getMontantComm(), calView.getMontantInt(), calView.getMontantPenal(),
+						calView.getMontantPrinc(), false, d.getDemandeCredit());
+				//calRembAprDebl.add(calFinal);
 				
-				d.setDateDec(decaissement.getDateDec());
-				d.setPiece(decaissement.getPiece());
-				d.setMontantDec(decaissement.getMontantDec());
-				d.setCommission(decaissement.getCommission());
-				d.setStationnary(decaissement.getStationnary());
-				d.setUserUpdate(ut);
+				//Total solde courant
+				soldCourant += calView.getMontantPrinc() + calView.getMontantInt() - calView.getMontantPenal();
+				//total intérêt				
+				totInter += calView.getMontantInt();
+				//Solde total
+				double soldTotal = totInter + d.getDemandeCredit().getMontantDemande();
+								
+				//ajout calendrier due au Fihe credit
+				FicheCredit fiche = new FicheCredit(calView.getDate(), "Tranche due", "", calView.getMontantPrinc(), 
+						calView.getMontantInt(), calView.getMontantPenal(), soldCourant, 
+						d.getDemandeCredit().getMontantDemande(), totInter, soldTotal, d.getDemandeCredit().getNumCredit());
 				try {
 					transaction.begin();
-					em.merge(d);
+					em.persist(fiche);
+					em.persist(calFinal);
 					transaction.commit();
-					System.out.println("Decaissement modifié!");
-					return true;
+					em.refresh(fiche); 
+					em.refresh(calFinal); 
+					System.out.println("Fiche credit modifié");
+					
 				} catch (Exception e) {
-					e.printStackTrace(); 
-					return false;
+					e.printStackTrace();
 				}
+			}
+		}
+		
+		//Enregistrement modification
+		
+		d.setDateDec(decaissement.getDateDec());
+		d.setPiece(decaissement.getPiece());
+		d.setMontantDec(decaissement.getMontantDec());
+		d.setCommission(decaissement.getCommission());
+		d.setStationnary(decaissement.getStationnary());
+		d.setUserUpdate(ut);
+		try {
+			
+			//Fihe credit
+			FicheCredit f = new FicheCredit(decaissement.getDateDec(), "Decaissement", decaissement.getPiece(), decaissement.getMontantDec(),
+					0, 0, 0, decaissement.getMontantDec(), 0, decaissement.getMontantDec(), d.getDemandeCredit().getNumCredit());
+			
+			//Compte crédité
+			ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Decaissement crédit " +d.getDemandeCredit().getNumCredit(),
+					decaissement.getPiece(), decaissement.getMontantDec(), 0, ut, ind, grp, d.getDemandeCredit(), null, accCredNouv);
+			//Compte Debité
+			Account accDebNouv = CodeIncrement.getAcount(em, confGl.getCptPrincEnCoursInd());
+			ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Decaissement crédit " +d.getDemandeCredit().getNumCredit(),
+					decaissement.getPiece(), 0, decaissement.getMontantDec(), ut, ind, grp, d.getDemandeCredit(), null, accDebNouv);
+			
+			transaction.begin();
+			em.merge(d);
+			em.persist(f);
+			transaction.commit();
+			em.refresh(f); 
+			System.out.println("Decaissement modifié!");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Erreur modification decaissement!");
+			return false;
+		}
 	}
 
 	

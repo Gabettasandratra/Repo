@@ -80,6 +80,14 @@ public interface ComptabiliteService {
 			@WebParam(name = "nomUtilisateur") @XmlElement(required=false,nillable=true)String nomUtilisateur,
 			@WebParam(name = "dateDeb") @XmlElement(required=false,nillable=true)String dateDeb,
 			@WebParam(name = "dateFin") @XmlElement(required=false,nillable=true)String dateFin);
+	
+	    
+	//Recupère le solde d'une compte avant la date en paramètre
+	@WebMethod
+	@WebResult(name="resultat")
+	public double getSoldeAvant(
+			@WebParam(name = "numCompte") @XmlElement(required=false,nillable=true)String num,
+			@WebParam(name = "date") @XmlElement(required=false,nillable=true)String date);
 
 	/***
 	 * METHODE POUR LISTER LES DONNEEES DANS LE GRAND LIVRE 
@@ -94,7 +102,7 @@ public interface ComptabiliteService {
 	@WebMethod
 	@WebResult(name="list")
 	public List<Account> listComptes();
-	
+
 	//CHERCHER COMPTE COMPTA 
 	@WebMethod
 	@WebResult(name="resultat")
@@ -307,4 +315,17 @@ public interface ComptabiliteService {
 	public OperationView updateOperationView(
 	@XmlElement(required=false) @WebParam(name="id")int id,
 	@XmlElement(required=false) @WebParam(name="operation")OperationView operation);
+	
+	//-------------------------------------------------------------------------------------
+	/*********************************** Cloture compte **********************************/
+	//Ajout Cloture
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean addCloture(
+	@XmlElement(required=true) @WebParam(name="dateDeb")String dateDeb,
+	@XmlElement(required=true) @WebParam(name="dateFin")String dateFin,
+	@XmlElement(required=true) @WebParam(name="desc")String desc,
+	@XmlElement(required=true) @WebParam(name="user")int user
+	);
+	
 }

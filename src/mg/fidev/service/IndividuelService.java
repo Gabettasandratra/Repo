@@ -39,7 +39,29 @@ public interface IndividuelService {
 			@WebParam(name = "individuel") @XmlElement(required = true) Individuel individuel,
 			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence,
 			@WebParam(name = "docIdentite") @XmlElement(required = true) Docidentite docIdentite,
-			@WebParam(name = "adresse") @XmlElement(required = true) Adresse adresse);
+			@WebParam(name = "adresse") @XmlElement(required = true) Adresse adresse,
+			@WebParam(name = "codeGrp") @XmlElement(required = true) String codeGrp);
+	
+	//Modifier client individuel
+	@WebMethod
+	@WebResult(name = "validation")
+	public boolean updateIndividuel(
+			@WebParam(name = "individuel") @XmlElement(required = true) Individuel individuel,
+			@WebParam(name = "agence") @XmlElement(required = true) String codeAgence,
+			@WebParam(name = "docIdentite") @XmlElement(required = true) Docidentite docIdentite,
+			@WebParam(name = "adresse") @XmlElement(required = true) Adresse adresse,
+			@WebParam(name = "codeGrp") @XmlElement(required = true) String codeGrp,
+			@WebParam(name = "idAdresse") @XmlElement(required = true) int idAdresse
+			);
+	
+	//Supprimer client individuel
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean deleteIndividuel(
+			@WebParam(name = "codeInd")@XmlElement(required = false)String code,
+			@WebParam(name = "dateSupp")@XmlElement(required = false)String date,
+			@WebParam(name = "raison")@XmlElement(required = false)String raison
+			);
 	
 	//Liste de tous les clients individuels
 	@WebMethod
@@ -128,13 +150,6 @@ public interface IndividuelService {
 			@WebParam(name = "codeClient")@XmlElement(required = false)String code
 			);
 	
-	//Supprimer client individuel
-	@WebMethod
-	@WebResult(name="validation")
-	public boolean deleteIndividuel(
-			@WebParam(name = "codeClient")@XmlElement(required = false)String code
-			);
-	
 	//Vérification date de naissance du client
 	@WebMethod
 	@WebResult(name="resultat")
@@ -163,4 +178,10 @@ public interface IndividuelService {
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<Individuel> getClientNonApprouver();
+	
+	//Recuperé CIN ou Passeport client
+	@WebMethod
+	@WebResult(name="resultat")
+	public Docidentite getDocidentite(
+			@WebParam(name = "codeInd")@XmlElement(required = false)String codeInd);
 }

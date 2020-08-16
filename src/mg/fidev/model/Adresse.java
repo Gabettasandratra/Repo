@@ -32,7 +32,7 @@ public class Adresse implements Serializable {
 
 	private String adressePhysique;
 
-	private String adresseRegion;
+	private String adresseRegion;  
 
 	private String adresseVille;
 

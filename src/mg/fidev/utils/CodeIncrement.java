@@ -210,15 +210,20 @@ public class CodeIncrement {
 	 * quelconque
 	 **/
 
-	public static List<CalView> getCalendrierPaiement(String codeInd, String codeGrp,
+	public static List<CalView> getCalendrierPaiement(String codeCred, String codeInd, String codeGrp,
 			String date_dem, double montant, double tauxInt, int nbTranche,
 			String typeTranche, int diffPaie, String modCalcul) {
 
 		List<CalView> resultat = new ArrayList<CalView>();
 		
-		DemandeCredit dmd = new DemandeCredit();
+		DemandeCredit dmd = null;
+		
+		if(!codeCred.equals("")){  
+		    dmd = CreditServiceImpl.em.find(DemandeCredit.class, codeCred);
+		}
 		
 		if(!codeInd.equals("")){
+			dmd = new DemandeCredit();
 			Individuel ind = CreditServiceImpl.em.find(Individuel.class, codeInd);
 			int lastIndex = CreditServiceImpl.getLastIndex(codeInd);
 			String index = String.format("%05d", ++lastIndex);
@@ -229,6 +234,7 @@ public class CodeIncrement {
 			System.out.println("Demande credit pour client individuel");
 		}
 		if(!codeGrp.equals("")){
+			dmd = new DemandeCredit();
 			Groupe grp =  CreditServiceImpl.em.find(Groupe.class, codeGrp);
 			int lastIndex = CreditServiceImpl.getLastIndex(codeGrp);
 			String index = String.format("%05d", ++lastIndex);

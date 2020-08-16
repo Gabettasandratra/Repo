@@ -133,6 +133,11 @@ public class Utilisateur implements Serializable {
 	@XmlTransient
 	private List<Grandlivre> grandlivres;
 	
+	//bi-directional many-to-one association to cloture
+	@OneToMany(mappedBy="user",cascade=CascadeType.ALL)
+	@XmlTransient
+	private List<Cloture> clotures;
+	
 //	@ManyToOne(cascade=CascadeType.ALL)
 //	@JoinColumn(name="Code_agence")
 //	private Agence agence;
@@ -376,6 +381,14 @@ public class Utilisateur implements Serializable {
 
 	public void setTransactions(List<TransactionEpargne> transactions) {
 		this.transactions = transactions;
+	}
+
+	public List<Cloture> getClotures() {
+		return clotures;
+	}
+
+	public void setClotures(List<Cloture> clotures) {
+		this.clotures = clotures;
 	}
 	
 }

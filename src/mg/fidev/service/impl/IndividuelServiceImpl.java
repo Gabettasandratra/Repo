@@ -70,7 +70,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 	 * ***/
 	@Override
 	public boolean insertIndividuel(Individuel individuel, String codeAgence,
-			Docidentite docIdentite, Adresse adresse) {
+			Docidentite docIdentite, Adresse adresse, String codeGrp) {
 		
 		individuel.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
 		individuel.setEstClientIndividuel(true);
@@ -95,6 +95,11 @@ public class IndividuelServiceImpl implements IndividuelService {
 				
 			}
 			
+			if(!codeGrp.equals("")){
+				Groupe g = em.find(Groupe.class, codeGrp);
+				individuel.setGroupe(g); 
+			}
+			
 			transaction.begin();
 			em.persist(individuel);
 			em.persist(docIdentite);
@@ -107,6 +112,102 @@ public class IndividuelServiceImpl implements IndividuelService {
 		} catch (Exception e) {
 			System.err.println("Erreur insertion individuel "+e.getMessage());
 			//return "Error";
+			return false;
+		}
+	}
+	
+	//Modifier client individuel
+	@Override
+	public boolean updateIndividuel(Individuel individuel, String codeAgence,
+			Docidentite doc, Adresse adres, String codeGrp, int idAdresse) { 
+		Individuel ind = em.find(Individuel.class, individuel.getCodeInd());
+		Adresse ad = em.find(Adresse.class, idAdresse);
+		ad = adres;
+		
+		Docidentite dc = em.find(Docidentite.class, doc.getNumero());
+		dc = doc;
+		
+		ind.setNomClient(individuel.getNomClient());
+		ind.setPrenomClient(individuel.getPrenomClient());
+		ind.setDateInscription(individuel.getDateInscription());
+		ind.setDateNaissance(individuel.getDateNaissance());
+		ind.setEmail(individuel.getEmail());
+		ind.setEstMembreGroupe(individuel.getEstMembreGroupe());
+		ind.setEtatCivil(individuel.getEtatCivil());
+		ind.setLangue(individuel.getLangue());
+		ind.setLieuNaissance(individuel.getLieuNaissance());
+		ind.setNbEnfant(individuel.getNbEnfant());
+		ind.setNbPersCharge(individuel.getNbPersCharge());
+		ind.setNiveauEtude(individuel.getNiveauEtude());
+		ind.setNomConjoint(individuel.getNomConjoint());
+		ind.setNumeroMobile(individuel.getNumeroMobile());
+		ind.setParentAdresse(individuel.getParentAdresse());
+		ind.setParentNom(individuel.getParentNom());
+		if(!individuel.getPhoto().equals(""))
+			ind.setPhoto(individuel.getPhoto());
+		ind.setProfession(individuel.getProfession());
+		ind.setSexe(individuel.getSexe());
+		ind.setTitre(individuel.getTitre());		
+		
+		ind.setAdresse(ad);
+		dc.setIndividuel(ind);
+		try {
+			if(ind.getEstGarant() == false){
+				if(individuel.getEstGarant() == true){
+					Garant gar = new Garant(CodeIncrement.getCodeGar(em, codeAgence), individuel.getNomClient(), individuel.getPrenomClient(),
+							individuel.getDateNaissance(),individuel.getDateInscription()
+							, individuel.getEmail(), true, individuel.getProfession(), 
+							individuel.getSexe(), ind.getCodeInd(), null, ad);
+					
+					dc.setGarant(gar);
+					transaction.begin();
+					em.persist(gar);
+					em.persist(dc);
+					transaction.commit();
+					em.refresh(gar);
+					ind.setEstGarant(true);
+					ind.setCodeGarant(gar.getCodeGarant());
+					
+				}				
+			}
+						
+			if(ind.getGroupe() == null && !codeGrp.equals("")){
+				Groupe g = em.find(Groupe.class, codeGrp);
+				ind.setGroupe(g); 
+			}
+			
+			transaction.begin();
+			em.merge(ind);
+			em.merge(dc);
+			transaction.commit();
+			System.out.println("Modification client individuel reussit");
+			//return "Succes";
+			return true;
+		} catch (Exception e) {
+			System.err.println("Erreur modification individuel "+e.getMessage());
+			//return "Error";
+			return false;
+		}
+		
+	}
+	
+	//Supprimer client individuel
+	@Override
+	public boolean deleteIndividuel(String code, String date, String raison) {
+		Individuel ind = em.find(Individuel.class, code);
+		ind.setDateSortie(date);
+		ind.setRaisonSortie(raison); 
+		ind.setSupprimer(true); 
+		try {
+			transaction.begin();
+			em.flush();
+			transaction.commit();
+			em.refresh(ind); 
+			System.out.println("Client individuel n° : "+ ind.getCodeInd() +" a été supprimé");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Erreur suppression client individuel");
 			return false;
 		}
 	}
@@ -237,10 +338,11 @@ public class IndividuelServiceImpl implements IndividuelService {
 	@Override
 	public List<Individuel> findByCode(String code) {
 		TypedQuery<Individuel> query = em.createQuery("SELECT i FROM Individuel i WHERE i.codeInd LIKE :code"
-				+ " AND i.estClientIndividuel = :x AND i.approuver =:y",Individuel.class);
+				+ " AND i.estClientIndividuel = :x AND i.approuver =:y AND i.supprimer =:z",Individuel.class);
 		query.setParameter("code", code+"%");
 		query.setParameter("x", true);
 		query.setParameter("y", true);
+		query.setParameter("z", false);
 		
 		List<Individuel> result = query.getResultList();
 		
@@ -275,7 +377,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 			}else if(grp != null){
 				droit.setGroupe(grp);
 			}
-			
+						
 			transaction.begin();
 			em.flush();
 			em.persist(droit);
@@ -390,19 +492,6 @@ public class IndividuelServiceImpl implements IndividuelService {
 		return ind;
 	}
 
-	@Override
-	public boolean deleteIndividuel(String code) {
-		Individuel ind = em.find(Individuel.class, code);
-		try {
-			transaction.begin();
-			em.remove(ind);
-			transaction.commit();
-			em.refresh(ind); 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
 
 	/*
 	 * fonction qui permet de ferivier la date de naissance d'un client parraport au date délivrance CIN
@@ -472,10 +561,11 @@ public class IndividuelServiceImpl implements IndividuelService {
 	@Override
 	public List<Individuel> getClientApprouver() {
 		TypedQuery<Individuel> q1 = em
-		.createQuery("select i from Individuel i where i.approuver = :ap and i.estClientIndividuel = :individuel",
+		.createQuery("select i from Individuel i where i.approuver = :ap and i.estClientIndividuel = :individuel AND i.supprimer =:z",
 						Individuel.class);
 		q1.setParameter("ap", true);
 		q1.setParameter("individuel", true);
+		q1.setParameter("z", false);
 			
 		return q1.getResultList();
 	}
@@ -483,12 +573,23 @@ public class IndividuelServiceImpl implements IndividuelService {
 	@Override
 	public List<Individuel> getClientNonApprouver() {
 		TypedQuery<Individuel> q1 = em
-				.createQuery("select i from Individuel i where i.approuver = :individuel and i.estClientIndividuel = :ap",
-								Individuel.class);
+				.createQuery("select i from Individuel i where i.approuver = :individuel and i.estClientIndividuel = :ap"
+						+ " AND i.supprimer =:z",Individuel.class);
 				q1.setParameter("individuel", false);
 				q1.setParameter("ap", true);
+				q1.setParameter("z", false);
 					
 				return q1.getResultList();
+	}
+
+	//Recuperé CIN ou Passeport client
+	@Override
+	public Docidentite getDocidentite(String codeInd) {
+		String sql = "select d from Docidentite d join d.individuel i where i.codeInd='"+ codeInd +"'";
+		TypedQuery<Docidentite> q = em.createQuery(sql, Docidentite.class);
+		if(!q.getResultList().isEmpty())
+			return (Docidentite) q.getSingleResult();
+		return null;
 	}
 	
 }

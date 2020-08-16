@@ -7,7 +7,7 @@ import mg.fidev.service.impl.CreditServiceImpl;
 import mg.fidev.service.impl.GroupeServiceImpl;
 import mg.fidev.service.impl.IndividuelServiceImpl;
 import mg.fidev.service.impl.ProduitEpargneServiceImpl;
-import mg.fidev.service.impl.UserServiceImpl;
+import mg.fidev.service.impl.UserServiceImpl; 
 
 public class ServicePublisher {
 
@@ -22,9 +22,9 @@ public class ServicePublisher {
 		System.out.println("-- Service Online --");    
 		/*LocalDate localDate = LocalDate.now();
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		//String d = "2020-04-12";  
+		//String d = "2020-04-12";
 		//System.out.println(d.substring(8, 10)); 
-		try {
+		try {   
 			System.out.println("Local date = "+ localDate);
 			System.out.println("Local date to string = "+ localDate.toString());
 			java.util.Date d = simpleDateFormat.parse(localDate.toString());

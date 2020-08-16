@@ -200,7 +200,7 @@ public interface ProduitEpargneService {
 	 * ***/
 	@WebMethod
 	@WebResult(name="validation")
-	public boolean trasactionEpargne(
+	public String trasactionEpargne(
 			@XmlElement(required=true) @WebParam(name="type") String typeTransac,
 			@XmlElement(required=true) @WebParam(name="date") String dateTransac,
 			@XmlElement(required=true) @WebParam(name="montant") double montant,
