@@ -97,6 +97,10 @@ public class Grandlivre implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="code_analytique")
 	private Analytique analytique;
+	
+	@ManyToOne
+	@JoinColumn(name="code_auxilliaire")
+	private CompteAuxilliaire auxilliaire;
 		
 	public Grandlivre() {
 	}
@@ -335,6 +339,14 @@ public class Grandlivre implements Serializable {
 
 	public void setCompteDat(CompteDAT compteDat) {
 		this.compteDat = compteDat;
+	}
+
+	public CompteAuxilliaire getAuxilliaire() {
+		return auxilliaire;
+	}
+
+	public void setAuxilliaire(CompteAuxilliaire auxilliaire) {
+		this.auxilliaire = auxilliaire;
 	}
 
 }

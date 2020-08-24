@@ -57,13 +57,6 @@ public class DemandeCredit implements Serializable {
 	@Column(name="montant_approved")
 	private double montantApproved;
 	
-	//1 Si commission payé sinon 0
-	@Column(name="commission")
-	private boolean commission;
-	
-	@Column(name="approuver")
-	private boolean approuver;
-	
 	@Column(name="taux")
 	private double taux;
 	
@@ -93,6 +86,19 @@ public class DemandeCredit implements Serializable {
 	
 	@Column(name="motif_rechelonne")
 	private String motifRechelonne;
+	
+	//1 Si commission payé sinon 0
+	@Column(name="commission")
+	private boolean commission;
+	
+	@Column(name="approuver")
+	private boolean approuver;
+	
+	@Column(name="decaisser")
+	private boolean decaisser;	
+	
+	@Column(name="supprimer")
+	private boolean supprimer;
 
 	/******************************************************************************************************************************/
 									/**********************RELEATION ONE TO MANY********************************/
@@ -186,6 +192,11 @@ public class DemandeCredit implements Serializable {
 	@JoinColumn(name="agent")
 	private Utilisateur agent;
 	
+	//User update
+	@ManyToOne
+	@JoinColumn(name="user_update")
+	private Utilisateur user_update;
+	
 	/************************************************************************************************************************************/
 	/************************************************************************************************************************************/
 	/************************************************************************************************************************************/
@@ -211,11 +222,9 @@ public class DemandeCredit implements Serializable {
 		this.numCredit = numCredit;
 	}
 	
-	
 	public int getNbCredit() {
 		return nbCredit;
 	}
-
 
 	public void setNbCredit(int nbCredit) {
 		this.nbCredit = nbCredit;
@@ -284,26 +293,21 @@ public class DemandeCredit implements Serializable {
 		return solde_total;
 	}
 
-
 	public void setSolde_total(double solde_total) {
 		this.solde_total = solde_total;
 	}
-
 
 	public double getPrincipale_total() {
 		return principale_total;
 	}
 
-
 	public void setPrincipale_total(double principale_total) {
 		this.principale_total = principale_total;
 	}
 
-
 	public double getInteret_total() {
 		return interet_total;
 	}
-
 
 	public void setInteret_total(double interet_total) {
 		this.interet_total = interet_total;
@@ -497,12 +501,10 @@ public class DemandeCredit implements Serializable {
 		return calapresdebl;
 	}
 
-
 	public List<Grandlivre> getGrandLivre() {
 		return grandLivre;
 	}
-
-
+	
 	public void setGrandLivre(List<Grandlivre> grandLivre) {
 		this.grandLivre = grandLivre;
 	}
@@ -602,5 +604,30 @@ public class DemandeCredit implements Serializable {
 
 	public void setMontantMembres(List<CreditMembreGroupe> montantMembres) {
 		this.montantMembres = montantMembres;
+	}
+
+	public boolean isSupprimer() {
+		return supprimer;
+	}
+
+	public void setSupprimer(boolean supprimer) {
+		this.supprimer = supprimer;
+	}
+
+	public boolean isDecaisser() {
+		return decaisser;
+	}
+
+	public void setDecaisser(boolean decaisser) {
+		this.decaisser = decaisser;
+	}
+
+	public Utilisateur getUser_update() {
+		return user_update;
+	}
+
+	public void setUser_update(Utilisateur user_update) {
+		this.user_update = user_update;
 	}	
+
 }

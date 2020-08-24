@@ -2,9 +2,8 @@ package mg.fidev.model;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -21,8 +20,10 @@ public class MembreGroupe implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private int idMembre;
+	private String idMembre;
+	
+	@Column(name="dateAjout")
+	private String dateAjout;
 		
 	@ManyToOne
 	@JoinColumn(name="id_fonction")
@@ -32,28 +33,30 @@ public class MembreGroupe implements Serializable {
 	@JoinColumn(name="code_individuel")
 	private Individuel individuel;
 	
-
 	@ManyToOne
 	@JoinColumn(name="code_groupe")
 	private Groupe groupe;
-
-
+	
 	public MembreGroupe() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 	
-	public int getIdMembre() {
+	public String getIdMembre() {
 		return idMembre;
 	}
 
-
-
-	public void setIdMembre(int idMembre) {
+	public void setIdMembre(String idMembre) {
 		this.idMembre = idMembre;
 	}
+	
+	public String getDateAjout() {
+		return dateAjout;
+	}
 
-
+	public void setDateAjout(String dateAjout) {
+		this.dateAjout = dateAjout;
+	}
 
 	public FonctionMembreGroupe getFonctionMembre() {
 		return fonctionMembre;

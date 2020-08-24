@@ -19,6 +19,7 @@ import mg.fidev.model.Caisse;
 import mg.fidev.model.Cloture;
 import mg.fidev.model.ClotureCompte;
 import mg.fidev.model.Compte;
+import mg.fidev.model.CompteAuxilliaire;
 import mg.fidev.model.CompteDAT;
 import mg.fidev.model.CompteEpargne;
 import mg.fidev.model.ConfigGlCredit;
@@ -410,7 +411,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 	//Transaction caisse et banque comptable
 	@Override
 	public boolean saveTransaction(String date,String piece, String description,
-			String compte,String compte2,double debit, int user) {
+			String compte,String compte2,double debit,String analytique,String auxilliaire,String budget, int user) {
 		
 		//instaciation de l'utilisateur de saisie
 		Utilisateur ut = em.find(Utilisateur.class, user);
@@ -419,6 +420,9 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		
 		//Instance de compte d'equilibre à la configuration
 		Account cmpt2 = CodeIncrement.getAcount(em, compte2);
+		Budget bdg = em.find(Budget.class, budget);
+		Analytique anlt = saveAnalytique(analytique);
+		CompteAuxilliaire cmpAux = saveAuxilliaire(auxilliaire);
 		
 		//on instancie le grand livre	
 		Grandlivre debiter = new Grandlivre();
@@ -429,6 +433,9 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		debiter.setDescr(description);
 		debiter.setPiece(piece);
 		debiter.setAccount(cmpt);
+		debiter.setBudget(bdg);
+		debiter.setAnalytique(anlt);
+		debiter.setAuxilliaire(cmpAux); 
 		
 		debiter.setDebit(debit);
 		debiter.setUserId(ut.getNomUtilisateur());
@@ -441,6 +448,9 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		crediter.setDescr(description);
 		crediter.setPiece(piece);
 		crediter.setAccount(cmpt2);
+		crediter.setBudget(bdg);
+		crediter.setAnalytique(anlt);
+		crediter.setAuxilliaire(cmpAux); 
 		
 		crediter.setCredit(debit);
 		crediter.setUserId(ut.getNomUtilisateur());
@@ -776,6 +786,33 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		}
 		return null;
 	}
+	
+	//Enregistrement Analytique
+		static CompteAuxilliaire saveAuxilliaire(String nom) {
+			CompteAuxilliaire auxiliaire = new CompteAuxilliaire();
+			try {
+				Query verification = em
+						.createQuery("select a from CompteAuxilliaire a where a.nom = :x");
+				verification.setParameter("x", nom);
+
+				if (!verification.getResultList().isEmpty()) {
+					auxiliaire = (CompteAuxilliaire) verification.getSingleResult();
+					return auxiliaire;
+				} else {
+					auxiliaire.setId(CodeIncrement.getCodeAuxilliaire(em));
+					auxiliaire.setNom(nom);
+					transaction.begin();
+					em.persist(auxiliaire);
+					transaction.commit();
+					em.refresh(auxiliaire);
+					return auxiliaire;
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
 
 	//Get list analytique
 	@Override
@@ -794,17 +831,41 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		return null;
 	}
 	
+	@Override
+	public List<CompteAuxilliaire> getAllAuxilliaire() {
+
+		String sql = "select a from CompteAuxilliaire a";
+		TypedQuery<CompteAuxilliaire> query = em.createQuery(sql, CompteAuxilliaire.class);
+
+		if (!query.getResultList().isEmpty()) {
+			return  query.getResultList();
+		}
+
+		return null;
+	}
+
+	@Override
+	public List<CompteAuxilliaire> chercherAuxilliaire(String code) {
+		String sql = "select a from CompteAuxilliaire a where a.id like '" + code + "%'";
+		TypedQuery<CompteAuxilliaire> query = em.createQuery(sql,CompteAuxilliaire.class);
+		if (!query.getResultList().isEmpty()) {
+			return query.getResultList();
+		}
+		return null;
+	}
+	
 	
 	//Enregistrement opération divers comptable
 	@Override
 	public boolean saveOperationDivers(String date, String piece,
-			String description,String analytique, String budget, int user) {
+			String description,String analytique, String auxilliaire, String budget, int user) {
 
 		// on selectionne l'utilisateur de saisie
 		Utilisateur ut = em.find(Utilisateur.class, user);
 
 		Budget bdg = em.find(Budget.class, budget);
 		Analytique anlt = saveAnalytique(analytique);
+		CompteAuxilliaire cmpAux = saveAuxilliaire(auxilliaire);
 		
 		//Information grand livre
 		Grandlivre debiter = new Grandlivre();
@@ -816,6 +877,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		debiter.setUtilisateur(ut);
 		debiter.setAnalytique(anlt);
 		debiter.setBudget(bdg); 
+		debiter.setAuxilliaire(cmpAux); 
 		
 		Grandlivre crediter = new Grandlivre();
 		crediter.setTcode(CodeIncrement.genTcode(em));
@@ -826,6 +888,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		crediter.setUtilisateur(ut);
 		crediter.setAnalytique(anlt);
 		crediter.setBudget(bdg); 
+		crediter.setAuxilliaire(cmpAux); 
 
 		List<OperationView> listOperation = listOperationView();
 		
@@ -1653,5 +1716,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		}else
 			return false;
 	}
+
+	
 	
 }

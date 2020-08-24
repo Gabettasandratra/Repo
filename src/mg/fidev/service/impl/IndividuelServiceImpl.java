@@ -145,6 +145,9 @@ public class IndividuelServiceImpl implements IndividuelService {
 		ind.setParentNom(individuel.getParentNom());
 		if(!individuel.getPhoto().equals(""))
 			ind.setPhoto(individuel.getPhoto());
+		if(!individuel.getSignature().equals(""))
+			ind.setSignature(individuel.getSignature());
+		ind.setSecteurActiviter(individuel.getSecteurActiviter());
 		ind.setProfession(individuel.getProfession());
 		ind.setSexe(individuel.getSexe());
 		ind.setTitre(individuel.getTitre());		
@@ -337,7 +340,8 @@ public class IndividuelServiceImpl implements IndividuelService {
 	//chercher client individuel par son code
 	@Override
 	public List<Individuel> findByCode(String code) {
-		TypedQuery<Individuel> query = em.createQuery("SELECT i FROM Individuel i WHERE i.codeInd LIKE :code"
+		TypedQuery<Individuel> query = em.createQuery("SELECT i FROM Individuel i WHERE (i.codeInd LIKE :code "
+				+ " OR i.nomClient LIKE :code OR i.prenomClient LIKE :code)"
 				+ " AND i.estClientIndividuel = :x AND i.approuver =:y AND i.supprimer =:z",Individuel.class);
 		query.setParameter("code", code+"%");
 		query.setParameter("x", true);

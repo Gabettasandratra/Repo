@@ -60,7 +60,7 @@ public class CreditServiceImpl implements CreditService {
 	private static final String PERSISTENCE_UNIT_NAME = "FIDEV-Repository";
 	public static EntityManager em = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME).createEntityManager();
 	private static EntityTransaction transaction = em.getTransaction();
-	
+	 
 	/************************************************************************************************************************************************/
 
 						/*********************** CRUD SUR PRODUITS CREDIT ****************************/
@@ -105,9 +105,9 @@ public class CreditServiceImpl implements CreditService {
 	 * HISTORIQUE DEMANDE CREDIT
 	 * ***/
 	public List<DemandeCredit> findAllDemand() {
-		TypedQuery<DemandeCredit> q = em.createQuery("select c from DemandeCredit c", DemandeCredit.class);
-		List<DemandeCredit> l = q.getResultList();
-		return l;
+		TypedQuery<DemandeCredit> q = em.createQuery("select c from DemandeCredit c where c.supprimer=:x", DemandeCredit.class);
+		q.setParameter("x", false);
+		return q.getResultList();
 	}
 	
 	/**
@@ -115,8 +115,7 @@ public class CreditServiceImpl implements CreditService {
 	 * **/
 	public List<ProduitCredit> findAllCredit() {
 		TypedQuery<ProduitCredit> query = em.createQuery("select c from ProduitCredit c", ProduitCredit.class);
-		List<ProduitCredit> list = query.getResultList();
-		return list;
+		return query.getResultList();
 	}
 	
 	/**
@@ -136,10 +135,22 @@ public class CreditServiceImpl implements CreditService {
 	@Override
 	public List<DemandeCredit> chercherCredit(String mc,String statu) {
 		TypedQuery<DemandeCredit> query = em.createQuery("select d from DemandeCredit d where d.numCredit like :x"
-				+ " and (d.approbationStatut =:ap )", DemandeCredit.class);
+				+ " and (d.approbationStatut =:ap) and d.supprimer=:y", DemandeCredit.class);
 		query.setParameter("x", mc+"%");
 		query.setParameter("ap",statu);
+		query.setParameter("y", false);
 		//query.setParameter("ax","Rééchelonner");or d.approbationStatut =:ax
+		if(!query.getResultList().isEmpty())
+			return query.getResultList();
+		return null;
+	}
+	
+	@Override
+	public List<DemandeCredit> findDemandeNonApprouver(boolean approuver) {
+		TypedQuery<DemandeCredit> query = em.createQuery("select d from DemandeCredit d where d.approuver =:x"
+				+ " and d.supprimer=:z", DemandeCredit.class);
+		query.setParameter("x", approuver);
+		query.setParameter("z", false);
 		if(!query.getResultList().isEmpty())
 			return query.getResultList();
 		return null;
@@ -147,13 +158,20 @@ public class CreditServiceImpl implements CreditService {
 	
 	//chercher crédit par stituation
 	@Override
-	public List<DemandeCredit> findSituationCredit(boolean ap, boolean comm) {
+	public List<DemandeCredit> findSituationCredit(boolean ap, boolean comm, boolean decaisser) {
+		System.out.println("Find result for approbation:"+ ap + " Commission:"+ comm + " Decaisser: "+ decaisser);
 		TypedQuery<DemandeCredit> query = em.createQuery("select d from DemandeCredit d where d.approuver =:x"
-				+ " and d.commission =:y", DemandeCredit.class);
+				+ " and d.commission =:y  and d.decaisser =:decais and d.supprimer=:z", DemandeCredit.class);
 		query.setParameter("x", ap);
-		query.setParameter("y",comm);
-		if(!query.getResultList().isEmpty())
+		query.setParameter("y", comm);
+		query.setParameter("decais", decaisser);
+		query.setParameter("z", false);
+		if(!query.getResultList().isEmpty()){
+			System.out.println("Match result");
 			return query.getResultList();
+		}else{
+			System.out.println("No result");
+		}
 		return null;
 	}
 	
@@ -179,14 +197,16 @@ public class CreditServiceImpl implements CreditService {
 		
 		List<DemandeCredit> result = new ArrayList<DemandeCredit>();
 		if(m2.equals("")){
-			TypedQuery<DemandeCredit> query = em.createQuery("select d from DemandeCredit d where d.approbationStatut like :mc", DemandeCredit.class);
+			TypedQuery<DemandeCredit> query = em.createQuery("select d from DemandeCredit d where d.approbationStatut like :mc and d.supprimer=:z", DemandeCredit.class);
 			query.setParameter("mc", "%"+mc+"%");  
+			query.setParameter("z", false);
 			result = query.getResultList();		
 		}else{
-			TypedQuery<DemandeCredit> query = em.createQuery("select d from DemandeCredit d where d.approbationStatut like :mc"
+			TypedQuery<DemandeCredit> query = em.createQuery("select d from DemandeCredit d where d.approbationStatut like :mc and d.supprimer=:z"
 					+ " OR d.approbationStatut like :motCle", DemandeCredit.class);
 			query.setParameter("mc", "%"+mc+"%");
 			query.setParameter("motCle", "%"+m2+"%");
+			query.setParameter("z", false);
 			result = query.getResultList();			
 		}
 		return result;
@@ -235,45 +255,21 @@ public class CreditServiceImpl implements CreditService {
 	
 	
 	/******************************************************** DEMANDE CREDIT *************************************************************************/
-	
-	//Modifier demande crédit
-	@Override
-	public boolean updateDemandeCredit(String numCredit,DemandeCredit demande) {
-		
-		//DemandeCredit dm = em.find(DemandeCredit.class, numCredit);
-				
-		return false;
-	}
 
 	//Supprimer un crédit
 	@Override
 	public boolean deleteCredit(String numCred) {
 		DemandeCredit dm = em.find(DemandeCredit.class, numCred);
 		try {
-			//Supprimer l'enregistrement du crédit au table fiche crédit
-			//Query query = em.createNativeQuery("delete fiche_credit where num_credit="+dm.getNumCredit());
-			String sql = "select f from FicheCredit f where f.num_credit='"+dm.getNumCredit()+"'";
-			TypedQuery<FicheCredit> query = em.createQuery(sql,FicheCredit.class);
-			if(!query.getResultList().isEmpty()){
-				for (FicheCredit fiche : query.getResultList()) {
-					try {
-						transaction.begin();
-						em.remove(fiche); 
-						transaction.commit();
-						System.out.println("Fiche crédit n°: "+fiche.getNum_credit()+" supprimé");
-					} catch (Exception e) {
-						e.printStackTrace();
-					}			
-				}
-			}
+			dm.setSupprimer(true); 
 			transaction.begin();
-			em.remove(dm);
+			em.merge(dm);
 			transaction.commit();
-			System.out.println("Crédit supprimé");
+			System.out.println("Crédit Annulé");
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("Erreur suppression crédit");
+			System.out.println("Erreur annulation crédit");
 			return false;
 		}
 	}
@@ -307,6 +303,22 @@ public class CreditServiceImpl implements CreditService {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	//Supprimer calendrier due 
+	static void deleteCalpaiementDue(String numCred){
+		List<Calpaiementdue> cals = em.find(DemandeCredit.class, numCred).getCalpaiementdues();
+		for (Calpaiementdue cal : cals) {
+			try {
+				transaction.begin();
+				em.remove(cal); 
+				transaction.commit();
+				System.out.println("Calendrier due supprimé");			
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.err.println("Erreur suppression calendrier due");
+			}			
+		}
 	}
 	
 	/**
@@ -406,6 +418,119 @@ public class CreditServiceImpl implements CreditService {
 			}
 		}
 		
+	
+		
+	//Modifier demande crédit
+    @Override
+	public boolean updateDemandeCredit(String idProduit, DemandeCredit demandes,
+			int idAgent, int user_id) {
+		
+    	DemandeCredit dm = em.find(DemandeCredit.class, demandes.getNumCredit());
+    	Utilisateur userUpdate = em.find(Utilisateur.class, user_id);
+    	
+    	//Suppression fiche crédit , calendrier due, garatie
+    	deleteCalpaiementDue(dm.getNumCredit());
+    	deleteGarantie(dm.getNumCredit());
+    	deleteFiche(dm.getNumCredit(), "");
+    	
+    	//Pour initialiser les intérêt, soldCourant, total intérêt
+    	FicheCredit ficheCredit = new FicheCredit();			
+    	
+    	//Initialisation intérêt 
+		double interet = 0;	
+		for (CalView view : getAllCalView()) {
+			interet += view.getMontantInt();
+		}			
+		//Importation garatie from garantie view
+		List<GarantieCredit> garaties = new ArrayList<GarantieCredit>();
+		List<GarantieView> listGaraties = getAllGarantieView();
+		if(listGaraties != null){
+			for (GarantieView garantieView : listGaraties) {
+				GarantieCredit gar = new 
+						GarantieCredit(garantieView.getTypeGarantie(), garantieView.getNomGarantie(), garantieView.getValeur(),
+								garantieView.getPourcentage(), false, "", dm);
+
+				garaties.add(gar);
+			}
+			//Enregistrement de la garantie
+			dm.setGarantieCredits(garaties);				
+		}			
+		
+		dm.setProduitCredit(em.find(ProduitCredit.class, idProduit));//Produit crédit
+		dm.setAgent(em.find(Utilisateur.class, idAgent));//Agent de crédit
+		dm.setUser_update(userUpdate); 
+		dm.setApprobationStatut("Approbation en attente");
+		dm.setInteret(interet); 
+		dm.setButCredit(demandes.getButCredit());
+		dm.setDateDemande(demandes.getDateDemande());
+		dm.setDiffPaie(demandes.getDiffPaie());
+		dm.setModeCalculInteret(demandes.getModeCalculInteret());
+		dm.setMontantDemande(demandes.getMontantDemande());
+		dm.setNbTranche(demandes.getNbTranche());
+		dm.setTaux(demandes.getTaux());
+		dm.setTypeTranche(demandes.getTypeTranche());
+	
+		//Vider table garantie view
+		//deleteGarantieVIew();
+		
+		//Enregistrement Fiche credit
+		FicheCredit f = new FicheCredit(dm.getDateDemande(), "Demande crédit", "", dm.getMontantDemande(), interet,
+				0, 0, dm.getMontantDemande(), 0, dm.getMontantDemande(), dm.getNumCredit());
+				
+		System.out.println("modification demande crédit prête");
+		try {			
+			transaction.begin();
+			em.merge(dm);
+			em.persist(f);
+			transaction.commit();
+			em.refresh(f);
+			
+			//Initialisation solde courant et total de l'intérêt, qui sont utilisés pour l'enregistrement de fiche crédit
+			double soldCourant = ficheCredit.getSoldeCourant();
+			double totInter = ficheCredit.getInteret();		
+			//Récuperation calendrier due
+			for (CalView calView : getAllCalView()) {
+				try {// new
+						// SimpleDateFormat("yyyy-MM-dd").parse(calView.getDate()
+					Calpaiementdue cald = new Calpaiementdue(calView.getDate(), calView.getMontantComm(), 
+							calView.getMontantInt(), calView.getMontantPenal(), calView.getMontantPrinc(), dm);
+					
+					// Total solde courant
+					soldCourant += calView.getMontantPrinc() + calView.getMontantInt() - calView.getMontantPenal();
+					// total intérêt
+					totInter += calView.getMontantInt();
+					// Solde total
+					double soldTotal = totInter
+							+ dm.getMontantDemande();
+
+					// Ajout calendrier due au Fihe credit
+					FicheCredit fiche = new FicheCredit(calView.getDate(), "Tranche due", "", calView.getMontantPrinc(),
+							calView.getMontantInt(), calView.getMontantPenal(), soldCourant,
+							dm.getMontantDemande(), totInter, soldTotal, dm.getNumCredit());
+
+					transaction.begin();
+					em.persist(fiche);
+					em.persist(cald);
+					transaction.commit();
+					em.refresh(fiche);
+					em.refresh(cald);
+					System.out.println("Fiche credit enregitré");
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+			//Vider table calendrier view
+			deleteCalendrier();
+						
+			System.out.println("Modification demande crédit de "+ dm.getNumCredit() +" enregistré");
+			return true;
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			return false;
+		}
+	}
 	
 	/***
 	 * SAVE DEMANDE CREDIT Individuel (Opérationnel)
@@ -561,6 +686,34 @@ public class CreditServiceImpl implements CreditService {
 		return false;
 		
 	}
+	
+	//Supprimé garantie
+	static void deleteGarantie(String numCred){
+		List<GarantieCredit> gs = em.find(DemandeCredit.class, numCred).getGarantieCredits();
+		for (GarantieCredit g : gs) {
+			try {
+				transaction.begin();
+				em.remove(g);
+				transaction.commit();
+				System.out.println("Garantie supprimé");
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.err.println("Erreur suppression garantie");
+			}
+		}
+	}
+	
+	//Chercher garantie par numéro crédit
+	@Override
+	public List<GarantieCredit> getGarantieByNumCred(String numCredit) {
+		String sql = "select g from GarantieCredit g join g.demandeCredit d where d.numCredit = '"+ numCredit +"'";
+		TypedQuery<GarantieCredit> q = em.createQuery(sql, GarantieCredit.class);
+		if(!q.getResultList().isEmpty())
+			return q.getResultList();
+		return null;
+	}
+	
+	/**************************** Demande crédit groupe *********************************/
 		
 	static int getLastIndexMembre(String codeGrp){
 		String sql = "select count(*) from membre_groupe where groupe='"+codeGrp+"'";
@@ -808,6 +961,7 @@ public class CreditServiceImpl implements CreditService {
 		return false;
 	}
 		
+	/***************************** Commission Crédit **********************************/
 	//Liste Commission avant ou après approbation	
 	@Override
 	public List<DemandeCredit> getCommissionAvantApprobation(boolean a) {		
@@ -1073,8 +1227,10 @@ public class CreditServiceImpl implements CreditService {
 		
 	//Suppression de calendrier dues au fiche crédit
 	static void deleteFiche(String numCred, String trans){
-		String sql_fiche = "select f from FicheCredit f where f.transaction='"+ trans +"' "
-				+ " and f.num_credit='"+numCred+"'";
+		String sql_fiche = "select f from FicheCredit f where f.num_credit='"+numCred+"' ";
+		if(!trans.equals("")){
+			sql_fiche += " and f.transaction='"+ trans +"'"; 
+		}
 		TypedQuery<FicheCredit> query_fiche = em.createQuery(sql_fiche,FicheCredit.class);
 		for (FicheCredit ficheCredit : query_fiche.getResultList()) {
 			try {
@@ -1129,7 +1285,7 @@ public class CreditServiceImpl implements CreditService {
 		//Vérifie si le numero crédit est null ou pas
 		if (dm != null) {
 			//si les statuts du crédit sont approuver et commission payé
-			if (dm.isApprouver() == true && dm.isCommission() == true) {
+			if (dm.isApprouver() == true && dm.isCommission() == true && dm.isDecaisser() == false) {
 
 				try {
 					//Total solde à décaisser = montant approuvé - (commission + papeterie)
@@ -1144,6 +1300,7 @@ public class CreditServiceImpl implements CreditService {
 					dm.setPrincipale_total(dm.getMontantApproved());
 					dm.setSolde_total(soldeTotal);	
 					dm.setApprobationStatut("Demande decaissé");
+					dm.setDecaisser(true);
 					
 					//Insertion au GrandLivre        
 					Account accCred = null;     
@@ -2694,12 +2851,14 @@ public class CreditServiceImpl implements CreditService {
 	public boolean configGarantiCredit(ConfigGarantieCredit configGarCredit,String idProduitEpargne,String idProduit) {
 	
 		ProduitCredit pdtCred = em.find(ProduitCredit.class, idProduit);
-		ProduitEpargne pdEp = em.find(ProduitEpargne.class, idProduitEpargne);
 		Query q = em.createQuery("select i from ConfigCredit i");
 		ConfigCredit conf = (ConfigCredit) q.getSingleResult();
 		
 		try {
-			configGarCredit.setProduitEpargne(pdEp); 
+			if(!idProduitEpargne.equals("")){
+				ProduitEpargne pdEp = em.find(ProduitEpargne.class, idProduitEpargne);
+				configGarCredit.setProduitEpargne(pdEp); 				
+			}
 			pdtCred.setConfigCredit(conf);
 			pdtCred.setConfigGarantieCredit(configGarCredit);
 			transaction.begin();
@@ -2871,24 +3030,47 @@ public class CreditServiceImpl implements CreditService {
 	//Information garantie view
 	
 	@Override
-	public boolean addGarantieView(GarantieView garantie,String codeInd) {
+	public List<GarantieView> addGarantieView(GarantieView garantie,String codeInd,String codeCred) {
+		List<GarantieView> result = new ArrayList<GarantieView>();
 		try {
 			//Individuel ind = em.find(Individuel.class, codeInd); 
+					
+			if(!codeInd.equals("")){
+				
+				int lastIndex = getLastIndex(codeInd);
+				String index = String.format("%05d", ++lastIndex);
+								
+				String ag = codeInd.substring(0, 2);
+				String idCred = ag + "/" + index;
+				
+				garantie.setNumCredit(idCred);
+				transaction.begin();
+				em.persist(garantie);
+				transaction.commit();
+				em.refresh(garantie);
+				result.add(garantie);
+			}
 			
-			int lastIndex = getLastIndex(codeInd);
-			String index = String.format("%05d", ++lastIndex);
-			
-			String ag = codeInd.substring(0, 2);//ind.getCodeInd()
-			garantie.setNumCredit(ag + "/" + index);
-			transaction.begin();
-			em.persist(garantie);
-			transaction.commit();
-			em.refresh(garantie);
-			return true;
+			if(!codeCred.equals("")){
+				DemandeCredit dm = em.find(DemandeCredit.class, codeCred);
+				for (GarantieCredit gar : dm.getGarantieCredits()) {
+					GarantieView g = new GarantieView();
+					g.setNomGarantie(gar.getNomGarantie());
+					g.setNumCredit(dm.getNumCredit());
+					g.setPourcentage(gar.getPourcentage());
+					g.setTypeGarantie(gar.getTypeGarantie());
+					g.setValeur(gar.getValeur()); 
+					transaction.begin();
+					em.persist(g);
+					transaction.commit();
+					em.refresh(g);
+					result.add(g);
+				}
+			}			
 		} catch (Exception e) {
 			e.printStackTrace();
-			return false;
 		}
+		return result;
 	}
 
 	@Override
@@ -3098,8 +3280,7 @@ public class CreditServiceImpl implements CreditService {
 		
 		return null;
 	}
-
-	
+		
 	/*********************************************************************************************************************************************/
 	
 	/*********************************************************************************************************************************************/

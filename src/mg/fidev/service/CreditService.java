@@ -83,7 +83,9 @@ public interface CreditService {
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<DemandeCredit> findSituationCredit(
-			@WebParam(name = "approbation") boolean ap, @WebParam(name = "commission") boolean comm);
+			@WebParam(name = "approbation") boolean ap, 
+			@WebParam(name = "commission") boolean comm,
+			@WebParam(name = "decaisser") boolean decaisser);
 	
 	/**
 	 * Methode Pour Chercher Produit Par Mot Clé
@@ -104,6 +106,13 @@ public interface CreditService {
 	@WebResult(name="Liste_demande")
 	public List<DemandeCredit> findDemandeByMc(@WebParam(name = "mc") String mc,
 			@WebParam(name = "mc2") @XmlElement(required=false,nillable=true) String m2);
+	
+	//Chercher crédit par situation crédit
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<DemandeCredit> findDemandeNonApprouver(
+			@WebParam(name = "approuver") boolean approuver);
+	
 	
 	/**
 	 * Methode pour Modifier un Produit Credit
@@ -143,9 +152,16 @@ public interface CreditService {
 	//Modifier demande crédit
 	@WebMethod
 	@WebResult(name="validation")
-	public boolean updateDemandeCredit(	
-	@WebParam(name="numCredit") String numCredit,
-	@WebParam(name="demandeCredit") @XmlElement(required=true,nillable=false) DemandeCredit demande);
+	public boolean updateDemandeCredit(
+		@WebParam(name="idProduit") @XmlElement(required=true,nillable=false) String idProduit,
+		@WebParam(name="demandeCredit") @XmlElement(required=true,nillable=false) DemandeCredit demande,
+		@WebParam(name="id_Agent") @XmlElement(required=true,nillable=false) int idAgent,
+		@WebParam(name="user_id") @XmlElement(required=true,nillable=false) int user_id);
+
+	//Chercher garantie par numéro crédit
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<GarantieCredit> getGarantieByNumCred(@WebParam(name="numCredit") String numCredit);
 	
 	//Supprimer un crédit
 	@WebMethod
@@ -252,9 +268,10 @@ public interface CreditService {
 	//Ajouter garantie
 	@WebMethod
 	@WebResult(name="validation")
-	public boolean addGarantieView(
+	public List<GarantieView> addGarantieView(
 	@WebParam(name="garantie") @XmlElement(required=false,nillable=true)GarantieView garantie,
-	@WebParam(name="codeInd") @XmlElement(required=false,nillable=true)String codeInd);
+	@WebParam(name="codeInd") @XmlElement(required=false,nillable=true)String codeInd,
+	@WebParam(name="codeCred") @XmlElement(required=false,nillable=true)String codeCred);
 	
 	//modifier garantie view
 	@WebMethod
@@ -545,7 +562,7 @@ public interface CreditService {
 	@WebResult(name = "validation")
 	public boolean configGarantiCredit(
 			@WebParam(name= "configGarCredit") @XmlElement(required=false,nillable=true) ConfigGarantieCredit configGarCredit,
-			@WebParam(name= "produitEpargne") @XmlElement(required=true,nillable=false) String idProduitEpargne,
+			@WebParam(name= "produitEpargne") @XmlElement(required=false,nillable=true) String idProduitEpargne,
 			@WebParam(name= "idProduit") @XmlElement(required=true,nillable=false) String idProduit
 			);
 	

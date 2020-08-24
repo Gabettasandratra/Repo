@@ -28,7 +28,21 @@ public class ConfigProdEp implements Serializable {
 	private int rowId;
 
 	private int ageMinCpt;
-
+	
+	private double commRetraitCash;
+	
+	private double commTransfer;
+	
+	private String devise;
+	
+	private double fraisFermeture;
+	
+	@Column(name="fraisActivation")
+	private double fraisActivation;
+		
+	@Column(name="fraisDemandeRelever")
+	private double fraisDemandeRelever;
+	
 	private double fraisTenuCpt;
 
 	private int nbrJrIn;
@@ -37,19 +51,12 @@ public class ConfigProdEp implements Serializable {
 	
 	private int nbrJrMinRet;
 	
-	private double soldeOverture;
-
-	private String devise;
-	
-	private boolean soldeNegatif;
-
 	private double penalitePrelevemnt;
 	
-	private double commRetraitCash;
+	private double soldeOverture;
 	
-	private double commTransfer;
+	private boolean soldeNegatif;
 	
-	private double fraisFermeture;
 	
 
 	//bi-directional many-to-one association to ProduitEpargne
@@ -82,6 +89,22 @@ public class ConfigProdEp implements Serializable {
 
 	public void setFraisTenuCpt(double fraisTenuCpt) {
 		this.fraisTenuCpt = fraisTenuCpt;
+	}
+	
+	public double getFraisActivation() {
+		return fraisActivation;
+	}
+
+	public void setFraisActivation(double fraisActivation) {
+		this.fraisActivation = fraisActivation;
+	}
+
+	public double getFraisDemandeRelever() {
+		return fraisDemandeRelever;
+	}
+
+	public void setFraisDemandeRelever(double fraisDemandeRelever) {
+		this.fraisDemandeRelever = fraisDemandeRelever;
 	}
 
 	public int getNbrJrIn() {

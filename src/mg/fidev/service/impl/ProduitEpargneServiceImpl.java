@@ -205,14 +205,16 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 
 	}
 	/***
-	 * CHERCHER COMPTE PAR NUM COMPTE
+	 * CHERCHER COMPTE ACTIF PAR NUM COMPTE
 	 * ***/
 	@Override
 	public List<CompteEpargne> findCompteByCode(String numCmpt) {
 		TypedQuery<CompteEpargne> query = em.createQuery("SELECT c FROM CompteEpargne c WHERE c.fermer = :x AND c.numCompteEp LIKE :code"
+				+ " AND c.isActif =:y"
 				,CompteEpargne.class);
 		query.setParameter("x", false);
 		query.setParameter("code", numCmpt+"%");
+		query.setParameter("y", true);
 		
 		List<CompteEpargne> result = query.getResultList();
 		
@@ -221,6 +223,25 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		
 		return null;
 	}
+	
+	//Chercher compte inactif
+	@Override
+	public List<CompteEpargne> findCompteInactifByCode(String numCmpt) {
+		TypedQuery<CompteEpargne> query = em.createQuery("SELECT c FROM CompteEpargne c WHERE c.fermer = :x AND c.numCompteEp LIKE :code"
+				+ " AND c.isActif =:y"
+				,CompteEpargne.class);
+		query.setParameter("x", false);
+		query.setParameter("code", numCmpt+"%");
+		query.setParameter("y", false);
+		
+		List<CompteEpargne> result = query.getResultList();
+		
+		if(!result.isEmpty())return result;
+		else System.out.println("Auccun client trouvé!!!");
+		
+		return null;
+	}
+
 
 	//Enregistrement configuration génerale d'un produit épargne
 	@Override
@@ -340,8 +361,8 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	 * OUVRIR COMPTE EPARGNE
 	 * ***/
 	@Override
-	public CompteEpargne ouvrirCompte(String dateOuverture,boolean geler,boolean pasRetrait
-			,String dateRetirer, String idProduitEp,String individuelId, String groupeId, int userId) {
+	public CompteEpargne ouvrirCompte(String dateOuverture,boolean pasRetrait, boolean prioritaire
+			, String idProduitEp,String individuelId, String groupeId, int userId) {
 			//Instance nouveau compte_epargne
 			CompteEpargne cpt_ep = new CompteEpargne();
 			
@@ -378,10 +399,13 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			if(verInd == true || verGrp == true){
 				//Insertion des informations sur le compte
 				cpt_ep.setDateOuverture(dateOuverture);
-				cpt_ep.setDateEcheance(dateRetirer);
+				cpt_ep.setDateEcheance("");
 				cpt_ep.setUtilisateur(ut);
 				cpt_ep.setProduitEpargne(pdt_ep);
 				cpt_ep.setIsActif(true);
+				cpt_ep.setFermer(false);
+				cpt_ep.setPasRetrait(false);
+				cpt_ep.setPrioritaire(prioritaire);
 				if(ind != null){
 					System.out.println("Compte individuel");
 					String dateNais = ind.getDateNaissance();				
@@ -389,7 +413,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 					
 					int age = Period.between(LocalDate.parse(dateNais), dateNow).getYears();
 					System.out.println("âge = "+age);
-					if(age>=confProduit.getAgeMinCpt()){					
+					if(age >= confProduit.getAgeMinCpt()){					
 						cpt_ep.setIndividuel(ind);
 						cpt_ep.setNumCompteEp(individuelId+"/"+idProduitEp);
 						
@@ -466,7 +490,16 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	//Checher unique compte par numéro de compte
 	@Override
 	public CompteEpargne findUniqueCompte(String numCompte) {
-		return em.find(CompteEpargne.class, numCompte);
+		
+		CompteEpargne c  = em.find(CompteEpargne.class, numCompte);
+		if(c != null){
+			System.out.println("Compte trouvé num : "+c.getNumCompteEp());
+			return c;
+		}else{
+			System.out.println("Compte non trouvé");
+			return null;
+		}
+			
 	}
 	
 	
@@ -611,7 +644,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 									int v = confProd.getNbrJrMinRet();
 									if(qs.getSingleResult() != null){
 										String dernierTransaction = (String)qs.getSingleResult();
-										long difDate = calcDate(dernierTransaction, dateTransac);
+										long difDate = calculDiffDate(dernierTransaction, dateTransac);
 										v = (int)difDate;
 									}
 									
@@ -751,7 +784,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				ComptabliteServiceImpl.saveImputationEpargne(
 						tr.getIdTransactionEp(), dateTrans, desc, pieceCompta,
 						(ancienMontant * -1), 0, ut, ind, grp, ce, null, Cred);
-
+				ancienMontant = (ancienMontant * -1);
 			} else if (tr.getTypeTransEp().equalsIgnoreCase("RE")) {
 				String desc = "Modification trans. du compte "
 						+ ce.getNumCompteEp();
@@ -762,7 +795,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				ComptabliteServiceImpl.saveImputationEpargne(
 						tr.getIdTransactionEp(), dateTrans, desc, pieceCompta,
 						0, (ancienMontant * -1), ut, ind, grp, ce, null, Cred);
-
+				ancienMontant = (ancienMontant * 1);
 			}
 			/*****************************************************************************************/
 
@@ -818,8 +851,9 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 					.getProduitEpargne().getConfigGlEpargne().getEpargneInd());
 
 			if (typeTrans.equalsIgnoreCase("DE")) {
-
-				ce.setSolde((ce.getSolde() + montant));
+				double solde = (ce.getSolde() + (ancienMontant) + montant);
+				ce.setSolde(solde);
+				tr.setSolde(solde); 
 				try {
 					String nouvDesc = "Ressaisie trans. du compte "
 							+ ce.getNumCompteEp();
@@ -848,8 +882,9 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				}
 
 			} else if (typeTrans.equalsIgnoreCase("RE")) {
-				ce.setSolde((ce.getSolde() - montant));
-
+				double solde = (ce.getSolde() + (ancienMontant) - montant);
+				ce.setSolde(solde);
+				tr.setSolde(solde);
 				try {
 					String nouvDesc = "Ressaisie trans. du compte "
 							+ ce.getNumCompteEp();
@@ -949,7 +984,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		//----------------------------------------------------------------------------------------------------------
 
 	//calcul difference entre deux date retrait
-	static long calcDate(String dateDeb, String dateFin) {
+	static long calculDiffDate(String dateDeb, String dateFin) {
 		try {			
 			LocalDate date1 = LocalDate.parse(dateDeb);
 			LocalDate date2 = LocalDate.parse(dateFin);
@@ -1729,6 +1764,165 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			return false;
 		}
 	}   
+	
+	//Get max date transaction
+	public static String getMaxDateTransaction(String numCompte){
+		Query q = em.createQuery("SELECT MAX(t.dateTransaction) FROM TransactionEpargne t JOIN t.compteEpargne cp "
+				+ " WHERE cp.numCompteEp = :x ");
+		q.setParameter("x", numCompte);		
+		
+		String dateMax = "";
+		if(q.getSingleResult() != null){
+			dateMax = (String) q.getSingleResult();
+		}else
+			dateMax = "";
+		return dateMax;
+	}
+	
+	//Mettre comptes en inactif
+		@Override
+		public List<CompteEpargne> desactiverCompte(String date) {
+			List<CompteEpargne> compteEp = new ArrayList<CompteEpargne>();
+			
+			for (CompteEpargne c : getCompteDistinc("")) {
+				String numCmpt = c.getNumCompteEp();
+				System.out.println("Numéro compte épargne : "+numCmpt);
+				
+				//Récuperation date du dernière transaction
+				String dateTrans = getMaxDateTransaction(numCmpt);
+				//Calcul difference entre date dernière transaction et date aujourd'hui
+				int diffDate = (int) calculDiffDate(dateTrans, date);
+				
+				//Nombre de jour maximum pour mettre un compte comme inactif
+				int nbJrMax = c.getProduitEpargne().getConfigProdEp().getNbrJrIn();
+				
+				if(diffDate > nbJrMax){
+					try {
+						c.setActif(false);
+						transaction.begin();
+						em.flush();
+						transaction.commit();
+						em.refresh(c);
+						compteEp.add(c);
+					} catch (Exception e) {
+						e.printStackTrace();
+						compteEp = null;
+					}
+				}
+				
+			}
+			
+			System.out.println("Liste des comptes inactif le : "+date);
+			for (CompteEpargne compteEpargne : compteEp) {
+				System.out.println("Numéro compte : "+compteEpargne.getNumCompteEp());				
+			}
+			
+			return compteEp;
+		}
+
+		//Reactiver un compte
+		@Override
+		public boolean activerCompte(String numCompte, String date, double frais,
+				int user, String pieceCompta, String typPaie, String numTel,
+				String compteCaisse) {
+			
+			CompteEpargne c = em.find(CompteEpargne.class, numCompte);
+			Utilisateur ut = em.find(Utilisateur.class, user);
+			
+			Individuel ind = null;
+			Groupe grp = null;
+			
+			if(c.getIndividuel() != null)
+				ind = c.getIndividuel();
+			if(c.getGroupe() != null)
+				grp = c.getGroupe();
+
+			try {
+				
+				/************ Imputation compta *************************/
+				String indexTcode = CodeIncrement.genTcode(em);
+				String desc = "Activation du compte "+c.getNumCompteEp();
+				
+				String numAccountCredit = c.getProduitEpargne().getConfigGlEpargne().getActivationCompte();
+				
+				Account cred = CodeIncrement.getAcount(em, numAccountCredit);
+				
+				String vp = "";
+				Caisse caisse = null;
+				if(typPaie.equalsIgnoreCase("cash")){
+					caisse = em.find(Caisse.class, compteCaisse);
+					Account ac = caisse.getAccount();				
+					//Débit
+					ComptabliteServiceImpl.saveImputationEpargne(indexTcode, date, desc, pieceCompta, 
+							0, frais, ut, ind, grp, c, null, ac);
+					
+					vp = String.valueOf(ac.getNumCpt());
+
+				}else if(typPaie.equalsIgnoreCase("mobile")){
+					String cmptMobil = c.getProduitEpargne().getConfigGlEpargne().getChargeSMScpt();
+					Account ac = CodeIncrement.getAcount(em, cmptMobil);
+					
+					//Débit
+					ComptabliteServiceImpl.saveImputationEpargne(indexTcode, date, desc, pieceCompta, 
+							0, frais, ut, ind, grp, c, null, ac);
+					
+					vp = numTel;
+				}
+				
+				//Crédit
+				ComptabliteServiceImpl.saveImputationEpargne(indexTcode, date, desc, pieceCompta, 
+						frais, 0, ut, ind, grp, c, null, cred);
+				
+				/***************** Enregistrement transaction si solde du compte supérieur à 0 *************/
+				
+				if(c.getSolde() > frais){
+					//Enregistrement de la transaction
+					
+					double sd = c.getSolde() - frais;
+					
+					TransactionEpargne trans = new TransactionEpargne(indexTcode, date,
+							"Frais activation compte", frais, pieceCompta, "RE", typPaie, vp, 0, 0, 0, c, ut);
+					trans.setCaisse(caisse);
+					c.setSolde(sd);
+					trans.setSolde(sd); 
+					try {
+						transaction.begin();
+						em.flush();
+						em.persist(trans);
+						transaction.commit();
+						em.refresh(trans); 
+						System.out.println("transaction enregistré");
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.err.println("Erreur enregistrement transaction");
+					}
+				}
+				
+				/************ Mise à jour du compte épargne *******************/
+				c.setActif(true);
+				transaction.begin();
+				em.flush();
+				transaction.commit();
+				System.out.println("Compte "+ c.getNumCompteEp() +" activé");
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.err.println("Erreur activation compte");
+				return false;				
+			}
+		}
+		
+		
+		//Recuperer tous les comptes inactif
+		@Override
+		public List<CompteEpargne> getCompteEpargne(boolean etat) {
+			String sql ="select c from CompteEpargne c where c.isActif='"+ etat +"'";
+			TypedQuery<CompteEpargne> q = em.createQuery(sql, CompteEpargne.class);
+			if(!q.getResultList().isEmpty())
+				return q.getResultList();
+			return null;
+		}
+
 
 	/***
 	 * Rapport par produit
@@ -1980,6 +2174,93 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		}
 				
 		return result;
+	}
+	
+	@Override
+	public List<TransactionEpargne> getDemandeReleverCompte(String numCompte,
+			String dateDeb, String dateFin, String dateDem, double frais, int user,
+			String pieceCompta, String typPaie, String numTel,
+			String compteCaisse) {
+		
+		CompteEpargne c = em.find(CompteEpargne.class, numCompte);
+		Utilisateur ut = em.find(Utilisateur.class, user);
+		
+		Individuel ind = null;
+		Groupe grp = null;
+		
+		if(c.getIndividuel() != null)
+			ind = c.getIndividuel();
+		if(c.getGroupe() != null)
+			grp = c.getGroupe();
+
+		try {
+			
+			/************ Imputation compta *************************/
+			String indexTcode = CodeIncrement.genTcode(em);
+			String desc = "Frais demande relevé "+c.getNumCompteEp();
+			
+			String numAccountCredit = c.getProduitEpargne().getConfigGlEpargne().getDemandRelever();
+			
+			Account cred = CodeIncrement.getAcount(em, numAccountCredit);
+			
+			String vp = "";
+			Caisse caisse = null;
+			if(typPaie.equalsIgnoreCase("cash")){
+				caisse = em.find(Caisse.class, compteCaisse);
+				Account ac = caisse.getAccount();				
+				//Débit
+				ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateDem, desc, pieceCompta, 
+						0, frais, ut, ind, grp, c, null, ac);
+				
+				vp = String.valueOf(ac.getNumCpt());
+
+			}else if(typPaie.equalsIgnoreCase("mobile")){
+				String cmptMobil = c.getProduitEpargne().getConfigGlEpargne().getChargeSMScpt();
+				Account ac = CodeIncrement.getAcount(em, cmptMobil);
+				
+				//Débit
+				ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateDem, desc, pieceCompta, 
+						0, frais, ut, ind, grp, c, null, ac);
+				
+				vp = numTel;
+			}
+			
+			//Crédit
+			ComptabliteServiceImpl.saveImputationEpargne(indexTcode, dateDem, desc, pieceCompta, 
+					frais, 0, ut, ind, grp, c, null, cred);
+			
+			/***************** Enregistrement transaction si solde du compte supérieur à 0 *************/
+			
+			if(c.getSolde() > frais){
+				//Enregistrement de la transaction
+				
+				double sd = c.getSolde() - frais;
+				
+				TransactionEpargne trans = new TransactionEpargne(indexTcode, dateDem,
+						"Frais demande relevé", frais, pieceCompta, "RE", typPaie, vp, 0, 0, 0, c, ut);
+				trans.setCaisse(caisse);
+				c.setSolde(sd);
+				trans.setSolde(sd); 
+				try {
+					transaction.begin();
+					em.flush(); 
+					em.persist(trans);
+					transaction.commit();
+					em.refresh(trans); 
+					System.out.println("transaction enregistré");
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.err.println("Erreur enregistrement transaction");
+				}
+			}
+			
+			return getReleverCompte(numCompte, dateDeb, dateFin);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Erreur activation compte");
+			return null;
+		}
+		
 	}
 	
 	//Selection distinct de compte caisse dans transction epargne 
@@ -2933,6 +3214,6 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		result.setPenalite(penalite); 
 		return result;
 	}
-
+	
 }
 

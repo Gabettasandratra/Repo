@@ -49,6 +49,9 @@ public class CompteEpargne implements Serializable {
 	private boolean comptGeler;
 	
 	private boolean pasRetrait;
+	
+	@Column(name="prioritaire")        
+	private boolean isPrioritaire;
 
 	//bi-directional many-to-one association to Groupe
 	@ManyToOne
@@ -155,6 +158,14 @@ public class CompteEpargne implements Serializable {
 
 	public void setComptGeler(boolean comptGeler) {
 		this.comptGeler = comptGeler;
+	}
+
+	public boolean isPrioritaire() {
+		return isPrioritaire;
+	}
+
+	public void setPrioritaire(boolean isPrioritaire) {
+		this.isPrioritaire = isPrioritaire;
 	}
 
 	public List<InteretEpargne> getInteret() {

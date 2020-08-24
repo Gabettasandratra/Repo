@@ -27,6 +27,9 @@ public class ConfigGlEpargne implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int rowId;
 	
+	@Column(name="activationCompte")
+	private String activationCompte;
+	
 	private String chargeIntNegGrp;
 
 	private String chargeIntNegInd;
@@ -54,6 +57,9 @@ public class ConfigGlEpargne implements Serializable {
 	private String cptPapeterieEp;
 
 	private String cptVireCheque;
+	
+	@Column(name="demandRelever")
+	private String demandRelever;
 
 	private String epargneGrp;
 
@@ -81,6 +87,7 @@ public class ConfigGlEpargne implements Serializable {
 
 	private String virePermPenalCpt;
 
+
 	//bi-directional many-to-one association to ProduitEpargne
 	@OneToMany(mappedBy="configGlEpargne")
 	@XmlTransient
@@ -97,6 +104,14 @@ public class ConfigGlEpargne implements Serializable {
 		this.rowId = rowId;
 	}
 	
+	public String getActivationCompte() {
+		return activationCompte;
+	}
+
+	public void setActivationCompte(String activationCompte) {
+		this.activationCompte = activationCompte;
+	}
+
 	public String getChargeIntNegGrp() {
 		return this.chargeIntNegGrp;
 	}
@@ -208,6 +223,14 @@ public class ConfigGlEpargne implements Serializable {
 	public void setCptVireCheque(String cptVireCheque) {
 		this.cptVireCheque = cptVireCheque;
 	}
+	
+	public String getDemandRelever() {
+		return demandRelever;
+	}
+
+	public void setDemandRelever(String demandRelever) {
+		this.demandRelever = demandRelever;
+	}
 
 	public String getEpargneGrp() {
 		return this.epargneGrp;
@@ -312,6 +335,7 @@ public class ConfigGlEpargne implements Serializable {
 	public void setVirePermPenalCpt(String virePermPenalCpt) {
 		this.virePermPenalCpt = virePermPenalCpt;
 	}
+
 
 	public List<ProduitEpargne> getProduitEpargnes() {
 		return this.produitEpargnes;

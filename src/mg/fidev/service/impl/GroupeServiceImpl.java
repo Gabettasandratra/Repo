@@ -1,6 +1,5 @@
 package mg.fidev.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.jws.WebService;
@@ -84,16 +83,29 @@ public class GroupeServiceImpl implements GroupeService {
 	/***
 	 * ENREGISTREMENT DE NOUVEAU GROUPE
 	 * ***/
-	@SuppressWarnings("unused")
+
 	@Override
 	public String saveGroupe(Groupe groupe,Adresse adresse, String codeAgence) {
 
 		String result = "";
 		groupe.setCodeGrp(CodeIncrement.getCodeGrp(em, codeAgence));
 		groupe.setAdresse(adresse);
+		try {
+			transaction.begin();
+			em.persist(adresse);	
+			em.persist(groupe);
+			//em.merge(ind);
+			transaction.commit();
+			result = "success";
+			//em.refresh(groupe);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = "erreur";
+		}	
+		return result;
 		/*if(groupe.getIndividuels() != null){
 			ind.setGroupe(groupe);
-		}*/
+		}
 		List<MembreGroupe> membres = new ArrayList<MembreGroupe>();
 		List<MembreView> mview = getallMembreView();
 		for (MembreView membreView : mview) {
@@ -120,20 +132,9 @@ public class GroupeServiceImpl implements GroupeService {
 			result = "erreur";
 		}else{
 			groupe.setMembres(membres); 
-			try {
-				transaction.begin();
-				em.persist(adresse);	
-				em.persist(groupe);
-				//em.merge(ind);
-				transaction.commit();
-				result = "success";
-				//em.refresh(groupe);
-			} catch (Exception e) {
-				e.printStackTrace();
-				result = "erreur";
-			}			
-		}
-		return result;
+			
+		}*/
+		
 	}
 
 	@Override
@@ -159,34 +160,6 @@ public class GroupeServiceImpl implements GroupeService {
 		return results;
 	}
 
-	/***
-	 * AJOUT CONSEIL ADMIN GROUPE
-	 * ***/
-	@Override
-	public void addConseil(String codeGroupe, String president,
-			String secretaire, String tresorier) {
-		Groupe groupe = em.find(Groupe.class, codeGroupe);
-		
-		Individuel pres = em.find(Individuel.class, president);
-		
-		Individuel sec = em.find(Individuel.class, secretaire);
-		
-		Individuel tres = em.find(Individuel.class, tresorier);
-		
-		groupe.setPresident(pres.getNomClient());
-		groupe.setSecretaire(sec.getNomClient());
-		groupe.setTresorier(tres.getNomClient());
-		
-		try {		
-			transaction.begin();
-			em.flush();
-			transaction.commit();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-	}
 
 	/***
 	 * TRANSFERER MEMBRE
@@ -207,24 +180,24 @@ public class GroupeServiceImpl implements GroupeService {
 					individuel.setGroupe(trasfers);
 					try {	
 						
-							if(groupe.getPresident().equalsIgnoreCase(individuel.getNomClient())){
-								groupe.setPresident("");
+							if(groupe.getPresident() == individuel){
+								groupe.setPresident(null);
 								transaction.begin();
 								em.flush();							
 								transaction.commit();
 								em.refresh(groupe);
 							}
 							
-							if(groupe.getSecretaire().equalsIgnoreCase(individuel.getNomClient())){
-								groupe.setSecretaire("");
+							if(groupe.getSecretaire() == individuel){
+								groupe.setSecretaire(null);
 								transaction.begin();
 								em.flush();							
 								transaction.commit();
 								em.refresh(groupe);
 							}
 							
-							if(groupe.getTresorier().equalsIgnoreCase(individuel.getNomClient())){
-								groupe.setTresorier("");
+							if(groupe.getTresorier() == individuel){
+								groupe.setTresorier(null);
 								transaction.begin();
 								em.flush();							
 								transaction.commit();
@@ -251,12 +224,102 @@ public class GroupeServiceImpl implements GroupeService {
 		return true;
 	}
 	
+	//Enregistrement membre groupe
+	
+	//Généré code membre groupe
+	public static int getLastIndexMembre(String codeGrp) {
+		
+		String sql = "select count(m) from MembreGroupe m join m.groupe g "
+				+ " where g.codeGrp = '"+ codeGrp +"'";
+		Query q = em.createQuery(sql);
+		int result = Integer.parseInt(q.getSingleResult().toString());
+		return result;
+	}
+	
+	public static String genCodeMembre(String codeGrp){
+		
+		int lastIndex = getLastIndexMembre(codeGrp);
+		if(lastIndex == 0){
+			return codeGrp +"/01";
+		}else{
+			String index = String.format("%02d", ++lastIndex);		
+			return codeGrp +"/"+ index;
+		}
+	}
+	
+	@Override
+	public String saveMembre(String codeInd, String codeGroupe, int fonction,
+			String dateAdd) {
+		//Individuel
+		Individuel ind = em.find(Individuel.class, codeInd);
+		Groupe grp = em.find(Groupe.class, codeGroupe);
+		FonctionMembreGroupe f = em.find(FonctionMembreGroupe.class, fonction);
+		
+		String result = "";
+		
+		if(ind.getGroupe() != null){
+			result = "Le client "+ind.getCodeInd()+" est déjà membre du groupe "+ind.getGroupe().getNomGroupe();
+		}else{
+						
+			if(f.getNomFonction().equalsIgnoreCase("Président")){
+				if(grp.getPresident() != null){
+					result = "Le président du groupe doit être unique";
+				}else{
+					grp.setPresident(ind); 
+				}
+			}else if(f.getNomFonction().equalsIgnoreCase("Trésorier")){
+				if(grp.getTresorier() != null){
+					result = "Le tresorier du groupe doit être unique";
+				}else{
+					grp.setTresorier(ind); 
+				}
+			}else if(f.getNomFonction().equalsIgnoreCase("Secrétaire")){
+				if(grp.getSecretaire() != null){
+					result = "Le secretaire du groupe doit être unique";
+				}else{
+					grp.setSecretaire(ind); 
+				}
+			}
+			
+			ind.setGroupe(grp);
+			ind.setEstMembreGroupe(true); 
+			
+			MembreGroupe m = new MembreGroupe();
+			String code = genCodeMembre(grp.getCodeGrp());
+			
+			m.setIdMembre(code);
+			m.setDateAjout(dateAdd);
+			m.setIndividuel(ind);
+			m.setGroupe(grp);
+			m.setFonctionMembre(f);
+			
+			try {
+				transaction.begin();
+				em.flush();
+				em.flush();
+				em.persist(m);
+				transaction.commit();
+				em.refresh(m); 
+				result = "Membre ajouté";
+			} catch (Exception e) {
+				e.printStackTrace();
+				result = "Erreur enregistrement";
+			}
+			
+		}
+		
+		System.out.println(result);
+		return result;
+	}
+	
+	
 	/***
 	 * CHERCHER GROUPE PAR SON CODE
 	 * ***/
 	@Override
 	public List<Groupe> findByCode(String code) {
-		TypedQuery<Groupe> query = em.createQuery("SELECT g FROM Groupe g WHERE g.codeGrp LIKE :code",Groupe.class);
+		TypedQuery<Groupe> query = em.createQuery("SELECT g FROM Groupe g WHERE g.codeGrp LIKE :code OR "
+				+ " g.nomGroupe LIKE :code",Groupe.class);
 		query.setParameter("code", code+"%");
 		
 		List<Groupe> result = query.getResultList();
@@ -266,6 +329,8 @@ public class GroupeServiceImpl implements GroupeService {
 		
 		return null;
 	}
+	
+	
 	//Ajouter au membre view
 	@Override
 	public String addMembre(MembreView membre) {
@@ -324,12 +389,16 @@ public class GroupeServiceImpl implements GroupeService {
 		}
 		return result;
 	}
+	
+	
 	//liste membre view
 	@Override
 	public List<MembreView> getallMembreView() {
 		String sql = "select m from MembreView m";
 		return em.createQuery(sql,MembreView.class).getResultList();
 	}
+	
+	
 	//Vider membre view
 	@Override
 	public boolean deleteMembreView() {
@@ -346,11 +415,15 @@ public class GroupeServiceImpl implements GroupeService {
 			return false;
 		}
 	}
+	
+	
 	@Override
 	public List<FonctionMembreGroupe> getFonctionMembre() {
 		String sql = "select f from FonctionMembreGroupe f";
 		return em.createQuery(sql,FonctionMembreGroupe.class).getResultList();
 	}
+	
+	
 	@Override
 	public List<MembreGroupe> getMembreGroupe(String code) {
 		String sql = "select m from MembreGroupe m join m.groupe g where g.codeGrp ='"+code+"'";
@@ -359,6 +432,8 @@ public class GroupeServiceImpl implements GroupeService {
 			return query.getResultList();
 		return null;
 	}
+	
+	
 	@Override
 	public boolean tansfertMembreGroupe(int id, String codeGrp, String codeInd,
 			int fonction) {
@@ -379,5 +454,5 @@ public class GroupeServiceImpl implements GroupeService {
 			return false;
 		}
 	}
-	
+		
 }

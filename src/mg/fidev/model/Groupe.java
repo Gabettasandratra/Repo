@@ -43,14 +43,11 @@ public class Groupe implements Serializable {
 	
 	private String NumStat;
 	
-	private String president;
-	
-	private String secretaire;
-	
-	private String tresorier;
-	
 	@Column(name="logo")
 	private String logo;
+	
+	@Column(name="supprimer")
+	private boolean supprimer;
 	
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="groupe")
@@ -98,6 +95,25 @@ public class Groupe implements Serializable {
 	@OneToMany(mappedBy="groupe",cascade= CascadeType.ALL)
 	@XmlTransient
 	private List<MembreGroupe> membres;
+	
+	//President groupe
+	@ManyToOne
+	@JoinColumn(name="president")
+	@XmlTransient
+	private Individuel president;
+	
+	//Secretaire
+	@ManyToOne
+	@JoinColumn(name="secretaire")
+	@XmlTransient
+	private Individuel secretaire;
+	
+	//Tresorier
+	@ManyToOne
+	@JoinColumn(name="tresorier")
+	@XmlTransient
+	private Individuel tresorier;
+	
 	
 	public Groupe() {
 	}
@@ -173,30 +189,6 @@ public class Groupe implements Serializable {
 	public void setNumStat(String numStat) {
 		NumStat = numStat;
 	}
-
-	public String getPresident() {
-		return president;
-	}
-
-	public void setPresident(String president) {
-		this.president = president;
-	}
-
-	public String getSecretaire() {
-		return secretaire;
-	}
-
-	public void setSecretaire(String secretaire) {
-		this.secretaire = secretaire;
-	}
-
-	public String getTresorier() {
-		return tresorier;
-	}
-
-	public void setTresorier(String tresorier) {
-		this.tresorier = tresorier;
-	}
 	
 	public String getLogo() {
 		return logo;
@@ -204,6 +196,14 @@ public class Groupe implements Serializable {
 
 	public void setLogo(String logo) {
 		this.logo = logo;
+	}
+
+	public boolean isSupprimer() {
+		return supprimer;
+	}
+
+	public void setSupprimer(boolean supprimer) {
+		this.supprimer = supprimer;
 	}
 
 	public List<CompteEpargne> getCompteEpargnes() {
@@ -312,4 +312,27 @@ public class Groupe implements Serializable {
 		this.membres = membres;
 	}
 
+	public Individuel getPresident() {
+		return president;
+	}
+
+	public void setPresident(Individuel president) {
+		this.president = president;
+	}
+
+	public Individuel getSecretaire() {
+		return secretaire;
+	}
+
+	public void setSecretaire(Individuel secretaire) {
+		this.secretaire = secretaire;
+	}
+
+	public Individuel getTresorier() {
+		return tresorier;
+	}
+
+	public void setTresorier(Individuel tresorier) {
+		this.tresorier = tresorier;
+	}
 }

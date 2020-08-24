@@ -65,18 +65,7 @@ public interface GroupeService {
 	@WebMethod
 	@WebResult(name = "resultat")
 	public List<Individuel> getListeNonMembre();
-	
-	/***
-	 * AJOUT CONSEIL ADMIN D'UNE GROUPE
-	 * ***/
-	@WebMethod
-	@WebResult(name="validation")
-	public void addConseil(
-			@WebParam(name = "codeGroupe") @XmlElement(required=true,nillable=false) String codeGroupe,
-			@WebParam(name = "president") @XmlElement(required=true,nillable=false) String president,
-			@WebParam(name = "secretaire") @XmlElement(required=false,nillable=true) String secretaire,
-			@WebParam(name = "tresorier") @XmlElement(required=false,nillable=true) String tresorier);
-	
+		
 	/***
 	 * TRANSFERER MEMBRE GROUPE
 	 * ***/
@@ -86,6 +75,23 @@ public interface GroupeService {
 			@WebParam(name = "codeGroupe1") @XmlElement(required=true,nillable=false) String codeGrp1,
 			@WebParam(name = "codeGroupe2") @XmlElement(required=true,nillable=false) String codeGrp2,
 			@WebParam(name = "codeInd") @XmlElement(required=true,nillable=false) String codeInd);
+	
+	//Save membre groupe
+	@WebMethod
+	@WebResult(name="resultat")
+	public String saveMembre(
+			@WebParam(name = "codeInd") @XmlElement(required=true,nillable=false) String codeInd,
+			@WebParam(name = "codeGroupe") @XmlElement(required=true,nillable=false) String codeGroupe,
+			@WebParam(name = "fonction") @XmlElement(required=true,nillable=false) int fonction,
+			@WebParam(name = "dateAdd") @XmlElement(required=true,nillable=false) String dateAdd
+			);
+	
+	//Recupérer liste membre groupe d'un groupe
+	
+	@WebMethod
+	@WebResult(name="resultat")
+	List<MembreGroupe> getMembreGroupe(
+	@WebParam(name = "code")@XmlElement(required = true)String code);
 	
 	
 	/***
@@ -115,12 +121,6 @@ public interface GroupeService {
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<FonctionMembreGroupe> getFonctionMembre();
-	
-	//Liste membre groupe
-	@WebMethod
-	@WebResult(name="resultat")
-	List<MembreGroupe> getMembreGroupe(
-	@WebParam(name = "code")@XmlElement(required = true)String code);
 	
 	//Transeferer membre groupe
 	@WebMethod

@@ -53,12 +53,14 @@ public class CodeIncrement {
 		return result;
 	}
 	
+	//Generate code garant
 	public static String getCodeGar(EntityManager em, String agence){
 		int lastIndex = getLastIndexGar(em, agence);
 		String index = String.format("%06d", ++lastIndex);
 		return agence.substring(0, 2) + "/Gar/" + index;
 	}
 	
+	//Generate code budgét
 	public static String getCodeBudget(EntityManager em){
 		String sql = "select count(*) from budget";
 		Query q = em.createNativeQuery(sql);
@@ -68,6 +70,7 @@ public class CodeIncrement {
 		return "Bud" + index;
 	}
 	
+	//Generate code analytique
 	public static String getCodeAnalytique(EntityManager em){
 		String sql = "select count(*) from analytique";
 		Query q = em.createNativeQuery(sql);
@@ -75,6 +78,16 @@ public class CodeIncrement {
 		
 		String index = String.format("%03d", ++result);
 		return "An" + index;
+	}
+	
+	//Generate code auxilliaire
+	public static String getCodeAuxilliaire(EntityManager em){
+		String sql = "select count(*) from compteAuxilliaire";
+		Query q = em.createNativeQuery(sql);
+		int result = Integer.parseInt(q.getSingleResult().toString());
+		
+		String index = String.format("%03d", ++result);
+		return "Aux" + index;
 	}
 	
 	/***************************************************************************/

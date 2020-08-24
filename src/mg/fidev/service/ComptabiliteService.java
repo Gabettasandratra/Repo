@@ -14,6 +14,7 @@ import mg.fidev.model.Account;
 import mg.fidev.model.Analytique;
 import mg.fidev.model.Budget;
 import mg.fidev.model.Compte;
+import mg.fidev.model.CompteAuxilliaire;
 import mg.fidev.model.ConfigTransactionCompta;
 import mg.fidev.model.Grandlivre;
 import mg.fidev.model.OperationView;
@@ -131,6 +132,9 @@ public interface ComptabiliteService {
 			@XmlElement(required=true) @WebParam(name="compte1")String compte,
 			@XmlElement(required=true) @WebParam(name="compte2")String compte2,
 			@XmlElement(required=true) @WebParam(name="montant")double debit,
+			@XmlElement(required=false) @WebParam(name="analytique")String analytique,
+			@XmlElement(required=false) @WebParam(name="auxilliaire")String auxilliaire,
+			@XmlElement(required=false) @WebParam(name="budget")String budget,
 			@XmlElement(required=true) @WebParam(name="utilisateur")int user);
 	
 	
@@ -192,6 +196,17 @@ public interface ComptabiliteService {
 	@WebResult(name="resultat")
 	public List<Analytique> getAnalytique();
 	
+	//Affiche tous les comptes auxilliaires
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteAuxilliaire> getAllAuxilliaire();
+	
+	//Chercher code auxilliaire
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteAuxilliaire> chercherAuxilliaire(
+			@XmlElement(required=false) @WebParam(name="code")String code);
+	
 	//Enregistrement des divers opérations comptable
 	@WebMethod
 	@WebResult(name="validation")
@@ -199,8 +214,9 @@ public interface ComptabiliteService {
 	@XmlElement(required=true) @WebParam(name="date")String date,
 	@XmlElement(required=true) @WebParam(name="piece")String piece,
 	@XmlElement(required=true) @WebParam(name="description")String description,
-	@XmlElement(required=true) @WebParam(name="analytique")String analytique,
-	@XmlElement(required=true) @WebParam(name="budget")String budget,
+	@XmlElement(required=false) @WebParam(name="analytique")String analytique,
+	@XmlElement(required=false) @WebParam(name="auxilliaire")String auxilliaire,
+	@XmlElement(required=false) @WebParam(name="budget")String budget,
 	@XmlElement(required=true) @WebParam(name="utilisateur")int user
 			);
 	

@@ -59,6 +59,12 @@ public class Utilisateur implements Serializable {
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 	
+	//bi-directional many-to-one association to CompteEpargne
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<CompteFerme> compteFermes;
+	
+	
 	//bi-directional many-to-one association to TransactionEpargne
 	@OneToMany(mappedBy="utilisateur", cascade = CascadeType.ALL)
 	@XmlTransient
@@ -89,6 +95,13 @@ public class Utilisateur implements Serializable {
 	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
 	@XmlTransient
 	private List<DemandeCredit> demandeCredits;
+	
+	//Update crédit
+	//bi-directional many-to-one association to DemandeCredit demande saisissé
+	@OneToMany(mappedBy="user_update",cascade=CascadeType.ALL)
+	@XmlTransient
+	private List<DemandeCredit> updateDemande;
+	
 	
 	//Agent credit	
 	@OneToMany(mappedBy="agent",cascade=CascadeType.ALL)
@@ -363,6 +376,14 @@ public class Utilisateur implements Serializable {
 		return clients;
 	}
 
+	public List<DemandeCredit> getUpdateDemande() {
+		return updateDemande;
+	}
+
+	public void setUpdateDemande(List<DemandeCredit> updateDemande) {
+		this.updateDemande = updateDemande;
+	}
+
 	public void setClients(List<DemandeCredit> clients) {
 		this.clients = clients;
 	}
@@ -390,5 +411,12 @@ public class Utilisateur implements Serializable {
 	public void setClotures(List<Cloture> clotures) {
 		this.clotures = clotures;
 	}
-	
+
+	public List<CompteFerme> getCompteFermes() {
+		return compteFermes;
+	}
+
+	public void setCompteFermes(List<CompteFerme> compteFermes) {
+		this.compteFermes = compteFermes;
+	}	
 }

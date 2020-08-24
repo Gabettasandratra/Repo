@@ -46,6 +46,11 @@ public class CompteFerme implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="num_compte")
 	private CompteEpargne compteEpargne;
+	
+	//bi-directional many-to-one association to Utilisateur
+	@ManyToOne
+	@JoinColumn(name="user_id")
+	private Utilisateur utilisateur;
 
 	public CompteFerme() {
 	}
@@ -96,6 +101,14 @@ public class CompteFerme implements Serializable {
 
 	public void setCompteEpargne(CompteEpargne compteEpargne) {
 		this.compteEpargne = compteEpargne;
+	}
+
+	public Utilisateur getUtilisateur() {
+		return utilisateur;
+	}
+
+	public void setUtilisateur(Utilisateur utilisateur) {
+		this.utilisateur = utilisateur;
 	}
 
 }

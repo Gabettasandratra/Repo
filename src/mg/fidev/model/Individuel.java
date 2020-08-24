@@ -41,7 +41,7 @@ public class Individuel implements Serializable {
 	private String email;
 
 	private boolean estClientIndividuel;
-
+  
 	private boolean estGarant;
 
 	private boolean estMembreGroupe;
@@ -83,6 +83,12 @@ public class Individuel implements Serializable {
 	
 	@Column(name="photo")
 	private String photo;
+	
+	@Column(name="signature")
+	private String signature;
+	
+	@Column(name="secteurActiviter")
+	private String secteurActiviter;
 	
 	@Column(name="approuver")
 	private boolean approuver;
@@ -385,6 +391,22 @@ public class Individuel implements Serializable {
 
 	public void setPhoto(String photo) {
 		this.photo = photo;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public void setSignature(String signature) {
+		this.signature = signature;
+	}
+
+	public String getSecteurActiviter() {
+		return secteurActiviter;
+	}
+
+	public void setSecteurActiviter(String secteurActiviter) {
+		this.secteurActiviter = secteurActiviter;
 	}
 
 	public boolean isListeNoir() {

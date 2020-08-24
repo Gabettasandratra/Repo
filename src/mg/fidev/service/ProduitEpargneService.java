@@ -149,11 +149,18 @@ public interface ProduitEpargneService {
 	public List<CatEpargne> getCategorieEp();
 	
 	/***
-	 * CHERCHER COMPTE PAR NUMERO DE COMPTE
+	 * CHERCHER COMPTE ACTIF PAR NUMERO DE COMPTE
 	 * ***/
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<CompteEpargne> findCompteByCode(@WebParam(name ="numCmpt") @XmlElement(required=true) String numCmpt);
+	
+	/***
+	 * CHERCHER COMPTE INACTIF PAR NUMERO DE COMPTE
+	 * ***/
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteEpargne> findCompteInactifByCode(@WebParam(name ="numCmpt") @XmlElement(required=true) String numCmpt);
 	
 	
 	/***
@@ -163,9 +170,8 @@ public interface ProduitEpargneService {
 	@WebResult(name="resultat")
 	public CompteEpargne ouvrirCompte(
 			@XmlElement(required=true) @WebParam(name="dateCree") String dateOuverture,
-			@XmlElement(required=true,nillable=false) @WebParam(name="cmptGeler") boolean geler,
 			@XmlElement(required=false,nillable=true) @WebParam(name="pasRetrait") boolean pasRetrait,
-			@XmlElement(required=false,nillable=true) @WebParam(name="dateRetirer") String dateRetirer,
+			@XmlElement(required=false,nillable=true) @WebParam(name="prioritaire") boolean prioritaire,
 			@XmlElement(required=true) @WebParam(name="idProduitEp") String idProduitEp,
 			@XmlElement(required=true) @WebParam(name="codeInd") String individuelId,
 			@XmlElement(required=true) @WebParam(name="codeGrp") String groupeId,
@@ -266,6 +272,13 @@ public interface ProduitEpargneService {
 	
 	//-----------------------------------------------------------------------------------------------------
 	
+	//Recuperer tous les comptes inactif
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteEpargne> getCompteEpargne(
+			@XmlElement(required=true,nillable=false) @WebParam(name="etat")boolean etat);
+	
+	
 	
 	/***
 	 * RAPPORT TRANSACTION
@@ -330,7 +343,7 @@ public interface ProduitEpargneService {
 	);
 	
 	/***
-	 * Rélever de compte
+	 * Relevé de compte
 	 * ****/
 	@WebMethod
 	@WebResult(name="resultat")
@@ -339,6 +352,25 @@ public interface ProduitEpargneService {
 	@WebParam(name ="dateDeb") @XmlElement(required=true)String dateDeb,
 	@WebParam(name ="dateFin") @XmlElement(required=true)String dateFin
 	);
+	
+	
+	/***
+	 * Demande relevé de compte
+	 * ****/
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<TransactionEpargne> getDemandeReleverCompte(
+			@WebParam(name ="numCompte") @XmlElement(required=true)String numCompte,
+			@WebParam(name ="dateDeb") @XmlElement(required=true)String dateDeb,
+			@WebParam(name ="dateFin") @XmlElement(required=true)String dateFin,
+			@WebParam(name ="dateDem") @XmlElement(required=true)String dateDem,
+			@XmlElement(required=false) @WebParam(name="frais")double frais,
+			@XmlElement(required=false) @WebParam(name="user")int user,
+			@XmlElement(required=true) @WebParam(name="piece") String pieceCompta,
+			@XmlElement(required=true) @WebParam(name="typPaie")String typPaie,
+			@XmlElement(required=false) @WebParam(name="numTel")String numTel, 
+			@XmlElement(required=false) @WebParam(name="compteCaisse")String compteCaisse
+			);
 
 	/***
 	 * Rapport nouveau compte épargne
@@ -391,6 +423,7 @@ public interface ProduitEpargneService {
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<TransactionEpargne> getAllTransaction();
+	
 	
 	//------------------------------------------------------------------------------------------------
 	//Ouvrir dépôt à terme
@@ -482,6 +515,25 @@ public interface ProduitEpargneService {
 	public CalculDAT calculMontantDAT(
 	@XmlElement(required=false) @WebParam(name="date")String date,
 	@XmlElement(required=false) @WebParam(name="compte")String numCompte);
+	
+	//Mettre un compte en inactif
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteEpargne> desactiverCompte(
+			@XmlElement(required=false) @WebParam(name="date")String date);
+	
+	//Activer un compte
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean activerCompte(
+			@XmlElement(required=false) @WebParam(name="compte")String numCompte,
+			@XmlElement(required=false) @WebParam(name="date")String date,
+			@XmlElement(required=false) @WebParam(name="frais")double frais,
+			@XmlElement(required=false) @WebParam(name="user")int user,
+			@XmlElement(required=true) @WebParam(name="piece") String pieceCompta,
+			@XmlElement(required=true) @WebParam(name="typPaie")String typPaie,
+			@XmlElement(required=false) @WebParam(name="numTel")String numTel, 
+			@XmlElement(required=false) @WebParam(name="compteCaisse")String compteCaisse);
 	
 }
 
