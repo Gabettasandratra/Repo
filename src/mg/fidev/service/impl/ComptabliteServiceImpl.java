@@ -18,7 +18,6 @@ import mg.fidev.model.Budget;
 import mg.fidev.model.Caisse;
 import mg.fidev.model.Cloture;
 import mg.fidev.model.ClotureCompte;
-import mg.fidev.model.Compte;
 import mg.fidev.model.CompteAuxilliaire;
 import mg.fidev.model.CompteDAT;
 import mg.fidev.model.CompteEpargne;
@@ -36,7 +35,15 @@ import mg.fidev.utils.AfficheBalance;
 import mg.fidev.utils.AfficheBilan;
 import mg.fidev.utils.AfficheListeCreditDeclasser;
 import mg.fidev.utils.CodeIncrement;
+import mg.fidev.utils.CompteCompta;
+import mg.fidev.utils.HeaderCompta;
 import mg.fidev.utils.MouvementCompta;
+import mg.fidev.utils.PositionCompta4;
+import mg.fidev.utils.PositionCompta5;
+import mg.fidev.utils.PositionCompta6;
+import mg.fidev.utils.PositionCompta7;
+import mg.fidev.utils.PositionCompta8;
+import mg.fidev.utils.RubriqueCompta;
 
 @WebService(name="comptabliteService", targetNamespace="http://fidev.mg.comptabliteService", serviceName="comptabliteService",
 portName="comptabliteServicePort", endpointInterface="mg.fidev.service.ComptabiliteService")
@@ -153,6 +160,23 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		
 	}
 	
+	//Liste des comptes à 4 positions de plus
+	@Override
+	public List<Account> getCompte() {
+		String sql = "select a from Account a where a.hlevel >= '6' order by a.numCpt asc";
+		TypedQuery<Account> result = em.createQuery(sql, Account.class);
+		return result.getResultList();
+	}
+	
+	//Chercher comptes à 4 positions de plus
+	@Override
+	public List<Account> findComptes(String compte) {
+		String sql = "select a from Account a where a.hlevel >= '6' and a.isActive = '"+true+"' "
+				+ "and a.numCpt like '"+ compte +"%' order by a.numCpt asc";
+		TypedQuery<Account> result = em.createQuery(sql, Account.class);
+		return result.getResultList();
+	}
+		
 	//FONCTION QUI AFFICHE LE GRAND LIVRE 
 	@Override
 	public List<Grandlivre> afficheGrandLivre(String compte,String nomUtilisateur,String dateDeb, String dateFin) {
@@ -282,46 +306,6 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			return false;
 		}
 	}
-	
-	//Ajout nouveau compte comptable (Test)
-	@Override
-	public Compte ajoutCompte(Compte compte, String compteParent) {
-		/*
-		 * La liste des paramètres requis sont :
-		 * -code de compte
-		 * -libelle de compte
-		 * -devise
-		 * */ 	
-		if(compte.getCompte().equals("") || compte.getLibelle().equals("")){
-			System.out.println("Numero de compte null");		
-			return null;
-		}
-		
-		try {	
-			compte.setFerme(false);
-			compte.setActive(true);
-			compte.setType("Compte");
-			
-			if(!compteParent.equals("")){
-				Compte parent = em.createQuery("select p from Compte p where p.compte = "
-						+ "'"+compteParent+"'", Compte.class).getSingleResult();
-				compte.setCompteParent(parent);
-				compte.setLevel(parent.getLevel()+1);
-				parent.setActive(false);
-			}
-			
-			transaction.begin();
-			em.persist(compte);
-			em.flush();
-			transaction.commit();
-			em.refresh(compte);
-			return compte;				
-		} catch (NullPointerException e) {
-			e.printStackTrace();
-			return null;
-		}
-	
-	}
 
 	@Override
 	public Account addAccount(Account compte, int compteParent) {
@@ -333,13 +317,13 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			
 			if(parrent != null ){
 				compte.setAccount(parrent); 
-				compte.setHlevel(parrent.getHlevel()+1);
+				compte.setHlevel(parrent.getHlevel() + 1);
 				parrent.setActive(false);
 			}
 			
 			transaction.begin();
-			em.persist(compte);
 			em.flush();
+			em.persist(compte);
 			transaction.commit();
 			em.refresh(compte);
 			if(parrent != null)
@@ -350,29 +334,13 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 			return null;
 		}
 	}
-	
-	//Recupérer les comptes comptable (Test)
-	@Override
-	public List<Compte> getComptes() {
-		try {
-			String sql = "SELECT c FROM Compte c GROUP BY c.compte ";	
-			TypedQuery<Compte> query = em.createQuery(sql,Compte.class);
-			
-			if(!query.getResultList().isEmpty()){
-				return query.getResultList();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();		
-		}	
-		return null;
-	}
-	
+
 	//Recupérer les comptes comptable
 	@Override
 	public List<Account> getAccounts() {
 		
 		try {
-			String sql = "SELECT c FROM Account c order by c.numCpt asc";	// ORDER BY c.account and 
+			String sql = "SELECT c FROM Account c join c.account a order by a.numCpt asc";	// ORDER BY c.account and 
 			TypedQuery<Account> query = em.createQuery(sql,Account.class);
 			
 			if(!query.getResultList().isEmpty()){
@@ -459,8 +427,8 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		
 		try {		
 			transaction.begin();
-			em.persist(crediter);
 			em.persist(debiter);
+			em.persist(crediter);
 			em.flush();
 			transaction.commit();
 			System.out.println("Enregistrement reussit");
@@ -473,28 +441,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		}
 	
 	}
-	
-	//Get Compte actif (Test)
-	@Override
-	public List<Compte> getComptesActif(String compte) {
-		try {
-			String sql = "SELECT c FROM Compte c WHERE c.active = '"+true+"'";	
-			
-			if(!compte.equals("")){
-				sql+=" AND c.compte like '"+ compte +"%'";
-			}
-			
-			TypedQuery<Compte> query = em.createQuery(sql,Compte.class);
-			
-			if(!query.getResultList().isEmpty()){
-				return query.getResultList();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();		
-		}	
-		return null;
-	}
-	
+
 	//Get grand livre par code client
 	@Override
 	public List<Grandlivre> grandLivreClient(String codeCli, String codeGrp) {
@@ -922,8 +869,8 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		
 		try {
 			transaction.begin();
-			em.persist(crediter);
 			em.persist(debiter);
+			em.persist(crediter);
 			em.flush();
 			transaction.commit();
 			System.out.println("Enregistrement opération reussit");
@@ -1213,6 +1160,70 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		return result;
 	}
 
+	//Analyse comptes
+	@Override
+	public List<Grandlivre> getAnalyseCompte(String compte, String compte2,
+			String dateDeb, String dateFin) {
+
+		String sql = "select g from Grandlivre g join g.account ac ";
+		if(!compte.equals("") || !compte2.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
+			
+			sql +="where ";
+			
+			/*if(!nomUtilisateur.equals("")){
+				sql+= "g.userId ='"+nomUtilisateur+"'";
+				
+				if(!dateDeb.equals("") && dateFin.equals("")){
+					sql+= " AND g.date ='"+dateDeb+"'";				
+				}
+				if(!dateDeb.equals("") && !dateFin.equals("")){
+					sql+= " AND g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+				}			
+			}*/
+			
+			if(!compte.equals("") && compte2.equals("")){
+				sql+= " ac.numCpt ='"+compte+"'";
+				if(!dateDeb.equals("") && dateFin.equals("")){
+					sql+= " AND g.date ='"+dateDeb+"'";				
+				}
+				if(!dateDeb.equals("") && !dateFin.equals("")){
+					sql+= " AND g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+				}	   
+			}
+			
+			if(!compte.equals("") && !compte2.equals("")){
+				sql+= " ac.numCpt between '"+compte+"' and '"+compte2+"'";
+				if(!dateDeb.equals("") && dateFin.equals("")){
+					sql+= " AND g.date ='"+dateDeb+"'";				
+				}
+				if(!dateDeb.equals("") && !dateFin.equals("")){
+					sql+= " AND g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+				}	   
+			}
+			
+			if(!dateDeb.equals("") && dateFin.equals("") && compte.equals("") && compte2.equals("")){
+				sql+= "g.date ='"+dateDeb+"'";
+			}
+			
+			if(!dateDeb.equals("") && !dateFin.equals("") && compte.equals("") && compte2.equals("")){
+				sql+= "g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+			}	
+			
+		}
+		
+		sql +=" order by g.tcode asc";
+		//sql +=" order by ac.numCpt asc";
+		
+		TypedQuery<Grandlivre> query = em.createQuery(sql,Grandlivre.class);
+		if(!(query.getResultList().isEmpty()))
+			return query.getResultList();
+		else{
+			System.err.println("Il n'y a pas de resultat");
+			return null;			
+		}
+		
+	}
+	
 	//affiche une liste des crédits qui peuvent être déclasser 
 	@Override
 	public  List<AfficheListeCreditDeclasser> declasserCredit(String dateDeb) {
@@ -1484,17 +1495,15 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		return true;
 	}
 	
-	
-
 	//resultat financiers par période
 	@Override
     public List<AfficheBilan> getResultat(String dateDeb, String dateFin) {	
 		
 		List<AfficheBilan> result = new ArrayList<AfficheBilan>();
 		
-		int nb = 7;	
+		int nb = 6;	
 		
-		for (int i = 6; i <= nb; i++) {
+		for (int i = 7; i >= nb; i--) {
 			String num = String.valueOf(i); 			
 			//compte parent		
 			Account parent = CodeIncrement.getAcount(em, num);
@@ -1716,7 +1725,315 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		}else
 			return false;
 	}
+		
+	//Affiche plan comptable
+	@Override   
+	public List<HeaderCompta> getPlanCompta() {
+		List<HeaderCompta> result = new ArrayList<HeaderCompta>();
 
+		String sql = "select a from Account a where a.hlevel ='1'";
+		TypedQuery<Account> qH = em.createQuery(sql, Account.class);
+		
+		for (Account a : qH.getResultList()) {
+			String sqlPos = "select a from Account a join a.account ac where ac.numCpt = '"+ a.getNumCpt() +"' order by a.numCpt";//a.hlevel ='3' and
+			TypedQuery<Account> qP = em.createQuery(sqlPos, Account.class);
+			
+			List<RubriqueCompta> r = new ArrayList<RubriqueCompta>();
+			
+			for (Account c : qP.getResultList()) {
+				
+				RubriqueCompta ru = new RubriqueCompta(c.getNumCpt(), c.getLabel(), c.getIsActive(), c.getDevise(), null);
+				
+				if(c.getIsHeader() == true){
+					List<CompteCompta> comptes = new ArrayList<CompteCompta>();					
+					
+					for (Account a3 : c.getAccounts()) {
+						
+						CompteCompta cmpt = new 
+								CompteCompta(a3.getNumCpt(), a3.getLabel(),	a3.getIsActive(), a3.getDevise(), null);
+						
+						if(a3.getIsHeader() == true){
+							List<PositionCompta4> pos4 = new ArrayList<PositionCompta4>();							
+												
+							for (Account a4 : a3.getAccounts()) {
+								PositionCompta4 p4 = new 
+								PositionCompta4(a4.getNumCpt(), a4.getLabel(), a4.getIsActive(), a4.getDevise(), null);
+								
+								if(a4.getIsHeader() == true){
+									List<PositionCompta5> pos5 = new ArrayList<PositionCompta5>();
+									
+									for (Account a5 : a4.getAccounts()) {
+										
+										PositionCompta5 p5 = new 
+												PositionCompta5(a5.getNumCpt(), a5.getLabel(), a5.getIsActive(), a5.getDevise(), null);
+										if(a5.getIsHeader() == true){
+											
+											List<PositionCompta6> pos6 = new ArrayList<PositionCompta6>();
+											
+											for (Account a6 : a5.getAccounts()) {												
+												PositionCompta6 p6 = new 
+														PositionCompta6(a6.getNumCpt(), a6.getLabel(), a6.getIsActive(), a6.getDevise(), null);
+												
+												if(a6.getIsHeader() == true){
+													List<PositionCompta7> pos7 = new ArrayList<PositionCompta7>();
+													
+													for (Account a7 : a6.getAccounts()) {
+														
+														PositionCompta7 p7 = new 
+																PositionCompta7(a7.getNumCpt(), a7.getLabel(), a7.getIsActive(), a7.getDevise(), null);
+														
+														if(a7.getIsHeader() == true){
+															List<PositionCompta8> pos8 = new ArrayList<PositionCompta8>();
+															
+															for (Account a8: a7.getAccounts()) {
+																PositionCompta8 p8 = new 
+																		PositionCompta8(a8.getNumCpt(), a8.getLabel(), a8.getIsActive(), a8.getDevise());
+																pos8.add(p8);
+															}
+															p7.setPos8(pos8); 
+														}
+														pos7.add(p7);
+													}
+													
+													p6.setPos7(pos7); 
+												}
+												pos6.add(p6);
+											}
+											
+											p5.setPos6(pos6); 
+											
+										}								
+										pos5.add(p5);
+									}
+									
+									p4.setPos5(pos5); 
+								}
+								pos4.add(p4);
+							}
+							
+							cmpt.setPos4(pos4); 
+						}
+						
+						comptes.add(cmpt);
+					}					
+					
+					ru.setComptes(comptes); 
+				}
+				
+				r.add(ru);				
+			}
+			
+			HeaderCompta h = new HeaderCompta(a.getNumCpt(), a.getLabel(), a.getIsActive(), a.getDevise(), r);
+			
+			result.add(h);
+		}
+		
+		return result;
+	}
 	
-	
+	static void testPlanCompta(){
+		
+		List<Account> result = new ArrayList<Account>();
+		String sql = "select a from Account a where a.hlevel ='1'";
+		TypedQuery<Account> qH = em.createQuery(sql, Account.class);
+		
+		for (Account a : qH.getResultList()) {
+			String sqlPos = "select a from Account a join a.account ac where ac.numCpt = '"+ a.getNumCpt() +"'";//a.hlevel ='3' and
+			TypedQuery<Account> qP = em.createQuery(sqlPos, Account.class);
+			
+			for (Account c : qP.getResultList()) {
+				if(c.getIsHeader() == true){
+					//List<Account> ls = c.getAccounts();
+				}
+					
+			}
+			result.add(a);
+		}
+	}
+
+	//Reinitialiser solde
+	@Override
+	public boolean reinitialiserSolde() {
+		String sql ="select a from Account a";
+		TypedQuery<Account> q = em.createQuery(sql, Account.class);
+		if(!q.getResultList().isEmpty()){
+			List<Account> ac = q.getResultList();
+			for (Account account : ac) {
+				account.setSoldeInit(0.0);
+				account.setSoldeProgressif(0.0); 
+				try {
+					transaction.begin();
+					em.merge(account);
+					transaction.commit();
+					em.refresh(account); 
+					return true;
+				} catch (Exception e) {
+					e.printStackTrace(); 
+					return false;
+				}
+			}			
+		}
+		return false;
+	}
+
+	//Chercher code analytique par mot clé
+	@Override
+	public List<Analytique> findCodeAn(String code) {
+		String sql = "select a from Analytique a where a.id like '"+ code +"%' or a.nom like '"+ code +"%' "
+				+ " order by a.nom asc";
+		TypedQuery<Analytique> q = em.createQuery(sql, Analytique.class);
+		
+		if(!q.getResultList().isEmpty())
+			return q.getResultList();
+		return null;
+	}
+
+	//Chercher code budgétaire par mot clé
+	@Override
+	public List<Budget> findCodeBud(String code) {
+		String sql = "select a from Budget a where a.code like '"+ code +"%' or a.nom like '"+ code +"%' "
+				+ " order by a.nom asc";
+		TypedQuery<Budget> q = em.createQuery(sql, Budget.class);
+		
+		if(!q.getResultList().isEmpty())
+			return q.getResultList();
+		return null;
+	}
+
+	//Chercher compte auxilliaire par mot clé
+	@Override
+	public List<CompteAuxilliaire> findCodeAux(String code) {
+		String sql = "select a from CompteAuxilliaire a where a.id like '"+ code +"%' or a.nom like '"+ code +"%' "
+				+ " order by a.nom asc";
+		TypedQuery<CompteAuxilliaire> q = em.createQuery(sql, CompteAuxilliaire.class);
+		
+		if(!q.getResultList().isEmpty())
+			return q.getResultList();
+		return null;
+	}
+
+	//Analyse compte analytique
+	@Override
+	public List<Grandlivre> getAnalyseCompteAn(String compte, String dateDeb,
+			String dateFin) {
+		String sql = "select g from Grandlivre g join g.analytique a ";
+		if(!compte.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
+			
+			sql +="where ";
+		
+			if(!compte.equals("")){
+				sql+= " a.id ='"+compte+"'";
+				if(!dateDeb.equals("") && dateFin.equals("")){
+					sql+= " AND g.date ='"+dateDeb+"'";				
+				}
+				if(!dateDeb.equals("") && !dateFin.equals("")){
+					sql+= " AND g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+				}	   
+			}
+						
+			if(!dateDeb.equals("") && dateFin.equals("") && compte.equals("")){
+				sql+= "g.date ='"+dateDeb+"'";
+			}
+			
+			if(!dateDeb.equals("") && !dateFin.equals("") && compte.equals("")){
+				sql+= "g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+			}	
+			
+		}
+		
+		sql +=" order by g.tcode asc";
+		//sql +=" order by ac.numCpt asc";
+		
+		TypedQuery<Grandlivre> query = em.createQuery(sql,Grandlivre.class);
+		if(!(query.getResultList().isEmpty()))
+			return query.getResultList();
+		else{
+			System.err.println("Il n'y a pas de resultat");
+			return null;			
+		}
+		
+	}
+
+	//Analyse compte budgétaires
+	@Override
+	public List<Grandlivre> getAnalyseCompteBud(String compte, String dateDeb,
+			String dateFin) {
+		String sql = "select g from Grandlivre g join g.budget a ";
+		if(!compte.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
+			
+			sql +="where ";
+		
+			if(!compte.equals("")){
+				sql+= " a.code ='"+compte+"'";
+				if(!dateDeb.equals("") && dateFin.equals("")){
+					sql+= " AND g.date ='"+dateDeb+"'";				
+				}
+				if(!dateDeb.equals("") && !dateFin.equals("")){
+					sql+= " AND g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+				}	   
+			}
+						
+			if(!dateDeb.equals("") && dateFin.equals("") && compte.equals("")){
+				sql+= "g.date ='"+dateDeb+"'";
+			}
+			
+			if(!dateDeb.equals("") && !dateFin.equals("") && compte.equals("")){
+				sql+= "g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+			}	
+			
+		}
+		
+		sql +=" order by g.tcode asc";
+		//sql +=" order by ac.numCpt asc";
+		
+		TypedQuery<Grandlivre> query = em.createQuery(sql,Grandlivre.class);
+		if(!(query.getResultList().isEmpty()))
+			return query.getResultList();
+		else{
+			System.err.println("Il n'y a pas de resultat");
+			return null;			
+		}
+	}
+
+	//Analyse compte auxilliaires
+	@Override
+	public List<Grandlivre> getAnalyseCompteAux(String compte, String dateDeb,
+			String dateFin) {
+		String sql = "select g from Grandlivre g join g.auxilliaire a ";
+		if(!compte.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
+			
+			sql +="where ";
+		
+			if(!compte.equals("")){
+				sql+= " a.id ='"+compte+"'";
+				if(!dateDeb.equals("") && dateFin.equals("")){
+					sql+= " AND g.date ='"+dateDeb+"'";				
+				}
+				if(!dateDeb.equals("") && !dateFin.equals("")){
+					sql+= " AND g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+				}	   
+			}
+						
+			if(!dateDeb.equals("") && dateFin.equals("") && compte.equals("")){
+				sql+= "g.date ='"+dateDeb+"'";
+			}
+			
+			if(!dateDeb.equals("") && !dateFin.equals("") && compte.equals("")){
+				sql+= "g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+			}	
+			
+		}
+		
+		sql +=" order by g.tcode asc";
+		//sql +=" order by ac.numCpt asc";
+		
+		TypedQuery<Grandlivre> query = em.createQuery(sql,Grandlivre.class);
+		if(!(query.getResultList().isEmpty()))
+			return query.getResultList();
+		else{
+			System.err.println("Il n'y a pas de resultat");
+			return null;			
+		}
+	}
+
 }

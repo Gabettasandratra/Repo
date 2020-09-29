@@ -114,6 +114,11 @@ public class Individuel implements Serializable {
 	@OneToMany(mappedBy="individuel")
 	@XmlTransient
 	private List<CompteDAT> compteDat;
+	
+	//Compte PEP
+	@OneToMany(mappedBy="individuel")
+	@XmlTransient
+	private List<ComptePep> comptePep;
 
 	//bi-directional many-to-one association to DemandeCredit
 	@OneToMany(mappedBy="individuel")
@@ -156,6 +161,11 @@ public class Individuel implements Serializable {
 	@OneToMany(mappedBy="individuel")
 	@XmlTransient
 	private List<MembreGroupe> membres;
+	
+	//bi-directional many-to-one association to agence
+	@ManyToOne(cascade = CascadeType.REFRESH)
+	@JoinColumn(name="codeAgence")
+	private Agence agence;
 
 	public Individuel() {
 	}
@@ -554,4 +564,22 @@ public class Individuel implements Serializable {
 	public void setApprouver(boolean approuver) {
 		this.approuver = approuver;
 	}
+
+	public Agence getAgence() {
+		return agence;
+	}
+
+	public void setAgence(Agence agence) {
+		this.agence = agence;
+	}
+
+	public List<ComptePep> getComptePep() {
+		return comptePep;
+	}
+
+	public void setComptePep(List<ComptePep> comptePep) {
+		this.comptePep = comptePep;
+	}
+	
+	
 }

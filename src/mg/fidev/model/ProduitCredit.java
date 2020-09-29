@@ -31,6 +31,9 @@ public class ProduitCredit implements Serializable {
 
 	@Column(name="nom_prod_credit")
 	private String nomProdCredit;
+	
+	@Column(name="supprimer")
+	private boolean supprimer;
 
 	/***
 	 * DEMANDE CREDIT
@@ -165,6 +168,14 @@ public class ProduitCredit implements Serializable {
 
 	public void setNomProdCredit(String nomProdCredit) {
 		this.nomProdCredit = nomProdCredit;
+	}
+
+	public boolean isSupprimer() {
+		return supprimer;
+	}
+
+	public void setSupprimer(boolean supprimer) {
+		this.supprimer = supprimer;
 	}
 
 	public List<DemandeCredit> getDemandeCredits() {

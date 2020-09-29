@@ -78,12 +78,10 @@ public class Grandlivre implements Serializable {
 	
 	@ManyToOne
 	@JoinColumn(name="compte_epargne")
-	@XmlTransient
 	private CompteEpargne compteEpargne;
 	
 	@ManyToOne
 	@JoinColumn(name="compte_dat")
-	@XmlTransient
 	private CompteDAT compteDat;
 	
 	@ManyToOne

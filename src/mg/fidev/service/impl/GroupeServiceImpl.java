@@ -10,6 +10,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Adresse;
+import mg.fidev.model.Agence;
 import mg.fidev.model.FonctionMembreGroupe;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
@@ -88,20 +89,27 @@ public class GroupeServiceImpl implements GroupeService {
 	public String saveGroupe(Groupe groupe,Adresse adresse, String codeAgence) {
 
 		String result = "";
-		groupe.setCodeGrp(CodeIncrement.getCodeGrp(em, codeAgence));
-		groupe.setAdresse(adresse);
-		try {
-			transaction.begin();
-			em.persist(adresse);	
-			em.persist(groupe);
-			//em.merge(ind);
-			transaction.commit();
-			result = "success";
-			//em.refresh(groupe);
-		} catch (Exception e) {
-			e.printStackTrace();
-			result = "erreur";
-		}	
+		if(!codeAgence.equals("")){
+		
+			Agence ag = em.find(Agence.class, codeAgence);	
+			
+			groupe.setAgence(ag); 
+			groupe.setCodeGrp(CodeIncrement.getCodeGrp(em, codeAgence));
+			groupe.setAdresse(adresse);
+			try {
+				transaction.begin();
+				em.persist(adresse);	
+				em.persist(groupe);
+				//em.merge(ind);
+				transaction.commit();
+				result = "success";
+				//em.refresh(groupe);
+			} catch (Exception e) {
+				e.printStackTrace();
+				result = "erreur";
+			}	
+			
+		}
 		return result;
 		/*if(groupe.getIndividuels() != null){
 			ind.setGroupe(groupe);

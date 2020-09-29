@@ -12,8 +12,12 @@ import javax.xml.bind.annotation.XmlElement;
 
 import mg.fidev.model.CatEpargne;
 import mg.fidev.model.CompteDAT;
+import mg.fidev.model.CompteDATSupp;
 import mg.fidev.model.CompteEpargne;
+import mg.fidev.model.CompteEpargneSupp;
 import mg.fidev.model.CompteFerme;
+import mg.fidev.model.ComptePep;
+import mg.fidev.model.ComptePepSupp;
 import mg.fidev.model.ConfigGLDAT;
 import mg.fidev.model.ConfigGeneralDAT;
 import mg.fidev.model.ConfigGlEpargne;
@@ -22,6 +26,8 @@ import mg.fidev.model.ConfigProdEp;
 import mg.fidev.model.InteretEpargne;
 import mg.fidev.model.ProduitEpargne;
 import mg.fidev.model.TransactionEpargne;
+import mg.fidev.model.TransactionEpargneSupp;
+import mg.fidev.model.TransactionPep;
 import mg.fidev.model.TypeEpargne;
 import mg.fidev.utils.CalculDAT;
 import mg.fidev.utils.FicheCaisseEpargne;
@@ -46,7 +52,8 @@ public interface ProduitEpargneService {
 	 * ***/
 	@WebMethod
 	@WebResult(name="liste")
-	public List<ProduitEpargne> findAllProduit();
+	public List<ProduitEpargne> findAllProduit(
+			@WebParam(name = "type") @XmlElement(required=true,nillable=false) String type);
 	
 	/**
 	 * Chercher un produit épargne par son indentifiant
@@ -82,6 +89,8 @@ public interface ProduitEpargneService {
 			@WebParam(name = "nomProd")String nomProd, 
 			@WebParam(name = "isActive")boolean isActive);
 	
+	//--------------------------------------------------------------------------------------------------
+	/********************************* Configuration produits épargne *********************************/
 	/**
 	 * configuration intérêt d'épargne
 	 * ***/
@@ -124,15 +133,19 @@ public interface ProduitEpargneService {
 	@WebParam(name= "idProduit") @XmlElement(required=true,nillable=false) String idProduit,
 	@WebParam(name= "configGeneral") @XmlElement(required=true,nillable=false) ConfigGeneralDAT confGen);
 	
+	//--------------------------------------------------------------------------------------------------
+		/********************************* Intérêt épargne épargne *********************************/
+	
 	/***
 	 * Calcul intérêt
 	 * ***/
 	@WebMethod
-	@WebResult(name="validation")
+	@WebResult(name="resultat")
 	public List<InteretEpargne> calcInteret(
-			@WebParam(name ="idProd") @XmlElement(required=true)String idProd,
-			@WebParam(name ="dateDeb") @XmlElement(required=true)String date1,
-			@WebParam(name ="dateFin") @XmlElement(required=true)String date2);
+			@WebParam(name ="dateDeb") @XmlElement(required=true)String date1);
+	
+	//--------------------------------------------------------------------------------------------------
+		/********************************* Type et categorie produits épargne *********************************/
 	
 	/***
 	 * SELECTION DE TYPE D'EPARGNE
@@ -148,20 +161,8 @@ public interface ProduitEpargneService {
 	@WebResult(name="categorieEp")
 	public List<CatEpargne> getCategorieEp();
 	
-	/***
-	 * CHERCHER COMPTE ACTIF PAR NUMERO DE COMPTE
-	 * ***/
-	@WebMethod
-	@WebResult(name="resultat")
-	public List<CompteEpargne> findCompteByCode(@WebParam(name ="numCmpt") @XmlElement(required=true) String numCmpt);
-	
-	/***
-	 * CHERCHER COMPTE INACTIF PAR NUMERO DE COMPTE
-	 * ***/
-	@WebMethod
-	@WebResult(name="resultat")
-	public List<CompteEpargne> findCompteInactifByCode(@WebParam(name ="numCmpt") @XmlElement(required=true) String numCmpt);
-	
+	//--------------------------------------------------------------------------------------------------
+		/********************************* Compte épargne *********************************/
 	
 	/***
 	 * OUVRIR COMPTE EPARGNE
@@ -176,7 +177,22 @@ public interface ProduitEpargneService {
 			@XmlElement(required=true) @WebParam(name="codeInd") String individuelId,
 			@XmlElement(required=true) @WebParam(name="codeGrp") String groupeId,
 			@XmlElement(required=true) @WebParam(name="userId") int userId
-		);
+			);	
+
+	/***
+	 * CHERCHER COMPTE ACTIF PAR NUMERO DE COMPTE
+	 * ***/
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteEpargne> findCompteByCode(@WebParam(name ="numCmpt") @XmlElement(required=true) String numCmpt);
+	
+	/***
+	 * CHERCHER COMPTE INACTIF PAR NUMERO DE COMPTE
+	 * ***/
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteEpargne> findCompteInactifByCode(@WebParam(name ="numCmpt") @XmlElement(required=true) String numCmpt);
+	
 	
 	//CHERCHER COMPTE PAR CODE CLIENT ET PRODUIT
 	@WebMethod
@@ -202,6 +218,31 @@ public interface ProduitEpargneService {
 			@XmlElement(required=true, nillable=false) @WebParam(name="date")String date);
 	
 	/***
+	 * Fermer compte épargne
+	 * ***/
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean fermerCompte(
+			@XmlElement(required=false,nillable=true) @WebParam(name="comptFerm")CompteFerme compFerme, 
+			@XmlElement(required=true,nillable=false) @WebParam(name="numCmpt")String numCmpt);
+	
+	
+	//Supprimer compte épargne 
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean deleteCompte(
+			@XmlElement(required=true,nillable=false) @WebParam(name="numCmpt")String numCmpt,
+			@XmlElement(required=true,nillable=false) @WebParam(name="user")int user
+			);
+	
+	//Liste compte épargne supprimé
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteEpargneSupp> getCompteSupprimer();
+	
+	//--------------------------------------------------------------------------------------------------
+		/********************************* Transactions épargne *********************************/
+	/***
 	 * Transaction épargne
 	 * ***/
 	@WebMethod
@@ -220,7 +261,6 @@ public interface ProduitEpargneService {
 			@XmlElement(required=true) @WebParam(name="utilisateur") int idUser
 			);
 	
-	//------------------------------------------------------------------------------------------------------
 		/****************************Modification Transaction*****************************************************/
 		//Recupère detail transaction
 		@WebMethod
@@ -249,10 +289,19 @@ public interface ProduitEpargneService {
 		@WebResult(name="resultat")
 		public boolean deleteTransaction(
 				@XmlElement(required=true) @WebParam(name="codeTrans") String codeTrans,
-				@XmlElement(required=true) @WebParam(name="utilisateur") int idUser);		
+				@XmlElement(required=true) @WebParam(name="utilisateur") int idUser);	
+		
+		//Liste Transactions supprimés
+		@WebMethod
+		@WebResult(name="resultat")
+		public List<TransactionEpargneSupp> getTransactionSupprimer(
+				@XmlElement(required=false,nillable=true) @WebParam(name="agence")String agence,
+				@XmlElement(required=false,nillable=true) @WebParam(name="produit")String produit,
+				@XmlElement(required=false,nillable=true) @WebParam(name="dateDeb")String dateDeb,
+				@XmlElement(required=false,nillable=true) @WebParam(name="dateFin")String dateFin);
 		
 		//------------------------------------------------------------------------------------------------------	
-	
+		/********************************* Transfert solde épargne *********************************/
 	/***
 	 * Virement
 	 * ***/
@@ -272,20 +321,36 @@ public interface ProduitEpargneService {
 	
 	//-----------------------------------------------------------------------------------------------------
 	
+	/***************************** Rapport sur épargne **************************/
+	
+	
+	//Chercher compte épargne par code client et type d'épargne
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteEpargne> findCompteEpByType(
+			@XmlElement(required=true,nillable=false) @WebParam(name="typeEp")String typeEp,
+			@XmlElement(required=false,nillable=true) @WebParam(name="codeInd")String codeInd,
+			@XmlElement(required=false,nillable=true) @WebParam(name="codeGrp")String codeGrp
+			);
+	
+	
 	//Recuperer tous les comptes inactif
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<CompteEpargne> getCompteEpargne(
 			@XmlElement(required=true,nillable=false) @WebParam(name="etat")boolean etat);
 	
-	
-	
 	/***
 	 * RAPPORT TRANSACTION
 	 * ***/
 	@WebMethod
 	@WebResult(name="resultat")
-	public List<TransactionEpargne> rapportTransactions(
+	public List<TransactionEpargne> rapportTransactions(			
+			@XmlElement(required=false,nillable=true) @WebParam(name="agence")String agence,
+			@XmlElement(required=false,nillable=true) @WebParam(name="client")String client,
+			@XmlElement(required=false,nillable=true) @WebParam(name="type")String type,
+			@XmlElement(required=false,nillable=true) @WebParam(name="produit")String produit,
+			@XmlElement(required=false,nillable=true) @WebParam(name="numCompte")String numCompte,
 			@XmlElement(required=false,nillable=true) @WebParam(name="dateDeb")String dateDeb,
 			@XmlElement(required=false,nillable=true) @WebParam(name="dateFin")String dateFin);
 	
@@ -297,15 +362,6 @@ public interface ProduitEpargneService {
 	public List<CompteEpargne> findByCodeCli(
 			@XmlElement(required=false,nillable=true) @WebParam(name="codeInd")String codeInd,
 			@XmlElement(required=false,nillable=true) @WebParam(name="codeGrp")String codeGrp);
-	
-	/***
-	 * Fermer compte épargne
-	 * ***/
-	@WebMethod
-	@WebResult(name="validation")
-	public boolean fermerCompte(
-			@XmlElement(required=false,nillable=true) @WebParam(name="comptFerm")CompteFerme compFerme, 
-			@XmlElement(required=true,nillable=false) @WebParam(name="numCmpt")String numCmpt);
 	
 	/***
 	 * Rapport épargne par produit
@@ -322,14 +378,24 @@ public interface ProduitEpargneService {
 	@WebMethod  
     @WebResult(name="resultat")
 	public List<SoldeEpargne> getSoldeEpargne(
-	@XmlElement(required=false,nillable=true) @WebParam(name="idProd")String idProd);
+	@XmlElement(required=false,nillable=true) @WebParam(name="agence")String agence,
+	@XmlElement(required=false,nillable=true) @WebParam(name="client")String client,
+	@XmlElement(required=false,nillable=true) @WebParam(name="type")String type,
+	@XmlElement(required=false,nillable=true) @WebParam(name="idProd")String idProd,
+	@XmlElement(required=false,nillable=true) @WebParam(name="dateDeb")String dateDeb,
+	@XmlElement(required=false,nillable=true) @WebParam(name="dateFin")String dateFin
+	);
 	
 	//Rapport solde minimum maximum	
 	@WebMethod
     @WebResult(name="resultat")
 	public List<SoldeEpargne> getSoldeMinMax(
-			@WebParam(name ="dateDeb") @XmlElement(required=true)String date1,
-			@WebParam(name ="dateFin") @XmlElement(required=true)String date2);
+			@XmlElement(required=false,nillable=true) @WebParam(name="agence")String agence,
+			@XmlElement(required=false,nillable=true) @WebParam(name="client")String client,
+			@XmlElement(required=false,nillable=true) @WebParam(name="type")String type,
+			@XmlElement(required=false,nillable=true) @WebParam(name="idProd")String idProd,
+			@XmlElement(required=false,nillable=true) @WebParam(name="dateDeb")String dateDeb,
+			@XmlElement(required=false,nillable=true) @WebParam(name="dateFin")String dateFin);
 	
 	/***
 	 * Rapport intérêt
@@ -378,8 +444,12 @@ public interface ProduitEpargneService {
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<CompteEpargne> rapportNouveauCompte(
-	@WebParam(name ="dateDeb") @XmlElement(required=true)String dateDeb,
-	@WebParam(name ="dateFin") @XmlElement(required=true)String dateFin
+			@XmlElement(required=false,nillable=true) @WebParam(name="agence")String agence,
+			@XmlElement(required=false,nillable=true) @WebParam(name="client")String client,
+			@XmlElement(required=false,nillable=true) @WebParam(name="type")String type,
+			@XmlElement(required=false,nillable=true) @WebParam(name="idProd")String produit,
+			@XmlElement(required=false,nillable=true) @WebParam(name="dateDeb")String dateDeb,
+			@XmlElement(required=false,nillable=true) @WebParam(name="dateFin")String dateFin
 	);
 	
 	/***
@@ -388,8 +458,12 @@ public interface ProduitEpargneService {
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<CompteFerme> getCompteFermer(
-	@WebParam(name ="dateDeb") @XmlElement(required=true)String dateDeb,
-	@WebParam(name ="dateFin") @XmlElement(required=true)String dateFin
+			@XmlElement(required=false,nillable=true) @WebParam(name="agence")String agence,
+			@XmlElement(required=false,nillable=true) @WebParam(name="client")String client,
+			@XmlElement(required=false,nillable=true) @WebParam(name="type")String type,
+			@XmlElement(required=false,nillable=true) @WebParam(name="idProd")String produit,
+			@XmlElement(required=false,nillable=true) @WebParam(name="dateDeb")String dateDeb,
+			@XmlElement(required=false,nillable=true) @WebParam(name="dateFin")String dateFin
 	);
 	
 	/***
@@ -398,6 +472,8 @@ public interface ProduitEpargneService {
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<TransactionEpargne> getFicheJournalier(
+			@XmlElement(required=false,nillable=true) @WebParam(name="agence")String agence,
+			@XmlElement(required=false,nillable=true) @WebParam(name="type")String type,
 			@WebParam(name="date") @XmlElement(required=true)String date);
 	
 	/**
@@ -456,6 +532,14 @@ public interface ProduitEpargneService {
 	@XmlElement(required=false) @WebParam(name="CompteCaisse") String nomCptCaisse,
 	@XmlElement(required=false) @WebParam(name="numCompte") String numCptEp);
 	
+	//Retrait automatique sur DAT
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteDAT> retraitDATAuto(
+			@XmlElement(required=false) @WebParam(name="date") String dateRetrait,
+			@XmlElement(required=true) @WebParam(name="userId") int userId
+			);
+	
 	//Annuler dépôt à terme
 	@WebMethod
 	@WebResult(name="validation")
@@ -463,6 +547,19 @@ public interface ProduitEpargneService {
 	@XmlElement(required=false) @WebParam(name="compte") String compte,
 	@XmlElement(required=false) @WebParam(name="raison") String raison);
 	
+	//Supprimer Compte DAT 
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean deleteCompteDAT(
+			@XmlElement(required=false) @WebParam(name="numCompte") String compte,
+			@XmlElement(required=false) @WebParam(name="user") int user);
+	
+	//Liste comptes DAT supprimés
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<CompteDATSupp> getCompteDATSupprimer();
+	
+	//----------------------------------------------------------------------------------------------
 	//Rapport dépôt à terme
 	@WebMethod
 	@WebResult(name="resultat")
@@ -494,6 +591,9 @@ public interface ProduitEpargneService {
 	@XmlElement(required=false) @WebParam(name="compte") String compte,
 	@XmlElement(required=false) @WebParam(name="payer") boolean payer,
 	@XmlElement(required=false) @WebParam(name="fermer") boolean fermer);
+	
+	
+	//-------------------------------------------------------------------------------------------
 	
 	//Pour faire selection du produit de DAT ou DAV
 	@WebMethod
@@ -534,6 +634,94 @@ public interface ProduitEpargneService {
 			@XmlElement(required=true) @WebParam(name="typPaie")String typPaie,
 			@XmlElement(required=false) @WebParam(name="numTel")String numTel, 
 			@XmlElement(required=false) @WebParam(name="compteCaisse")String compteCaisse);
+	
+	//------------------------------------------------------------------------------------------
+	/*******************************Plan d'épargne ********************************************/
+	
+	//Compte Plan d'épargne 
+	@WebMethod
+	@WebResult(name="resultat")
+	public String ouvrirComptePep(
+			@XmlElement(required=false) @WebParam(name="compte")ComptePep compte,
+			@XmlElement(required=true) @WebParam(name="idProduit") String idProduit,
+			@XmlElement(required=true) @WebParam(name="codeInd") String codeind,
+			@XmlElement(required=true) @WebParam(name="codeGrp") String codeGrp,
+			@XmlElement(required=true) @WebParam(name="userId") int userId
+			);
+	
+	//Modifier compte plan d'épargne 
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean modifierComptePep(
+			@XmlElement(required=false) @WebParam(name="idCompte")String idCompte,
+			@XmlElement(required=false) @WebParam(name="compte")ComptePep compte,
+			@XmlElement(required=false) @WebParam(name="userId")int userId
+			);
+
+	//Chercher unique compte pep
+	@WebMethod
+	@WebResult(name="resultat")
+	public ComptePep getUniqueComptePep(
+			@XmlElement(required=false) @WebParam(name="idCompte")String idCompte);
+	
+	//Supprimer compte pep
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean deleteComptePep(
+			@XmlElement(required=false) @WebParam(name="idCompte")String idCompte,
+			@XmlElement(required=false) @WebParam(name="userId")int userId);
+	
+	//Chercher compte Pep par mot clé
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<ComptePep> findComptePep(
+			@XmlElement(required=false) @WebParam(name="idCompte")String idCompte);
+	
+	//Liste des comptes Pep
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<ComptePep> getAllComptePep();
+	
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<ComptePepSupp> getComptePepSupp();
+	
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<ComptePep> getComptePepByCli(
+			@XmlElement(required=false) @WebParam(name="codeInd") String codeInd,
+			@XmlElement(required=false) @WebParam(name="codeGrp") String codeGrp);
+	
+	//-----------------------------------------------------------------------------------------------
+	//Transaction sur pep
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean saveTransPep(
+			@XmlElement(required=false) @WebParam(name="trans") TransactionPep trans,
+			@XmlElement(required=true) @WebParam(name="numCompte") String numCptEp,
+			@XmlElement(required=true) @WebParam(name="utilisateur") int idUser);
+	
+	@WebMethod
+	@WebResult(name="resultat")
+	public TransactionPep getUniqueTransPep(
+			@XmlElement(required=true) @WebParam(name="idTrans") String idTrans);
+	
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<TransactionPep> getAllTransPep();
+	
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean updateTransPep(
+			@XmlElement(required=true) @WebParam(name="idTrans") String idTrans,
+			@XmlElement(required=false) @WebParam(name="trans") TransactionPep trans,
+			@XmlElement(required=true) @WebParam(name="utilisateur") int idUser);
+	
+	@WebMethod
+	@WebResult(name="validation")
+	public boolean deleteTransPep(
+			@XmlElement(required=true) @WebParam(name="idTrans") String idTrans,
+			@XmlElement(required=true) @WebParam(name="utilisateur") int idUser);
 	
 }
 

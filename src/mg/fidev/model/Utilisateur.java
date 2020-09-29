@@ -20,7 +20,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-
 /**
  * The persistent class for the utilisateur database table.
  * 
@@ -50,12 +49,12 @@ public class Utilisateur implements Serializable {
 	private String photo;
 
 	//bi-directional many-to-one association to CommissionCredit
-	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<CommissionCredit> commissionCredits;
 
 	//bi-directional many-to-one association to CompteEpargne
-	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<CompteEpargne> compteEpargnes;
 	
@@ -66,60 +65,75 @@ public class Utilisateur implements Serializable {
 	
 	
 	//bi-directional many-to-one association to TransactionEpargne
-	@OneToMany(mappedBy="utilisateur", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<TransactionEpargne> transactionEpargnes;
 	
 	//bi-directional many-to-one association to TransactionEpargne
-	@OneToMany(mappedBy="userUpdate", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy="userUpdate")
 	@XmlTransient
 	private List<TransactionEpargne> transactions;
 	
+	//Transaction plan d'épargne
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<TransactionPep> transPep;
+	
+	
+	//Transaction plan d'épargne
+	@OneToMany(mappedBy="userUpdate")
+	@XmlTransient
+	private List<TransactionPep> updateTrans;
+	
 	
 	//Compte DAT
-	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<CompteDAT> compteDat;
+	
+	//Compte PEP
+	@OneToMany(mappedBy="utilisateur")
+	@XmlTransient
+	private List<ComptePep> comptePep;
 
 	//bi-directional many-to-one association to Decaissement
-	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<Decaissement> decaissements;
 	
 	//bi-directional many-to-one association to Decaissement
-	@OneToMany(mappedBy="userUpdate",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="userUpdate")
 	@XmlTransient
 	private List<Decaissement> update;
 
 	//bi-directional many-to-one association to DemandeCredit demande saisissé
-	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<DemandeCredit> demandeCredits;
 	
 	//Update crédit
 	//bi-directional many-to-one association to DemandeCredit demande saisissé
-	@OneToMany(mappedBy="user_update",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="user_update")
 	@XmlTransient
 	private List<DemandeCredit> updateDemande;
 	
-	
 	//Agent credit	
-	@OneToMany(mappedBy="agent",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="agent")
 	@XmlTransient
 	private List<DemandeCredit> clients;
 	
-
 	//bi-directional many-to-one association to Remboursement
-	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<Remboursement> remboursements;
 
 	//bi-directional many-to-many association to Agence
-	@ManyToMany(cascade=CascadeType.ALL)
+	@ManyToMany
 	@JoinTable(name="utilisateur_agence"
 		, joinColumns={@JoinColumn(name="UtilisateuridUtilisateur")
 			}, inverseJoinColumns={@JoinColumn(name="AgencecodeAgence")}
 		)
+	@XmlTransient
 	private List<Agence> agences;
 
 	//bi-directional many-to-many association to CompteCaisse
@@ -137,17 +151,17 @@ public class Utilisateur implements Serializable {
 	private List<Caisse> caisses;
 
 	//bi-directional many-to-one association to Fonction
-	@ManyToOne(cascade=CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name="fonctionId")
 	private Fonction fonction;
 	
 	//bi-directional many-to-one association to granlivre
-	@OneToMany(mappedBy="utilisateur",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="utilisateur")
 	@XmlTransient
 	private List<Grandlivre> grandlivres;
 	
 	//bi-directional many-to-one association to cloture
-	@OneToMany(mappedBy="user",cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="user")
 	@XmlTransient
 	private List<Cloture> clotures;
 	
@@ -418,5 +432,30 @@ public class Utilisateur implements Serializable {
 
 	public void setCompteFermes(List<CompteFerme> compteFermes) {
 		this.compteFermes = compteFermes;
+	}
+
+	public List<ComptePep> getComptePep() {
+		return comptePep;
+	}
+
+	public void setComptePep(List<ComptePep> comptePep) {
+		this.comptePep = comptePep;
+	}
+
+	public List<TransactionPep> getTransPep() {
+		return transPep;
+	}
+
+	public void setTransPep(List<TransactionPep> transPep) {
+		this.transPep = transPep;
+	}
+
+	public List<TransactionPep> getUpdateTrans() {
+		return updateTrans;
+	}
+
+	public void setUpdateTrans(List<TransactionPep> updateTrans) {
+		this.updateTrans = updateTrans;
 	}	
+
 }

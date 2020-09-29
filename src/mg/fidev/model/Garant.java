@@ -56,11 +56,14 @@ public class Garant implements Serializable{
 	
 	//Taux à garantissé sur le crédit
 	@Column(name="taux_cred")
-	private double tauxCred;
+	private int tauxCred;
 	
 	//Montant à garantir sur le crédit
 	@Column(name="total_montant")
 	private double montant;
+	
+	@Column(name="supprimer")
+	private boolean supprimer;
 	
 	//bi-directional many-to-one association to Docidentite
 	@OneToMany(mappedBy="garant")
@@ -77,6 +80,16 @@ public class Garant implements Serializable{
 	@JoinColumn(name="numCredit")
 	@XmlTransient
 	private DemandeCredit demandeCredit;
+	
+	@OneToMany(mappedBy="garant")
+	@XmlTransient
+	private List<GarantCredit> garantCredits; 
+	
+	//bi-directional many-to-one association to agence
+	@ManyToOne(cascade = CascadeType.REFRESH)
+	@JoinColumn(name="codeAgence")
+	private Agence agence;
+
 	
 	public Garant() {
 		super();
@@ -209,11 +222,11 @@ public class Garant implements Serializable{
 		this.demandeCredit = demandeCredit;
 	}
 
-	public double getTauxCred() {
+	public int getTauxCred() {
 		return tauxCred;
 	}
 
-	public void setTauxCred(double tauxCred) {
+	public void setTauxCred(int tauxCred) {
 		this.tauxCred = tauxCred;
 	}
 
@@ -224,7 +237,29 @@ public class Garant implements Serializable{
 	public void setMontant(double montant) {
 		this.montant = montant;
 	}
-	
-	
 
+	public List<GarantCredit> getGarantCredits() {
+		return garantCredits;
+	}
+
+	public void setGarantCredits(List<GarantCredit> garantCredits) {
+		this.garantCredits = garantCredits;
+	}
+
+	public boolean isSupprimer() {
+		return supprimer;
+	}
+
+	public void setSupprimer(boolean supprimer) {
+		this.supprimer = supprimer;
+	}
+
+	public Agence getAgence() {
+		return agence;
+	}
+
+	public void setAgence(Agence agence) {
+		this.agence = agence;
+	}
+	
 }

@@ -28,9 +28,9 @@ public class CodeIncrement {
 	 * ***/
 	///	Récupère le dernier index d'un client d'une même agence
 	private static int getLastIndex(EntityManager em, String agence) {
-		String sql = "select count(*) from individuel where left(codeInd, 2) = '"+agence+"'"
-				+ "and estClientIndividuel = true";
-		Query q = em.createNativeQuery(sql);
+		String sql = "select count(i) from Individuel i join i.agence a where a.codeAgence = '"+agence+"'"
+				+ " and i.estClientIndividuel = 'true'";
+		Query q = em.createQuery(sql);
 		int result = Integer.parseInt(q.getSingleResult().toString());
 		return result;
 	} 
@@ -47,8 +47,10 @@ public class CodeIncrement {
 	 * GENERER CODE GARANT
 	 * ***/
 	private static int getLastIndexGar(EntityManager em, String agence) {
-		String sql = "select count(*) from garant_credit where left(codeGarant, 2) = '"+agence+"'";
-		Query q = em.createNativeQuery(sql);
+		/*String sql = "select count(*) from garant_credit where left(codeGarant, 2) = '"+agence+"'";
+		Query q = em.createNativeQuery(sql);*/
+		String sql = "select count(g) from Garant g join g.agence a where a.codeAgence = '"+agence+"'";
+		Query q = em.createQuery(sql);
 		int result = Integer.parseInt(q.getSingleResult().toString());
 		return result;
 	}

@@ -37,6 +37,7 @@ import mg.fidev.model.Decaissement;
 import mg.fidev.model.DemandeCredit;
 import mg.fidev.model.FicheCredit;
 import mg.fidev.model.Garant;
+import mg.fidev.model.GarantCredit;
 import mg.fidev.model.GarantieCredit;
 import mg.fidev.model.GarantieView;
 import mg.fidev.model.Groupe;
@@ -114,7 +115,16 @@ public class CreditServiceImpl implements CreditService {
 	 * Liste des Produits Credit
 	 * **/
 	public List<ProduitCredit> findAllCredit() {
-		TypedQuery<ProduitCredit> query = em.createQuery("select c from ProduitCredit c", ProduitCredit.class);
+		TypedQuery<ProduitCredit> query = em.createQuery("select c from ProduitCredit c where c.supprimer =:x", ProduitCredit.class);
+		query.setParameter("x", false);
+		return query.getResultList();
+	}
+	
+	//Liste des produits crédits supprimé
+	@Override
+	public List<ProduitCredit> getProduitSupprimer() {
+		TypedQuery<ProduitCredit> query = em.createQuery("select c from ProduitCredit c where c.supprimer =:x", ProduitCredit.class);
+		query.setParameter("x", true);
 		return query.getResultList();
 	}
 	
@@ -181,8 +191,9 @@ public class CreditServiceImpl implements CreditService {
 	@Override
 	public List<ProduitCredit> findCreditByMc(String mc) {
 			TypedQuery<ProduitCredit> query = em.createQuery(
-					" select c from ProduitCredit c where c.nomProdCredit like :mc", ProduitCredit.class);
+					" select c from ProduitCredit c where c.nomProdCredit like :mc and c.supprimer=:x", ProduitCredit.class);
 			query.setParameter("mc", "%"+mc+"%");
+			query.setParameter("x", false);
 			List<ProduitCredit> result = query.getResultList();
 
 		return result; 
@@ -238,17 +249,19 @@ public class CreditServiceImpl implements CreditService {
 	@Override
 	public String deleteProduitCredit(String id) {
 		String res = "";
-		
-		transaction.begin();
 		ProduitCredit p = findOne(id);
 		if(p != null){
-			em.remove(p);
-			res = "Suppression avec succes!!!";
-		}		
-		else {
-			res = "Aucun produit de ce numéro";			
-		}			
-		transaction.commit();
+			p.setSupprimer(true); 
+			try {
+				transaction.begin();
+				em.merge(p);
+				transaction.commit();
+				res = "Suppression avec succes!!!";					
+			} catch (Exception e) {
+				e.printStackTrace(); 
+				res = "Aucun produit de ce numéro";			
+			}	
+		}
 		System.out.println(res); 
 		return res;
 	}
@@ -333,7 +346,7 @@ public class CreditServiceImpl implements CreditService {
 		return result;
 	}
 
-	
+	 
 	//SAISIE information demande crédit
 		//Générer calendrier remboursement d'une demande crédit groupe
 		@Override
@@ -536,16 +549,17 @@ public class CreditServiceImpl implements CreditService {
 	 * SAVE DEMANDE CREDIT Individuel (Opérationnel)
 	 * ***/
 	@Override
-	public boolean saveDemandeCreditIndividuel(String idProduit, String codeInd,DemandeCredit demande, int idAgent,
+	public String saveDemandeCreditIndividuel(String idProduit, String codeInd,DemandeCredit demande, int idAgent,
 			String codeGar1, String codeGar2, String codeGar3, int user_id,
-			double tauxGar1, double tauxGar2, double tauxGar3) {
+			int tauxGar1, int tauxGar2, int tauxGar3, String lien1, String lien2, String lien3) {
 	
+		String result = "";
 		//Pour initialiser les intérêt, soldCourant, total intérêt
 		FicheCredit ficheCredit = new FicheCredit();			
 		//Client
 		Individuel ind = em.find(Individuel.class, codeInd);	
 		
-		if(ind != null){
+		if(ind != null && ind.getGroupe() == null){
 			int lastIndex = getLastIndex(codeInd);
 			String index = String.format("%05d", ++lastIndex);		
 			String ag = ind.getCodeInd().substring(0, 2);
@@ -639,15 +653,19 @@ public class CreditServiceImpl implements CreditService {
 				//Garant crédit			
 				if(!codeGar1.equals("")){
 					Garant ga1 = em.find(Garant.class, codeGar1);
-					double montant = (demande.getMontantDemande()*tauxGar1)/100;
+					double montant = (demande.getMontantDemande() * tauxGar1)/100;
 					ga1.setTauxCred(tauxGar1); 
 					ga1.setMontant(montant);
 					ga1.setDemandeCredit(demande); 
+					GarantCredit garCred = new GarantCredit(lien1, montant,
+							tauxGar1, ga1, demande);
 					
 					transaction.begin();
 					em.merge(ga1);
+					em.merge(garCred);
 					transaction.commit();
 					em.refresh(ga1);
+					//em.refresh(garCred);
 				}
 				//Garant 2
 				if(!codeGar2.equals("")){
@@ -657,10 +675,15 @@ public class CreditServiceImpl implements CreditService {
 					ga2.setMontant(montant);
 					ga2.setDemandeCredit(demande); 
 					
+					GarantCredit garCred2 = new GarantCredit(lien2, montant,
+							tauxGar2, ga2, demande);
+					
 					transaction.begin();
 					em.merge(ga2);
+					em.merge(garCred2);
 					transaction.commit();
 					em.refresh(ga2);
+					//em.refresh(garCred2);
 				}
 				//Garant 3
 				if(!codeGar3.equals("")){
@@ -670,21 +693,29 @@ public class CreditServiceImpl implements CreditService {
 					ga3.setMontant(montant);
 					ga3.setDemandeCredit(demande); 
 					
+					GarantCredit garCred3 = new GarantCredit(lien3, montant,
+							tauxGar3, ga3, demande);
+					
 					transaction.begin();
 					em.merge(ga3);
+					em.merge(garCred3);
 					transaction.commit();
 					em.refresh(ga3);
+					//em.refresh(garCred3);
 				}		
-				
 				System.out.println("Demande crédit de "+demande.getNumCredit()+" enregistré");
-				return true;
+				result = "demande crédit enregistré";
+				//return true;
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
-				return false;
+				result = "Erreur enregistrement demande";
+				//return false;
 			}			
-		}	
-		return false;
-		
+		}else{
+			result = "Un client membre de groupe ne peut pas faire un crédit individuel";
+			//return false;
+		}
+		return result;
 	}
 	
 	//Supprimé garantie
@@ -1367,13 +1398,6 @@ public class CreditServiceImpl implements CreditService {
 							0, 0, 0, montant, 0, montant, dm.getNumCredit());
 					
 					//Imputation comptable
-					//Compte crédité
-					ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Decaissement crédit " +numCredit, piece,
-							soldeDecais, 0, ut, ind, grp, dm, null, accCred);
-					//Compte Debité
-					Account accDeb = CodeIncrement.getAcount(em, confGL.getCptPrincEnCoursInd());
-					ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Decaissement crédit " +numCredit, piece,
-							0, dm.getMontantApproved(), ut, ind, grp, dm, null, accDeb);
 					
 					//Compte debité 2 (Papeterie Decaissement)
 					if(papeterie != 0){
@@ -1387,7 +1411,15 @@ public class CreditServiceImpl implements CreditService {
 						ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Commission au decaissement de crédit " +numCredit,
 								piece, 0, commission, ut, ind, grp, dm, null, deb3);
 					}
-
+					
+					//Compte Debité
+					Account accDeb = CodeIncrement.getAcount(em, confGL.getCptPrincEnCoursInd());
+					ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Decaissement crédit " +numCredit, piece,
+							0, dm.getMontantApproved(), ut, ind, grp, dm, null, accDeb);
+					
+					//Compte crédité
+					ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Decaissement crédit " +numCredit, piece,
+							soldeDecais, 0, ut, ind, grp, dm, null, accCred);
 					
 					//Tester si on va mettre à jour la date remboursement ou pas 
 					if(confGen.getRecalcDateEcheanceAuDecais().equalsIgnoreCase("ne pas mettre a jours les dates")){
@@ -1557,13 +1589,14 @@ public class CreditServiceImpl implements CreditService {
 		else if(d.getTypePaie().equalsIgnoreCase("epargne"))
 			accCred = CodeIncrement.getAcount(em, confGl.getCptCheque());	
 		
-		//Compte crédité
+		//Compte Debité 
 		ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Modification decaissement Cr. " +d.getDemandeCredit().getNumCredit(),
-				decaissement.getPiece(), (ancienMontant * -1), 0, ut, ind, grp, d.getDemandeCredit(), null, accCred);
-		//Compte Debité
+				decaissement.getPiece(), 0, ancienMontant, ut, ind, grp, d.getDemandeCredit(), null, accCred);
+		
+		//Compte crédité
 		Account accDeb = CodeIncrement.getAcount(em, confGl.getCptPrincEnCoursInd());
 		ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Modification decaissement Cr. " +d.getDemandeCredit().getNumCredit(),
-				decaissement.getPiece(), 0, (ancienMontant * -1), ut, ind, grp, d.getDemandeCredit(), null, accDeb);
+				decaissement.getPiece(), ancienMontant, 0, ut, ind, grp, d.getDemandeCredit(), null, accDeb);
 		/****************************************************************/
 		/********************** Nouveau enregistrement *****************/
 		//Nouvel imputation
@@ -1663,13 +1696,14 @@ public class CreditServiceImpl implements CreditService {
 			FicheCredit f = new FicheCredit(decaissement.getDateDec(), "Decaissement", decaissement.getPiece(), decaissement.getMontantDec(),
 					0, 0, 0, decaissement.getMontantDec(), 0, decaissement.getMontantDec(), d.getDemandeCredit().getNumCredit());
 			
-			//Compte crédité
-			ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Decaissement crédit " +d.getDemandeCredit().getNumCredit(),
-					decaissement.getPiece(), decaissement.getMontantDec(), 0, ut, ind, grp, d.getDemandeCredit(), null, accCredNouv);
 			//Compte Debité
 			Account accDebNouv = CodeIncrement.getAcount(em, confGl.getCptPrincEnCoursInd());
 			ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Decaissement crédit " +d.getDemandeCredit().getNumCredit(),
 					decaissement.getPiece(), 0, decaissement.getMontantDec(), ut, ind, grp, d.getDemandeCredit(), null, accDebNouv);
+						
+			//Compte crédité
+			ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Decaissement crédit " +d.getDemandeCredit().getNumCredit(),
+					decaissement.getPiece(), decaissement.getMontantDec(), 0, ut, ind, grp, d.getDemandeCredit(), null, accCredNouv);
 			
 			transaction.begin();
 			em.merge(d);
@@ -1685,6 +1719,25 @@ public class CreditServiceImpl implements CreditService {
 		}
 	}
 
+	//Total décaissement
+	@Override
+	public double getTotalDecaissement() {
+		String sql = "select SUM(d.montantDec) from Decaissement d";
+		Query q = em.createQuery(sql);
+		return (double)q.getSingleResult();
+	}
+	
+	//Montant moyen de crédit
+	@Override
+	public double getMoyenCredit() {
+		String sql = "select SUM(d.montantDemande) from DemandeCredit d";
+		Query q = em.createQuery(sql);
+		if(q.getSingleResult() != null){
+			double total = (double)q.getSingleResult();
+			return total/2;
+		}
+		return 0;
+	}
 	
 	//Calcul difference entre la date au calendrier de remboursement et la date de paiement échéance
 	static Long calculDifferenceDate(String date, String numCredit){
@@ -2669,9 +2722,9 @@ public class CreditServiceImpl implements CreditService {
 
 	//Rapport garant crédit
 	@Override
-	public List<Garant> getGarantCredit(String numCredit) {
-		String sql = "select g from Garant g join g.demandeCredit d where d.numCredit='"+numCredit+"'";
-		TypedQuery<Garant> query = em.createQuery(sql,Garant.class);
+	public List<GarantCredit> getGarantCredit(String numCredit) {
+		String sql = "select g from GarantCredit g join g.credit d where d.numCredit='"+numCredit+"'";
+		TypedQuery<GarantCredit> query = em.createQuery(sql,GarantCredit.class);
 		if(!query.getResultList().isEmpty())
 			return query.getResultList();
 		return null;
@@ -3217,7 +3270,7 @@ public class CreditServiceImpl implements CreditService {
 				
 				//on va sélectionner tous les clients de l'agent en question
 				String sql ="select d from DemandeCredit d join d.agent u where u.idUtilisateur='"+utilisateur.getIdUtilisateur()+"' "
-						+ " and d.approbationStatut='Demande decaissé' and d.dateDemande between '"+dateDeb+"' and '"+dateFin+"'";			
+						+ " and d.approbationStatut='Demande decaissé' and d.dateDemande between '"+dateDeb+"' and '"+dateFin+"' and d.supprimer='false'";			
 				TypedQuery<DemandeCredit> quer2 = em.createQuery(sql,DemandeCredit.class);
 				//on va faire le parcours de demande crédit
 				if(!quer2.getResultList().isEmpty()){

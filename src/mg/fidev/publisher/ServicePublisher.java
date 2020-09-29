@@ -7,7 +7,7 @@ import mg.fidev.service.impl.CreditServiceImpl;
 import mg.fidev.service.impl.GroupeServiceImpl;
 import mg.fidev.service.impl.IndividuelServiceImpl;
 import mg.fidev.service.impl.ProduitEpargneServiceImpl;
-import mg.fidev.service.impl.UserServiceImpl; 
+import mg.fidev.service.impl.UserServiceImpl;
 
 public class ServicePublisher {
 
@@ -20,6 +20,8 @@ public class ServicePublisher {
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/credit", new CreditServiceImpl());
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/comptabilite", new ComptabliteServiceImpl());
 		System.out.println("-- Service Online --");    
+		
+		
 		/*LocalDate localDate = LocalDate.now();
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		//String d = "2020-04-12";
@@ -30,7 +32,7 @@ public class ServicePublisher {
 			java.util.Date d = simpleDateFormat.parse(localDate.toString());
 			System.out.println("Date = "+d);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			e.printStackTrace(); 
 		}
 		
 		double montant = 500;

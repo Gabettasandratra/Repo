@@ -59,6 +59,11 @@ public class Groupe implements Serializable {
 	@XmlTransient
 	private List<CompteDAT> compteDat;
 	
+	//Compte PEP
+	@OneToMany(mappedBy="groupe")
+	@XmlTransient
+	private List<ComptePep> comptePep;
+	
 	//bi-directional many-to-one association to DemandeCredit
 	@OneToMany(mappedBy="groupe")
 	@XmlTransient
@@ -114,6 +119,11 @@ public class Groupe implements Serializable {
 	@XmlTransient
 	private Individuel tresorier;
 	
+	//bi-directional many-to-one association to agence
+	@ManyToOne
+	@JoinColumn(name="codeAgence")
+	private Agence agence;
+
 	
 	public Groupe() {
 	}
@@ -334,5 +344,21 @@ public class Groupe implements Serializable {
 
 	public void setTresorier(Individuel tresorier) {
 		this.tresorier = tresorier;
+	}
+
+	public Agence getAgence() {
+		return agence;
+	}
+
+	public void setAgence(Agence agence) {
+		this.agence = agence;
+	}
+
+	public List<ComptePep> getComptePep() {
+		return comptePep;
+	}
+
+	public void setComptePep(List<ComptePep> comptePep) {
+		this.comptePep = comptePep;
 	}
 }

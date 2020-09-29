@@ -34,6 +34,9 @@ public class ProduitEpargne implements Serializable {
 	@Column(name="nom_prod_epargne")
 	private String nomProdEpargne;
 
+	@Column(name="supprimer")
+	private boolean supprimer;
+	
 	//bi-directional many-to-one association to CompteEpargne
 	@OneToMany(mappedBy="produitEpargne",cascade=CascadeType.REMOVE)
 	@XmlTransient
@@ -43,6 +46,11 @@ public class ProduitEpargne implements Serializable {
 	@OneToMany(mappedBy="produitEpargne",cascade=CascadeType.REMOVE)
 	@XmlTransient
 	private List<CompteDAT> compteDat;
+	
+	//Compte PEP
+	@OneToMany(mappedBy="produitEpargne",cascade=CascadeType.REMOVE)
+	@XmlTransient
+	private List<ComptePep> comptePep;
 
 	//bi-directional many-to-one association to ConfigGarantieCredit
 	@OneToMany(mappedBy="produitEpargne",cascade=CascadeType.REMOVE)
@@ -104,6 +112,14 @@ public class ProduitEpargne implements Serializable {
 
 	public void setNomProdEpargne(String nomProdEpargne) {
 		this.nomProdEpargne = nomProdEpargne;
+	}
+
+	public boolean isSupprimer() {
+		return supprimer;
+	}
+
+	public void setSupprimer(boolean supprimer) {
+		this.supprimer = supprimer;
 	}
 
 	public List<CompteEpargne> getCompteEpargnes() {
@@ -204,6 +220,14 @@ public class ProduitEpargne implements Serializable {
 
 	public void setCompteDat(List<CompteDAT> compteDat) {
 		this.compteDat = compteDat;
+	}
+
+	public List<ComptePep> getComptePep() {
+		return comptePep;
+	}
+
+	public void setComptePep(List<ComptePep> comptePep) {
+		this.comptePep = comptePep;
 	}
 
 }

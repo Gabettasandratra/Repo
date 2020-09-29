@@ -74,14 +74,26 @@
 		<class>mg.fidev.model.Cloture</class>
 		<class>mg.fidev.model.ClotureCompte</class>
 		<class>mg.fidev.model.CompteAuxilliaire</class>
+		<class>mg.fidev.model.FichierEducation</class>
+		<class>mg.fidev.model.FichierEtatCivil</class>
+		<class>mg.fidev.model.FichierSecteurActiviter</class>
+		<class>mg.fidev.model.GarantCredit</class>
+		<class>mg.fidev.model.Institution</class>
+		<class>mg.fidev.model.UtilisateurSupprimer</class>
+		<class>mg.fidev.model.TransactionEpargneSupp</class>
+		<class>mg.fidev.model.CompteEpargneSupp</class>
+		<class>mg.fidev.model.CompteDATSupp</class>
+		<class>mg.fidev.model.ComptePep</class>
+		<class>mg.fidev.model.ComptePepSupp</class>
+		<class>mg.fidev.model.TransactionPep</class>  
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/base_old"/>
 			<property name="javax.persistence.jdbc.user" value="root"/>
 			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
 			<property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
 			
-			<property name="eclipselink.ddlgeneration.output-mode" value="database"/>
-			<property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>  
+		<!--<property name="eclipselink.ddlgeneration.output-mode" value="database"/>
+			<property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>-->
 
 			<!-- <property name="eclipselink.ddl-generation" 	value="create-tables"/> -->
 		

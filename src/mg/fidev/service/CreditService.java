@@ -28,7 +28,7 @@ import mg.fidev.model.CrediGroupeView;
 import mg.fidev.model.Decaissement;
 import mg.fidev.model.DemandeCredit;
 import mg.fidev.model.FicheCredit;
-import mg.fidev.model.Garant;
+import mg.fidev.model.GarantCredit;
 import mg.fidev.model.GarantieCredit;
 import mg.fidev.model.GarantieView;
 import mg.fidev.model.ProduitCredit;
@@ -51,21 +51,33 @@ public interface CreditService {
 	@WebResult(name = "validation")
 	public ProduitCredit saveProduit_Credit(@WebParam(name = "nomProd") @XmlElement(required=true,nillable=false) String nomProdCredit,@WebParam(name = "etat") @XmlElement(required=true,nillable=false) boolean etat);
 	
+	/**
+	 * Methode pour Modifier un Produit Credit
+	 **/
 	@WebMethod
-	@WebResult(name="voir_Demande")
-	public List<DemandeCredit> findAllDemand();
+	@WebResult(name = "validation")
+	public ProduitCredit updateProduitCredit(@WebParam(name = "numCredit") @XmlElement(required=true,nillable=false) String numcredit,
+			@WebParam(name = "produit") ProduitCredit p);
+	
+	/**
+	 * Methode Pour Supprimer un Credit Produit
+	 **/
+	@WebMethod
+	@WebResult(name = "validation")
+	public String deleteProduitCredit(@WebParam(name="idProduitCredit") String id);
+	
 
 	/** 
 	 * Methode pour Lister les Produits Credits  	
 	 **/
 	@WebMethod
 	@WebResult(name="Listes_ProduitCredit")
-	public List<ProduitCredit> findAllCredit();
+	public List<ProduitCredit> findAllCredit(); 
 	
-	//Lister LES COMPTES CAISSES
+	//Liste des produits crédit supprimé
 	@WebMethod
-	@WebResult(name="Liste_CompteCaisse")
-	public List<Caisse> findAllComptCaisse();
+	@WebResult(name="resultat")
+	public List<ProduitCredit> getProduitSupprimer();
 	
 	/**
 	 * Methode pour Chercher un Produit Credit par la Clé primaire
@@ -74,6 +86,27 @@ public interface CreditService {
 	@WebResult(name = "validation")
 	public ProduitCredit findOne(@WebParam(name="idProduitCredit") String id);
 	
+	/**
+	 * Methode Pour Chercher Produit Par Mot Clé
+	 **/	
+	@WebMethod
+	@WebResult(name = "validation")
+	public List<ProduitCredit> findCreditByMc(@WebParam(name = "mc") String mc);
+	
+	
+	//------------------------------------------------------------------------------------------------
+	
+	//Lister LES COMPTES CAISSES
+	@WebMethod
+	@WebResult(name="Liste_CompteCaisse")
+	public List<Caisse> findAllComptCaisse();
+		
+	//------------------------------------------------------------------------------------------------
+	/****************************** DEMANDE CREDIT***************************************************/
+	@WebMethod
+	@WebResult(name="voir_Demande")
+	public List<DemandeCredit> findAllDemand();
+
 	//chercher par numéro crédit
 	@WebMethod
 	@WebResult(name="resultat")
@@ -86,13 +119,6 @@ public interface CreditService {
 			@WebParam(name = "approbation") boolean ap, 
 			@WebParam(name = "commission") boolean comm,
 			@WebParam(name = "decaisser") boolean decaisser);
-	
-	/**
-	 * Methode Pour Chercher Produit Par Mot Clé
-	 **/	
-	@WebMethod
-	@WebResult(name = "validation")
-	public List<ProduitCredit> findCreditByMc(@WebParam(name = "mc") String mc);
 	
 	//Liste commission avant ou après approbation
 	@WebMethod
@@ -113,29 +139,13 @@ public interface CreditService {
 	public List<DemandeCredit> findDemandeNonApprouver(
 			@WebParam(name = "approuver") boolean approuver);
 	
-	
-	/**
-	 * Methode pour Modifier un Produit Credit
-	 **/
-	@WebMethod
-	@WebResult(name = "validation")
-	public ProduitCredit updateProduitCredit(@WebParam(name = "numCredit") @XmlElement(required=true,nillable=false) String numcredit,
-			@WebParam(name = "produit") ProduitCredit p);
-	
-	/**
-	 * Methode Pour Supprimer un Credit Produit
-	 **/
-	@WebMethod
-	@WebResult(name = "validation")
-	public String deleteProduitCredit(@WebParam(name="idProduitCredit") String id);
-	
 	//-----------------------------------------------------------------------------
 	
 	/******************************** Demande crédit Individuel *******************************/
 	//Enregistrement DEMANDE CREDIT 	
 	@WebMethod
 	@WebResult(name="validation")
-	public boolean saveDemandeCreditIndividuel(
+	public String saveDemandeCreditIndividuel(
 	@WebParam(name="idProduit") @XmlElement(required=true,nillable=false) String idProduit, 
 	@WebParam(name="codeInd") @XmlElement(required=false,nillable=true)  String codeInd, 
 	@WebParam(name="demandeCredit") @XmlElement(required=true,nillable=false) DemandeCredit demande, 
@@ -144,9 +154,12 @@ public interface CreditService {
 	@WebParam(name="codeGar2") @XmlElement(required=false,nillable=true)String codeGar2,
 	@WebParam(name="codeGar3") @XmlElement(required=false,nillable=true)String codeGar3,
 	@WebParam(name="user_id") @XmlElement(required=true,nillable=false) int user_id,
-	@WebParam(name="tauxGar1") @XmlElement(required=false,nillable=true)double tauxGar1,
-	@WebParam(name="tauxGar2") @XmlElement(required=false,nillable=true)double tauxGar2,
-	@WebParam(name="tauxGar3") @XmlElement(required=false,nillable=true)double tauxGar3
+	@WebParam(name="tauxGar1") @XmlElement(required=false,nillable=true)int tauxGar1,
+	@WebParam(name="tauxGar2") @XmlElement(required=false,nillable=true)int tauxGar2,
+	@WebParam(name="tauxGar3") @XmlElement(required=false,nillable=true)int tauxGar3,
+	@WebParam(name="lien1") @XmlElement(required=false,nillable=true)String lien1,
+	@WebParam(name="lien2") @XmlElement(required=false,nillable=true)String lien2,
+	@WebParam(name="lien3") @XmlElement(required=false,nillable=true)String lien3
 	);
 	
 	//Modifier demande crédit
@@ -362,6 +375,16 @@ public interface CreditService {
 		@WebParam(name="userUpdate")int userUpdate,
 		@WebParam(name="numCred")String numCred);
 	
+	//Total decaissement
+	@WebMethod
+	@WebResult(name="resultat")
+	public double getTotalDecaissement();
+	
+	//Montant moyen de crédit
+	@WebMethod
+	@WebResult(name="resultat")
+	public double getMoyenCredit();
+	
 	//-----------------------------------------------------------------------------------
 	/********************************* Remboursement crédit ****************************/
 	//REMBOURSEMENT
@@ -464,7 +487,7 @@ public interface CreditService {
 	//Rapport garants 
 	@WebMethod
 	@WebResult(name="resultat")
-	public List<Garant> getGarantCredit(
+	public List<GarantCredit> getGarantCredit(
 	@WebParam(name="numCredit")@XmlElement(required=false,nillable=true)String numCredit);
 	
 	//Rapport garantie

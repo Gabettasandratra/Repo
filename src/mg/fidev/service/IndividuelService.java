@@ -68,6 +68,13 @@ public interface IndividuelService {
 	@WebResult(name = "resultat")
 	public List<Individuel> getAllIndividuel();
 	
+	//Recuperer client par utilisateurs
+	@WebMethod
+	@WebResult(name = "resultat")
+	public List<Individuel> getIndividuelByUser(
+			@WebParam(name = "user") @XmlElement(required = false, nillable= true)int user);
+	
+	
 	//Rapport client individuel
 	@WebMethod
 	@WebResult(name = "resultat")
@@ -81,6 +88,14 @@ public interface IndividuelService {
 			@WebParam(name = "dateFin") @XmlElement(required = false, nillable= true) String dateFin,
 			@WebParam(name = "startDate") @XmlElement(required = false, nillable= true)String startDate, 
 			@WebParam(name = "endDate") @XmlElement(required = false, nillable= true) String endDate);
+	
+	//Rapport client individuel supprimés
+	@WebMethod
+	@WebResult(name = "resultat")
+	public List<Individuel> rapportsIndividuelSupp(
+			@WebParam(name = "agence") @XmlElement(required = false, nillable= true)String agence,
+			@WebParam(name = "dateDeb") @XmlElement(required = false, nillable= true)String dateDeb, 
+			@WebParam(name = "dateFin") @XmlElement(required = false, nillable= true) String dateFin);
 
 	/***
 	 * AJOUTER AU LISTE ROUGE
@@ -107,7 +122,9 @@ public interface IndividuelService {
 	 * ***/
 	@WebMethod
 	@WebResult(name="resultat")
-	public List<Individuel> findByCode(@WebParam(name = "code")@XmlElement(required = true)String code);
+	public List<Individuel> findByCode(
+			@WebParam(name = "code")@XmlElement(required = true)String code,
+			@WebParam(name = "idUser")@XmlElement(required = false)int user);
 	
 	//Liste garant de crédit
 	@WebMethod
@@ -172,12 +189,20 @@ public interface IndividuelService {
 	//Liste client approuvé
 	@WebMethod
 	@WebResult(name="resultat")
-	public List<Individuel> getClientApprouver();
+	public List<Individuel> getClientApprouver(
+			@WebParam(name = "idUser")@XmlElement(required = false)int user);
 	
 	//Liste client non approuvé
 	@WebMethod
 	@WebResult(name="resultat")
-	public List<Individuel> getClientNonApprouver();
+	public List<Individuel> getClientNonApprouver(
+			@WebParam(name = "idUser")@XmlElement(required = false)int user);
+	
+	//Liste clients individuel supprimés
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<Individuel> getClientSupprimer(
+			@WebParam(name = "idUser")@XmlElement(required = false)int user);
 	
 	//Recuperé CIN ou Passeport client
 	@WebMethod

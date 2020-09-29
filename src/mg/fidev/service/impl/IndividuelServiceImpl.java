@@ -4,6 +4,7 @@ package mg.fidev.service.impl;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Adresse;
+import mg.fidev.model.Agence;
 import mg.fidev.model.CompteEpargne;
 import mg.fidev.model.DemandeCredit;
 import mg.fidev.model.Docidentite;
@@ -23,6 +25,7 @@ import mg.fidev.model.Garant;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
 import mg.fidev.model.ListeRouge;
+import mg.fidev.model.Utilisateur;
 import mg.fidev.service.IndividuelService;
 import mg.fidev.utils.CodeIncrement;
 
@@ -33,7 +36,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 			PERSISTENCE_UNIT_NAME).createEntityManager();
 	private static EntityTransaction transaction = em.getTransaction(); 
 
-	/***
+	/***    
 	 * LISTE DES CLIENTS INDIVIDUELS 
 	 * ***/
 	@Override
@@ -72,48 +75,53 @@ public class IndividuelServiceImpl implements IndividuelService {
 	public boolean insertIndividuel(Individuel individuel, String codeAgence,
 			Docidentite docIdentite, Adresse adresse, String codeGrp) {
 		
-		individuel.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
-		individuel.setEstClientIndividuel(true);
-		individuel.setAdresse(adresse);
-		docIdentite.setIndividuel(individuel);
-		try {
-			
-			if(individuel.getEstGarant() == true){
-				Garant gar = new Garant(CodeIncrement.getCodeGar(em, codeAgence), individuel.getNomClient(), individuel.getPrenomClient(),
-						individuel.getDateNaissance(),individuel.getDateInscription()
-						, individuel.getEmail(), true, individuel.getProfession(), 
-						individuel.getSexe(), individuel.getCodeInd(), null, adresse);
+		if(!codeAgence.equals("")){			
+			Agence ag = em.find(Agence.class, codeAgence);
+			individuel.setCodeInd(CodeIncrement.getCodeInd(em, codeAgence));
+			individuel.setEstClientIndividuel(true);
+			individuel.setAdresse(adresse);
+			individuel.setAgence(ag); 
+			docIdentite.setIndividuel(individuel);
+			try {
+				
+				if(individuel.getEstGarant() == true){
+					Garant gar = new Garant(CodeIncrement.getCodeGar(em, codeAgence), individuel.getNomClient(), individuel.getPrenomClient(),
+							individuel.getDateNaissance(),individuel.getDateInscription()
+							, individuel.getEmail(), true, individuel.getProfession(), 
+							individuel.getSexe(), individuel.getCodeInd(), null, adresse);
+						
+					docIdentite.setGarant(gar);
+					transaction.begin();
+					em.persist(gar);
+					em.persist(docIdentite);
+					transaction.commit();
+					em.refresh(gar);
+					individuel.setEstGarant(true);
+					individuel.setCodeGarant(gar.getCodeGarant());
 					
-				docIdentite.setGarant(gar);
+				}
+				
+				if(!codeGrp.equals("")){
+					Groupe g = em.find(Groupe.class, codeGrp);
+					individuel.setGroupe(g); 
+				}
+				
 				transaction.begin();
-				em.persist(gar);
+				em.persist(individuel);
 				em.persist(docIdentite);
 				transaction.commit();
-				em.refresh(gar);
-				individuel.setEstGarant(true);
-				individuel.setCodeGarant(gar.getCodeGarant());
-				
+				em.refresh(individuel);
+				em.refresh(docIdentite);
+				System.out.println("Insertion nouveau client individuel");
+				//return "Succes";
+				return true;
+			} catch (Exception e) {
+				System.err.println("Erreur insertion individuel "+e.getMessage());
+				//return "Error";
+				return false;
 			}
-			
-			if(!codeGrp.equals("")){
-				Groupe g = em.find(Groupe.class, codeGrp);
-				individuel.setGroupe(g); 
-			}
-			
-			transaction.begin();
-			em.persist(individuel);
-			em.persist(docIdentite);
-			transaction.commit();
-			em.refresh(individuel);
-			em.refresh(docIdentite);
-			System.out.println("Insertion nouveau client individuel");
-			//return "Succes";
-			return true;
-		} catch (Exception e) {
-			System.err.println("Erreur insertion individuel "+e.getMessage());
-			//return "Error";
-			return false;
 		}
+		return false;
 	}
 	
 	//Modifier client individuel
@@ -127,6 +135,9 @@ public class IndividuelServiceImpl implements IndividuelService {
 		Docidentite dc = em.find(Docidentite.class, doc.getNumero());
 		dc = doc;
 		
+		Agence ag = em.find(Agence.class, codeAgence);
+		
+		ind.setAgence(ag); 
 		ind.setNomClient(individuel.getNomClient());
 		ind.setPrenomClient(individuel.getPrenomClient());
 		ind.setDateInscription(individuel.getDateInscription());
@@ -222,6 +233,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 	public boolean saveGarant(Individuel individuel, Adresse adresse, Docidentite docId, String codeAgence) {
 		
 		Garant gar = new Garant();
+		Agence ag = em.find(Agence.class, codeAgence);
 		
 		gar.setCodeGarant(CodeIncrement.getCodeGar(em, codeAgence));
 		gar.setDateInscription(individuel.getDateInscription());
@@ -231,7 +243,9 @@ public class IndividuelServiceImpl implements IndividuelService {
 		gar.setPrenom(individuel.getPrenomClient());
 		gar.setProfession(individuel.getProfession());
 		gar.setSexe(individuel.getSexe());
+		gar.setSupprimer(false);
 		gar.setAdresse(adresse);
+		gar.setAgence(ag); 
 		docId.setGarant(gar);
 		
 		try {
@@ -339,21 +353,31 @@ public class IndividuelServiceImpl implements IndividuelService {
 
 	//chercher client individuel par son code
 	@Override
-	public List<Individuel> findByCode(String code) {
-		TypedQuery<Individuel> query = em.createQuery("SELECT i FROM Individuel i WHERE (i.codeInd LIKE :code "
-				+ " OR i.nomClient LIKE :code OR i.prenomClient LIKE :code)"
-				+ " AND i.estClientIndividuel = :x AND i.approuver =:y AND i.supprimer =:z",Individuel.class);
-		query.setParameter("code", code+"%");
-		query.setParameter("x", true);
-		query.setParameter("y", true);
-		query.setParameter("z", false);
+	public List<Individuel> findByCode(String code, int user) {
+		Utilisateur ut = em.find(Utilisateur.class, user);
+		List<Individuel> result = new ArrayList<Individuel>();
 		
-		List<Individuel> result = query.getResultList();
+		List<Agence> ag = ut.getAgences();
 		
-		if(!result.isEmpty())return result;
-		else System.out.println("Aucun client trouvé!!!");
-		
-		return null;
+		if(ag != null){
+			for (Agence agence : ag) {
+				String sql = "select i from Individuel i join i.agence ag where "
+						+ "(i.codeInd LIKE '"+ code +"%' OR i.nomClient LIKE '"+ code +"%' OR i.prenomClient LIKE '"+ code +"%') "
+						+ "AND i.estClientIndividuel = '"+ true +"' AND i.approuver ='"+ true +"' AND i.supprimer ='"+ false +"' "
+								+ "AND ag.codeAgence='"+agence.getCodeAgence()+"'";
+				
+				TypedQuery<Individuel> query = em.createQuery(sql, Individuel.class);
+							
+				//List<Individuel> result = query.getResultList();
+				
+				if(!query.getResultList().isEmpty()){
+					result.addAll(query.getResultList());
+				}
+				else System.out.println("Aucun client trouvé!!!");
+			}			
+		}
+			
+		return result;
 	}
 
 	//liste garant crédit
@@ -410,7 +434,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 				sql+=" and a.adressePhysique like '%"+ adresse +"%'";
 			}			
 			if(!agence.equals("")){
-				sql+=" and i.codeInd like '%"+ agence +"%'";
+				sql+=" and i.codeInd like '"+ agence +"%'";
 			}
 			if(!nivEtude.equals("")){
 				sql+=" and i.niveauEtude like '%"+ nivEtude +"%'";
@@ -426,8 +450,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 							
 			}
 			if(!dateDeb.equals("") && !dateFin.equals("")){
-				sql+=" and i.dateNaissance between '"+ dateDeb +"' and '"+ dateFin +"'";
-				
+				sql+=" and i.dateNaissance between '"+ dateDeb +"' and '"+ dateFin +"'";	
 			}	
 			
 			if(!startDate.equals("") && endDate.equals("")){
@@ -440,7 +463,34 @@ public class IndividuelServiceImpl implements IndividuelService {
 			
 		}
 		
-		sql +=" order by i.nomClient asc";
+		sql +=" and i.supprimer ='false' order by i.nomClient asc";
+		
+		TypedQuery<Individuel> query = em.createQuery(sql, Individuel.class);
+				
+		if(!query.getResultList().isEmpty()){
+			return query.getResultList();
+		}		
+		return null;
+	}
+	
+	//Rapports clients individuels supprimés
+	@Override
+	public List<Individuel> rapportsIndividuelSupp(String agence, String dateDeb, String dateFin) {
+		String sql = "select i from Individuel i where i.estClientIndividuel = '"+true+"' ";		
+		
+		if(!agence.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
+			
+			if(!agence.equals("") ){
+				sql+=" and i.codeInd like '"+ agence +"%'";
+			}	
+			
+			if(!dateDeb.equals("") && !dateFin.equals("")){
+				sql+=" and i.dateSortie between '"+ dateDeb +"' and '"+ dateFin +"'";	
+			}	
+			
+		}
+		
+		sql +=" and i.supprimer ='true' order by i.nomClient asc";
 		
 		TypedQuery<Individuel> query = em.createQuery(sql, Individuel.class);
 				
@@ -562,30 +612,6 @@ public class IndividuelServiceImpl implements IndividuelService {
 		}
 	}
 
-	@Override
-	public List<Individuel> getClientApprouver() {
-		TypedQuery<Individuel> q1 = em
-		.createQuery("select i from Individuel i where i.approuver = :ap and i.estClientIndividuel = :individuel AND i.supprimer =:z",
-						Individuel.class);
-		q1.setParameter("ap", true);
-		q1.setParameter("individuel", true);
-		q1.setParameter("z", false);
-			
-		return q1.getResultList();
-	}
-
-	@Override
-	public List<Individuel> getClientNonApprouver() {
-		TypedQuery<Individuel> q1 = em
-				.createQuery("select i from Individuel i where i.approuver = :individuel and i.estClientIndividuel = :ap"
-						+ " AND i.supprimer =:z",Individuel.class);
-				q1.setParameter("individuel", false);
-				q1.setParameter("ap", true);
-				q1.setParameter("z", false);
-					
-				return q1.getResultList();
-	}
-
 	//Recuperé CIN ou Passeport client
 	@Override
 	public Docidentite getDocidentite(String codeInd) {
@@ -594,6 +620,87 @@ public class IndividuelServiceImpl implements IndividuelService {
 		if(!q.getResultList().isEmpty())
 			return (Docidentite) q.getSingleResult();
 		return null;
+	}
+
+	//Recuperer client par utilisateurs
+	@Override
+	public List<Individuel> getIndividuelByUser(int user) {
+		//String sql = "select i from Individuel i join i.agence a join a.utilisateurs u where  ";
+		List<Individuel> result = new ArrayList<Individuel>();
+		Utilisateur ut = em.find(Utilisateur.class, user);	
+		for (Agence agence : ut.getAgences()) {
+			for (Individuel ind : agence.getIndividuels()) {
+				if(ind.getEstClientIndividuel() == true && ind.isApprouver() == true && ind.isSupprimer() == false)
+					result.add(ind);					
+			}
+		}
+		return result;
+	}
+
+	//Liste clients individuels approuvés
+	@Override
+	public List<Individuel> getClientApprouver(int user) {
+		/*TypedQuery<Individuel> q1 = em
+				.createQuery("select i from Individuel i where i.approuver = :ap and i.estClientIndividuel = :individuel AND i.supprimer =:z",
+								Individuel.class);
+				q1.setParameter("ap", true);
+				q1.setParameter("individuel", true);
+				q1.setParameter("z", false);
+					
+				return q1.getResultList();*/
+		List<Individuel> result = new ArrayList<Individuel>();
+		Utilisateur ut = em.find(Utilisateur.class, user);
+		List<Agence> ag = ut.getAgences();
+		for (Agence agence : ag) {
+			List<Individuel> inds = agence.getIndividuels();
+			for (Individuel individuel : inds) {
+				if(individuel.isApprouver() == true && individuel.getEstClientIndividuel() == true 
+						&& individuel.isSupprimer() == false)
+					result.add(individuel);
+			}
+		}
+		return result;
+	}
+
+	//Liste clients non approuvé
+	@Override
+	public List<Individuel> getClientNonApprouver(int user) {
+		/*TypedQuery<Individuel> q1 = em
+				.createQuery("select i from Individuel i where i.approuver = :individuel and i.estClientIndividuel = :ap"
+						+ " AND i.supprimer =:z",Individuel.class);
+				q1.setParameter("individuel", false);
+				q1.setParameter("ap", true);
+				q1.setParameter("z", false);
+					
+				return q1.getResultList();*/
+		List<Individuel> result = new ArrayList<Individuel>();
+		Utilisateur ut = em.find(Utilisateur.class, user);
+		List<Agence> ag = ut.getAgences();
+		for (Agence agence : ag) {
+			List<Individuel> inds = agence.getIndividuels();
+			for (Individuel individuel : inds) {
+				if(individuel.isApprouver() == false && individuel.getEstClientIndividuel() == true 
+						&& individuel.isSupprimer() == false)
+					result.add(individuel);
+			}
+		}
+		return result;
+	}
+
+	//Liste clients supprimés
+	@Override
+	public List<Individuel> getClientSupprimer(int user) {
+		List<Individuel> result = new ArrayList<Individuel>();
+		Utilisateur ut = em.find(Utilisateur.class, user);
+		List<Agence> ag = ut.getAgences();
+		for (Agence agence : ag) {
+			List<Individuel> inds = agence.getIndividuels();
+			for (Individuel individuel : inds) {
+				if(individuel.isSupprimer() == true)
+					result.add(individuel);
+			}
+		}
+		return result;
 	}
 	
 }

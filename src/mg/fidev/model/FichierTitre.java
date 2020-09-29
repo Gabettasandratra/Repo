@@ -1,7 +1,11 @@
 package mg.fidev.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 
 /**
@@ -10,17 +14,28 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="fichier_titre")
-@NamedQuery(name="FichierTitre.findAll", query="SELECT f FROM FichierTitre f")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class FichierTitre implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private int id;
+	
 	private String titre;
 
 	private String description;
 
 	public FichierTitre() {
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getTitre() {

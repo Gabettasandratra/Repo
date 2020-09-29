@@ -159,6 +159,11 @@ public class DemandeCredit implements Serializable {
 	@XmlTransient
 	private List<CreditMembreGroupe> montantMembres;
 	
+	@OneToMany(mappedBy="credit")
+	@XmlTransient
+	private List<GarantCredit> garantCredits; 
+	
+	
 	/**************************************************************************************************************************************/
 							/***************************RELATION MANY TO ONE***************************************/
 	/**************************************************************************************************************************************/
@@ -628,6 +633,13 @@ public class DemandeCredit implements Serializable {
 
 	public void setUser_update(Utilisateur user_update) {
 		this.user_update = user_update;
-	}	
+	}
 
+	public List<GarantCredit> getGarantCredits() {
+		return garantCredits;
+	}
+
+	public void setGarantCredits(List<GarantCredit> garantCredits) {
+		this.garantCredits = garantCredits;
+	}	
 }

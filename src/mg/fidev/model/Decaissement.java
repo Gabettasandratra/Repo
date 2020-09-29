@@ -47,7 +47,6 @@ public class Decaissement implements Serializable {
 
 	private float totvat;
 
-
 	private float pocFee;
 
 	private float tdf;
@@ -55,7 +54,6 @@ public class Decaissement implements Serializable {
 	@Column(name="cpt_caisse_num")
 	private String cptCaisseNum;
 	
-
 	//bi-directional many-to-one association to DemandeCredit
 	@ManyToOne
 	@JoinColumn(name="num_credit")
