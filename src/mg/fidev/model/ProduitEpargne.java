@@ -76,6 +76,16 @@ public class ProduitEpargne implements Serializable {
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="configGeneralDat")
 	private ConfigGeneralDAT configGeneralDat;
+	
+	//Config Général produit PEP
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configGeneralPEP")
+	private ConfigGeneralPEP configGeneralPEP;
+	
+	//Config GL produit PEP
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="configGlPep")
+	private ConfigGLPEP configGlPep;
 
 	//bi-directional many-to-one association to ConfigProdEp
 	@ManyToOne(cascade = CascadeType.ALL)
@@ -228,6 +238,22 @@ public class ProduitEpargne implements Serializable {
 
 	public void setComptePep(List<ComptePep> comptePep) {
 		this.comptePep = comptePep;
+	}
+
+	public ConfigGeneralPEP getConfigGeneralPEP() {
+		return configGeneralPEP;
+	}
+
+	public void setConfigGeneralPEP(ConfigGeneralPEP configGeneralPEP) {
+		this.configGeneralPEP = configGeneralPEP;
+	}
+
+	public ConfigGLPEP getConfigGlPep() {
+		return configGlPep;
+	}
+
+	public void setConfigGlPep(ConfigGLPEP configGlPep) {
+		this.configGlPep = configGlPep;
 	}
 
 }

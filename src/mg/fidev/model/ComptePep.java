@@ -31,6 +31,8 @@ public class ComptePep implements Serializable {
 	
 	private String dateFinDepot;
 	
+	private int totPeriode;
+	
 	private int periode;
 	
 	private String frequence;
@@ -40,6 +42,8 @@ public class ComptePep implements Serializable {
 	private double totalInteret;
 	
 	private double tauxInt;
+	
+	private boolean ret;
 	
 	//bi-directional many-to-one association to ProduitEpargne
 	@ManyToOne
@@ -69,6 +73,15 @@ public class ComptePep implements Serializable {
 	@OneToMany(mappedBy="comptePep")
 	@XmlTransient
 	private List<TransactionPep> transaction;
+	
+	@OneToMany(mappedBy="comptePep")
+	@XmlTransient
+	private List<CalendrierPep> calendriers;
+	
+	@OneToMany(mappedBy="comptePep")
+	@XmlTransient     
+	private List<Grandlivre> grandLivre;
+
 
 	public ComptePep() {
 		super();
@@ -123,6 +136,14 @@ public class ComptePep implements Serializable {
 		this.solde = solde;
 	}
 	
+	public int getTotPeriode() {
+		return totPeriode;
+	}
+
+	public void setTotPeriode(int totPeriode) {
+		this.totPeriode = totPeriode;
+	}
+
 	public double getTotalInteret() {
 		return totalInteret;
 	}
@@ -137,6 +158,14 @@ public class ComptePep implements Serializable {
 
 	public void setTauxInt(double tauxInt) {
 		this.tauxInt = tauxInt;
+	}
+
+	public boolean isRet() {
+		return ret;
+	}
+
+	public void setRet(boolean ret) {
+		this.ret = ret;
 	}
 
 	public ProduitEpargne getProduitEpargne() {
@@ -186,4 +215,21 @@ public class ComptePep implements Serializable {
 	public void setUserUpdate(Utilisateur userUpdate) {
 		this.userUpdate = userUpdate;
 	}
+
+	public List<CalendrierPep> getCalendriers() {
+		return calendriers;
+	}
+
+	public void setCalendriers(List<CalendrierPep> calendriers) {
+		this.calendriers = calendriers;
+	}
+
+	public List<Grandlivre> getGrandLivre() {
+		return grandLivre;
+	}
+
+	public void setGrandLivre(List<Grandlivre> grandLivre) {
+		this.grandLivre = grandLivre;
+	}
+
 }

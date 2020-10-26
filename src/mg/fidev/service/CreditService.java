@@ -33,8 +33,9 @@ import mg.fidev.model.GarantieCredit;
 import mg.fidev.model.GarantieView;
 import mg.fidev.model.ProduitCredit;
 import mg.fidev.model.Remboursement;
-import mg.fidev.utils.AfficheSoldeRestantDu;
 import mg.fidev.utils.Agent;
+import mg.fidev.utils.credit.AfficheMontantDue;
+import mg.fidev.utils.credit.AfficheSoldeRestantDu;
 
 
 @WebService(name = "creditProduitService", targetNamespace = "http://fidev.mg.creditProduitService", serviceName = "creditProduitService", portName = "creditServicePort")
@@ -106,8 +107,15 @@ public interface CreditService {
 	@WebMethod
 	@WebResult(name="voir_Demande")
 	public List<DemandeCredit> findAllDemand();
+	
 
-	//chercher par numéro crédit
+	//chercher un demande crédit par numéro crédit
+	@WebMethod
+	@WebResult(name="resultat")
+	public DemandeCredit getOneDemande(
+			@WebParam(name = "mc") String mc);
+
+	//chercher tous demande crédits par numéro crédit
 	@WebMethod
 	@WebResult(name="resultat")
 	public List<DemandeCredit> chercherCredit(@WebParam(name = "mc") String mc, @WebParam(name = "statu") String statu);
@@ -415,7 +423,7 @@ public interface CreditService {
 	//AFFICHE MONTANT A REMBOURSER aujourd'hui
 	@WebMethod
 	@WebResult(name="list")
-	public List<String> getMontaRemb(@WebParam(name="numCredit") String numCredit
+	public AfficheMontantDue getMontaRemb(@WebParam(name="numCredit") String numCredit
 			,@WebParam(name="date") String date);
 	
 	//-----------------------------------------------------------------------------------
@@ -496,6 +504,28 @@ public interface CreditService {
 	public List<GarantieCredit> getGarantieCredit(
 	@WebParam(name="numCredit")@XmlElement(required=false,nillable=true)String numCredit);	
 	
+	//Rapport liste de tous les garants crédits dans une période
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<GarantCredit> getGarantCreditByPeriode(
+	@XmlElement(required=false,nillable=true) @WebParam(name="agence")String agence,
+	@XmlElement(required=false,nillable=true) @WebParam(name="client")String client,
+	@XmlElement(required=false,nillable=true) @WebParam(name="produit")String produit,
+	@WebParam(name="dateDeb")@XmlElement(required=false,nillable=true)String dateDeb,
+	@WebParam(name="dateFin")@XmlElement(required=false,nillable=true)String dateFin
+	);
+
+	//Rapport liste de tous les garanties crédits dans une période
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<GarantieCredit> getGarantieCreditByPeriode(
+			@XmlElement(required=false,nillable=true) @WebParam(name="agence")String agence,
+			@XmlElement(required=false,nillable=true) @WebParam(name="client")String client,
+			@XmlElement(required=false,nillable=true) @WebParam(name="produit")String produit,
+			@WebParam(name="dateDeb")@XmlElement(required=false,nillable=true)String dateDeb,
+			@WebParam(name="dateFin")@XmlElement(required=false,nillable=true)String dateFin,
+			@WebParam(name="type")@XmlElement(required=false,nillable=true)String type);	
+	
 	//Rapport solde restant dû
 	@WebMethod
 	@WebResult(name="resultat")
@@ -519,6 +549,14 @@ public interface CreditService {
 	public List<Agent> analysePortefeuille(
 	@WebParam(name="dateDeb")@XmlElement(required=false,nillable=true)String dateDeb,
 	@WebParam(name="dateFin")@XmlElement(required=false,nillable=true)String dateFin);
+	
+	//Historique crédit
+	@WebMethod
+	@WebResult(name="resultat")
+	public List<DemandeCredit> getHistoriqueCredit(
+			@WebParam(name="codeInd")@XmlElement(required=false,nillable=true)String codeInd,
+			@WebParam(name="codeGrp")@XmlElement(required=false,nillable=true)String codeGrp);
+	
 	
 	
 /*************************************************** CONFIGURATION CREDITS *********************************************************************/
@@ -615,6 +653,9 @@ public interface CreditService {
 			@WebParam(name= "idProduit") @XmlElement(required=true,nillable=false) String idProduit);
 	
 	public List<CalView> testCal();
+	
+	
+	
 	
 /*	@WebMethod
 	@WebResult(name="historique_demande")

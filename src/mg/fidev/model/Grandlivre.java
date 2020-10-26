@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -21,6 +22,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * 
  */
 @Entity
+@Table
 @NamedQuery(name="Grandlivre.findAll", query="SELECT g FROM Grandlivre g")
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -83,6 +85,10 @@ public class Grandlivre implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="compte_dat")
 	private CompteDAT compteDat;
+	
+	@ManyToOne
+	@JoinColumn(name="compte_pep")
+	private ComptePep comptePep;
 	
 	@ManyToOne
 	@JoinColumn(name="num_compte_compta")
@@ -163,6 +169,27 @@ public class Grandlivre implements Serializable {
 		this.account = account;
 	}
 
+	public Grandlivre(String tcode, String date, String descr, String piece,
+			double credit, double debit, double solde, Utilisateur utilisateur,
+			Individuel codeInd, Groupe groupe, Agence agence,
+			ComptePep comptePep, Account account) {
+		super();
+		this.tcode = tcode;
+		this.date = date;
+		this.descr = descr;
+		this.piece = piece;
+		this.credit = credit;
+		this.debit = debit;
+		this.solde = solde;
+		this.utilisateur = utilisateur;
+		this.codeInd = codeInd;
+		this.groupe = groupe;
+		this.agence = agence;
+		this.comptePep = comptePep;
+		this.account = account;
+	}
+
+	
 	public String getId() {
 		return this.id;
 	}
@@ -345,6 +372,14 @@ public class Grandlivre implements Serializable {
 
 	public void setAuxilliaire(CompteAuxilliaire auxilliaire) {
 		this.auxilliaire = auxilliaire;
+	}
+
+	public ComptePep getComptePep() {
+		return comptePep;
+	}
+
+	public void setComptePep(ComptePep comptePep) {
+		this.comptePep = comptePep;
 	}
 
 }

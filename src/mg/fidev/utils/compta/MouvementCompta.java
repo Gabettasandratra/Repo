@@ -1,4 +1,4 @@
-package mg.fidev.utils;
+package mg.fidev.utils.compta;
 
 import java.io.Serializable;
 import java.util.List;

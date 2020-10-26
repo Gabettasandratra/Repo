@@ -133,7 +133,16 @@ public class IndividuelServiceImpl implements IndividuelService {
 		ad = adres;
 		
 		Docidentite dc = em.find(Docidentite.class, doc.getNumero());
-		dc = doc;
+		dc.setDateEmis(doc.getDateEmis());
+		dc.setDateExpire(doc.getDateExpire());
+		dc.setDelivrePar(doc.getDelivrePar());
+		dc.setNumero(doc.getNumero());
+		dc.setPriorite(doc.getPriorite());
+		if(!doc.getRecto().equals(""))
+			dc.setRecto(doc.getRecto());
+		if(!doc.getVerso().equals(""))
+			dc.setVerso(doc.getVerso());
+		dc.setTypedoc(doc.getTypedoc());
 		
 		Agence ag = em.find(Agence.class, codeAgence);
 		
@@ -599,6 +608,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 	public boolean approbationClient(String code) {
 		Individuel ind = em.find(Individuel.class, code);
 		ind.setApprouver(true);
+		ind.setSain(true);
 		try {
 			transaction.begin();
 			em.merge(ind);

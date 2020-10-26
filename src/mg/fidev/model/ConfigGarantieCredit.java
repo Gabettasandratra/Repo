@@ -31,6 +31,8 @@ public class ConfigGarantieCredit implements Serializable {
 	private boolean garantieBaseMontantCredit;
 
 	private boolean garantieIndOblig;
+	
+	private boolean garantieGrpOblig;
 
 	private boolean garantIndOblig;
 
@@ -42,7 +44,11 @@ public class ConfigGarantieCredit implements Serializable {
 	
 	private int pourcentageGarantieInd;
 	
+	private int pourcentageGarantieInd2;
+	
 	private int pourcentageGarantieGrp;
+	
+	private int pourcentageGarantieGrp2;
 
 	//bi-directional many-to-one association to ProduitEpargne
 	@ManyToOne
@@ -166,4 +172,28 @@ public class ConfigGarantieCredit implements Serializable {
 		return produitCredit;
 	}
 
+	public boolean isGarantieGrpOblig() {
+		return garantieGrpOblig;
+	}
+
+	public void setGarantieGrpOblig(boolean garantieGrpOblig) {
+		this.garantieGrpOblig = garantieGrpOblig;
+	}
+
+	public int getPourcentageGarantieInd2() {
+		return pourcentageGarantieInd2;
+	}
+
+	public void setPourcentageGarantieInd2(int pourcentageGarantieInd2) {
+		this.pourcentageGarantieInd2 = pourcentageGarantieInd2;
+	}
+
+	public int getPourcentageGarantieGrp2() {
+		return pourcentageGarantieGrp2;
+	}
+
+	public void setPourcentageGarantieGrp2(int pourcentageGarantieGrp2) {
+		this.pourcentageGarantieGrp2 = pourcentageGarantieGrp2;
+	}
+	
 }

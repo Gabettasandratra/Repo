@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
 			for (Utilisateur utilisateur : ut) {
 				
 				String mdpHash = utilisateur.getMdpUtilisateur();
-				if(BCrypt.checkpw(mdpUser, mdpHash)){
+				if(BCrypt.checkpw(mdpUser, mdpHash) && utilisateur.isAutoriser() == true){
 					for(Acces ac : utilisateur.getFonction().getAcces()){
 						System.out.println(ac.getTitreAcces());
 						a.add(ac);
@@ -73,8 +73,7 @@ public class UserServiceImpl implements UserService {
 					return null;
 				}
 			}
-			
-			
+	
 		}
 		else
 			System.err.println("Utilisateur null !!");
@@ -83,16 +82,9 @@ public class UserServiceImpl implements UserService {
 
 	///	Méthode pour l'enregistrement d'un nouvel utilisateur
 	@Override
-	public boolean insertUser(String nomUser, String loginUser, String mdpUser, String mdpConf,
-			String genreUser, String telUser,String photo,  int fonctionId, List<String> agence) {//List<String> listCptCaisse,
-		//	Instance nouvel utilisateur à insérer
-		Utilisateur user = new Utilisateur();
-		/*List<CompteCaisse> cptCaisse = new ArrayList<CompteCaisse>();
-		for(String a : listCptCaisse){
-		cptCaisse.add(em.find(CompteCaisse.class, a));
-     	}
-	  user.setCompteCaisses(cptCaisse);*/
-		
+	public boolean insertUser(Utilisateur user, String mdpConf,
+			int fonctionId, List<String> agence, List<String> listCptCaisse) {
+
 		List<Agence> agences = new ArrayList<Agence>();
 		if(agence != null){			
 			for (String code : agence) {				
@@ -101,17 +93,33 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		
-		String passHash = BCrypt.hashpw(mdpUser, BCrypt.gensalt());
+		List<Caisse> caisses = new ArrayList<Caisse>();
+		if(listCptCaisse != null){			
+			for (String a : listCptCaisse) {				
+				Caisse ca = em.find(Caisse.class, a);
+				caisses.add(ca);
+			}
+		}
+		
+		String passHash = BCrypt.hashpw(user.getMdpUtilisateur(), BCrypt.gensalt());
 		
 		//	Affectation informations utilisateur
-		if(mdpUser.equals(mdpConf)){
-			user.setNomUtilisateur(nomUser);
-			user.setLoginUtilisateur(loginUser);
+		if(user.getMdpUtilisateur().equals(mdpConf)){
+			org.joda.time.LocalDate ld = org.joda.time.LocalDate.now();
+			
 			user.setMdpUtilisateur(passHash);
-			user.setGenreUser(genreUser);
-			user.setTelUser(telUser);
-			user.setPhoto(photo); 
-			user.setAgences(agences); 
+			user.setDateInscrit(ld.toString());
+			user.setCaisses(caisses); 
+			user.setAgences(agences);
+			user.setAutoriser(true); 
+			
+			String dateExpCompt = ld.plusDays(user.getValiditerCompte()).toString();
+			System.out.println("Date expire compte:"+ dateExpCompt);
+			user.setDateExpireCompte(dateExpCompt); 
+			
+			String dateExpMdp = ld.plusDays(user.getValiditerMdp()).toString();
+			System.out.println("Date expire mdp:"+ dateExpMdp);
+			user.setDateExpireMdp(dateExpMdp); 
 
 			Fonction fct = em.find(Fonction.class, fonctionId);
 			user.setFonction(fct);
@@ -122,6 +130,7 @@ public class UserServiceImpl implements UserService {
 				transaction.begin();
 				em.persist(user);
 				transaction.commit();
+				em.refresh(user); 
 				System.out.println("Nouvel utilisateur inséré");
 				return true;
 			}catch(Exception ex){	//	Erreur d'insertion
@@ -154,7 +163,8 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public Utilisateur updateProfilUser(int idUser, String nomUser, String loginUser, String genreUser,
-			String telUser, String photo, int fonctionId, List<String> agence) {
+			String telUser, String adresse, String photo, int validCompte, int validMdp,
+			int fonctionId, List<String> agence, List<String> caisse) {
 		
 		//Instance classe fonction
 		Fonction f = em.find(Fonction.class, fonctionId);
@@ -170,11 +180,41 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		
+		//Caisses
+		List<Caisse> caisses = new ArrayList<Caisse>();
+		if(caisse != null){			
+			for (String code : caisse) {				
+				Caisse a = em.find(Caisse.class, code);
+				caisses.add(a);
+			}
+		}
+		
+		org.joda.time.LocalDate ld = null;
+		System.out.println("date inscrit user "+ user.getDateInscrit());
+		if(user.getDateInscrit() == null){
+			ld = org.joda.time.LocalDate.now();
+		}else{
+			ld = org.joda.time.LocalDate.parse(user.getDateInscrit());
+		}
+		
+		String dateExpCompt = ld.plusDays(validCompte).toString();
+		System.out.println("Date expire compte:"+ dateExpCompt);
+		user.setDateExpireCompte(dateExpCompt); 
+		
+		String dateExpMdp = ld.plusDays(validMdp).toString();
+		System.out.println("Date expire mdp:"+ dateExpMdp);
+		user.setDateExpireMdp(dateExpMdp); 
+		
+		user.setValiditerCompte(validCompte);
+		user.setValiditerMdp(validMdp); 
 		user.setNomUtilisateur(nomUser);
 		user.setLoginUtilisateur(loginUser);
 		user.setTelUser(telUser);
 		user.setGenreUser(genreUser);
+		user.setAdresse(adresse);
+		user.setCaisses(caisses); 
 		user.setAgences(agences); 
+			
 		if(!photo.equalsIgnoreCase(""))
 			user.setPhoto(photo);
 		user.setFonction(f);
@@ -231,6 +271,55 @@ public class UserServiceImpl implements UserService {
 			return q.getResultList();
 		return null;
 	}
+	
+	//Désactiver compte des utilisateurs
+	@Override
+	public List<Utilisateur> desactiverCompteUser(String date) {
+		List<Utilisateur> result = new ArrayList<Utilisateur>();
+
+		for (Utilisateur ut : getAllUser()) {
+			if(ut.getDateInscrit() != null && ut.getDateExpireCompte() != null && ut.isAutoriser() == true){
+				if(ut.getDateExpireCompte().equalsIgnoreCase(date)){
+					ut.setAutoriser(false);
+					try {
+						transaction.begin();
+						em.flush();
+						transaction.commit();
+						result.add(ut);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		for (Utilisateur utilisateur : result) {
+			System.out.println("Utilisateur: Id user : "+ utilisateur.getIdUtilisateur() + " nom : "+ utilisateur.getNomUtilisateur());
+		}
+		return result;
+	}
+
+	//Désactiver mot de passe des utilisateurs
+	@Override
+	public List<Utilisateur> desactiverMdp(String date) {
+		List<Utilisateur> result = new ArrayList<Utilisateur>();
+
+		for (Utilisateur ut : getAllUser()) {
+			if(ut.getDateInscrit() != null && ut.getDateExpireMdp() != null && ut.isAutoriser() == true){
+				if(ut.getDateExpireMdp().equalsIgnoreCase(date)){
+					ut.setAutoriser(false);
+					try {
+						transaction.begin();
+						em.flush();
+						transaction.commit();
+						result.add(ut);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return result;
+	}
 
 	//Liste utilisateurs par fonction en paramètre
 	@Override
@@ -251,23 +340,6 @@ public class UserServiceImpl implements UserService {
 			st.add(a.getTitreAcces());
 		}
 		return st;
-	}
-
-	@Override
-	public boolean ajoutCptCaisse(Caisse	 cptCaisse, int numCptCompta) {
-		Account cptGL = em.find(Account.class, numCptCompta);
-		cptCaisse.setAccount(cptGL);
-		System.out.println("Nouveau compte caisse");
-		try {
-			transaction.begin();
-			em.persist(cptCaisse);
-			transaction.commit();
-			System.out.println("Nouveau compte caisse inséré");
-			return true;
-		} catch (Exception e) {
-			System.err.println("Erreur d'insertion de compte caisse");
-			return false;
-		}
 	}
 
 	@Override
@@ -810,6 +882,80 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Institution findUniqueInstitution(int id) {
 		return em.find(Institution.class, id);
+	}
+	
+	//-----------------------------------------------------------------------------------------------------
+	/******************************** Gestion comptes caisses ********************************************/
+	
+	@Override
+	public boolean ajoutCptCaisse(Caisse cptCaisse, int numCptCompta) {
+		Account cptGL = em.find(Account.class, numCptCompta);
+		cptCaisse.setAccount(cptGL);
+		System.out.println("Nouveau compte caisse");
+		try {
+			transaction.begin();
+			em.persist(cptCaisse);
+			transaction.commit();
+			em.refresh(cptCaisse);
+			System.out.println("Nouveau compte caisse inséré");
+			return true;
+		} catch (Exception e) {
+			System.err.println("Erreur d'insertion de compte caisse");
+			return false;
+		}
+	}
+
+	//Modification caisse
+	@Override
+	public boolean updateCaisse(String idCaisse, Caisse cptCaisse,
+			int numCptCompta) {
+		Caisse c = em.find(Caisse.class, idCaisse);
+		Account cptGL = em.find(Account.class, numCptCompta);
+		try {
+			c = cptCaisse;
+			c.setAccount(cptGL); 
+			transaction.begin();
+			em.merge(c);
+			transaction.commit();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	//Suppression caisse
+	@Override
+	public boolean deleteCaisse(String idCaisse) {
+		Caisse c = em.find(Caisse.class, idCaisse);
+		try {
+			transaction.begin();
+			em.refresh(c);
+			transaction.commit(); 
+			System.out.println("Supression caisse réussi");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Erreur supression caisse");
+			return false;
+		}
+	}
+
+	@Override
+	public List<Caisse> getCaisseByUser(int idUser) {
+		Utilisateur ut = em.find(Utilisateur.class, idUser);
+		if(ut == null){
+			return getAllCaisse();
+		}else{ 
+			return ut.getCaisses();			
+		}
+	}
+
+	//Liste des comptes caisses 
+	@Override
+	public List<Caisse> getAllCaisse() {
+		TypedQuery<Caisse> q = em.createQuery("select c from Caisse c", Caisse.class);
+		return q.getResultList();
 	}
 
 }

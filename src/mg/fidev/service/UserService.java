@@ -32,33 +32,22 @@ public interface UserService {
 	@WebMethod 
 	@WebResult(name="validation")
 	public boolean insertUser(
-			@XmlElement(required=true) @WebParam(name="nomUser") String nomUser,
-			@XmlElement(required=true) @WebParam(name="loginUser") String loginUser,
-			@XmlElement(required=true) @WebParam(name="mdpUser") String mdpUser,
+			@XmlElement(required=true) @WebParam(name="user") Utilisateur user,
 			@XmlElement(required=true) @WebParam(name="mdpUserConf") String mdpUserConf,
-			@XmlElement(required=true) @WebParam(name="genreUser") String genreUser,
-			@XmlElement(required=true) @WebParam(name="telUser") String telUser,
-			@XmlElement(required=true) @WebParam(name="photo") String photo,
 			@XmlElement(required=true) @WebParam(name="fonction") int fonctionId,
-			@XmlElement(required=true) @WebParam(name="agence") List<String> agence);
-	//@XmlElement(required=false,nillable=true) @WebParam(name="compteCaisse") List<String> listCptCaisse,
+			@XmlElement(required=true) @WebParam(name="agence") List<String> agence,
+			@XmlElement(required=false) @WebParam(name="compteCaisse") List<String> listCptCaisse);
 	
 	@WebMethod
 	@WebResult(name="resultAuth")
 	public Utilisateur authentifie(
 			@XmlElement(required=true) @WebParam(name="login") String loginUser, 
-			@XmlElement(required=true) @WebParam(name="mdp") String mdpUser);
+			@XmlElement(required=true) @WebParam(name="mdp") String mdpUser
+			);
 	
 	@WebMethod @WebResult(name="listeAcces")
 	public List<String> getAcces(
 			@XmlElement(required=true) @WebParam(name="userName") int userName
-			);
-	
-	
-	@WebMethod @WebResult(name="cptCaisse")
-	public boolean ajoutCptCaisse(
-			@XmlElement(required=true) @WebParam(name="cptCaisse") Caisse cptCaisse,
-			@XmlElement(required=true) @WebParam(name="planCompta") int numCptCompta
 			);
 	
 	@WebMethod
@@ -141,9 +130,14 @@ public interface UserService {
 		@XmlElement(required=true) @WebParam(name="loginUser") String loginUser,
 		@XmlElement(required=true) @WebParam(name="genreUser") String genreUser,
 		@XmlElement(required=true) @WebParam(name="telUser") String telUser,
+		@XmlElement(required=true) @WebParam(name="adresse") String adresse,
 		@XmlElement(required=true) @WebParam(name="photo") String photo,
+		@XmlElement(required=true) @WebParam(name="validiterCompte") int validCompte,
+		@XmlElement(required=true) @WebParam(name="validiterMdp") int validMdp,
 		@XmlElement(required=true) @WebParam(name="fonction") int fonctionId,
-		@XmlElement(required=true) @WebParam(name="agence") List<String> agence);
+		@XmlElement(required=true) @WebParam(name="agence") List<String> agence,
+		@XmlElement(required=true) @WebParam(name="compteCaisse") List<String> caisse
+		);
 	
 	@WebMethod
 	@WebResult(name="validation")
@@ -161,6 +155,16 @@ public interface UserService {
 	@WebResult(name="resultat")
 	public List<UtilisateurSupprimer> getUserSupprimer();
 
+	@WebMethod
+	@WebResult(name="validation")
+	public List<Utilisateur> desactiverCompteUser(
+			@XmlElement(required=true) @WebParam(name="date")String date);
+	
+	@WebMethod
+	@WebResult(name="validation")
+	public List<Utilisateur> desactiverMdp(
+			@XmlElement(required=true) @WebParam(name="date")String date);
+	
 	//------------------------------------------------------------------------------
 	/*********************** Jours férié ****************************/
 	//Liste Jours Feriés
@@ -309,6 +313,37 @@ public interface UserService {
 	public Institution findUniqueInstitution(
 			@XmlElement(required=true) @WebParam(name="id")int id);
 	
+	//-------------------------------------------------------------------------------------
+	/********************************** Gestion caisse ***********************************/
+	@WebMethod @WebResult(name="cptCaisse")
+	public boolean ajoutCptCaisse(
+			@XmlElement(required=true) @WebParam(name="cptCaisse") Caisse cptCaisse,
+			@XmlElement(required=true) @WebParam(name="planCompta") int numCptCompta
+			);
 	
+	//Modifier caisse
+	@WebMethod 
+	@WebResult(name="validation")
+	public boolean updateCaisse(
+			@XmlElement(required=true) @WebParam(name="idCaisse") String idCaisse,
+			@XmlElement(required=false) @WebParam(name="cptCaisse") Caisse cptCaisse,
+			@XmlElement(required=true) @WebParam(name="planCompta") int numCptCompta);
+	
+	//Supprimer caisse 
+	@WebMethod  
+	@WebResult(name="validation")
+	public boolean deleteCaisse(
+			@XmlElement(required=true) @WebParam(name="idCaisse") String idCaisse);
+	
+	//Liste caisse par utilisateur
+	@WebMethod 
+	@WebResult(name="resultat")
+	public List<Caisse> getCaisseByUser(
+			@XmlElement(required=true) @WebParam(name="idUser") int idUser);
+	
+	//Liste de tous les comptes caisses
+	@WebMethod 
+	@WebResult(name="resultat")
+	public List<Caisse> getAllCaisse();
 	
 }

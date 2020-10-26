@@ -1,4 +1,4 @@
-package mg.fidev.utils;
+package mg.fidev.utils.compta;
 
 import java.io.Serializable;
 import java.util.List;
@@ -9,8 +9,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="position6")
-public class PositionCompta6 implements Serializable{
+@XmlRootElement(name="position5")
+public class PositionCompta5 implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -26,22 +26,22 @@ public class PositionCompta6 implements Serializable{
 	@XmlElement(name = "devise", required = false, nillable = true)
 	private String devise;
 	
-	@XmlElement(name = "pos7", required = false, nillable = true)
-	private List<PositionCompta7> pos7;
+	@XmlElement(name = "pos6", required = false, nillable = true)
+	private List<PositionCompta6> pos6;
 
-	public PositionCompta6() {
+	public PositionCompta5() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public PositionCompta6(String numCompte, String libele, boolean isActive,
-			String devise, List<PositionCompta7> pos7) {
+	public PositionCompta5(String numCompte, String libele, boolean isActive,
+			String devise, List<PositionCompta6> pos6) {
 		super();
 		this.numCompte = numCompte;
 		this.libele = libele;
 		this.isActive = isActive;
 		this.devise = devise;
-		this.pos7 = pos7;
+		this.pos6 = pos6;
 	}
 
 	public String getNumCompte() {
@@ -76,12 +76,12 @@ public class PositionCompta6 implements Serializable{
 		this.devise = devise;
 	}
 
-	public List<PositionCompta7> getPos7() {
-		return pos7;
+	public List<PositionCompta6> getPos6() {
+		return pos6;
 	}
 
-	public void setPos7(List<PositionCompta7> pos7) {
-		this.pos7 = pos7;
+	public void setPos6(List<PositionCompta6> pos6) {
+		this.pos6 = pos6;
 	}
-
+	
 }

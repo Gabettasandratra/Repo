@@ -1,4 +1,4 @@
-package mg.fidev.utils;
+package mg.fidev.utils.epargne;
 
 import java.io.Serializable;
 import java.util.List;

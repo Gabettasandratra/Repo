@@ -15,6 +15,8 @@ import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Account;
 import mg.fidev.model.Caisse;
+import mg.fidev.model.CalendrierPep;
+import mg.fidev.model.CalendrierPepView;
 import mg.fidev.model.CatEpargne;
 import mg.fidev.model.CompteDAT;
 import mg.fidev.model.CompteDATSupp;
@@ -24,10 +26,14 @@ import mg.fidev.model.CompteFerme;
 import mg.fidev.model.ComptePep;
 import mg.fidev.model.ComptePepSupp;
 import mg.fidev.model.ConfigGLDAT;
+import mg.fidev.model.ConfigGLPEP;
 import mg.fidev.model.ConfigGeneralDAT;
+import mg.fidev.model.ConfigGeneralPEP;
 import mg.fidev.model.ConfigGlEpargne;
 import mg.fidev.model.ConfigInteretProdEp;
 import mg.fidev.model.ConfigProdEp;
+import mg.fidev.model.CounterExecution;
+import mg.fidev.model.Grandlivre;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
 import mg.fidev.model.InteretEpargne;
@@ -38,10 +44,10 @@ import mg.fidev.model.TransactionPep;
 import mg.fidev.model.TypeEpargne;
 import mg.fidev.model.Utilisateur;
 import mg.fidev.service.ProduitEpargneService;
-import mg.fidev.utils.CalculDAT;
 import mg.fidev.utils.CodeIncrement;
-import mg.fidev.utils.FicheCaisseEpargne;
-import mg.fidev.utils.SoldeEpargne;
+import mg.fidev.utils.epargne.CalculDAT;
+import mg.fidev.utils.epargne.FicheCaisseEpargne;
+import mg.fidev.utils.epargne.SoldeEpargne;
 
 @WebService(name = "epargneService", targetNamespace = "http://fidev.mg.epargneService", serviceName = "epargneService", portName = "epargneServicePort", endpointInterface = "mg.fidev.service.ProduitEpargneService")
 public class ProduitEpargneServiceImpl implements ProduitEpargneService {
@@ -56,7 +62,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		String sql = "select count(p) from ProduitEpargne p join p.typeEpargne t "
 				+ " where t.nomTypeEpargne = '"+typeEp+"' ";
 		Query q = em.createQuery(sql);
-		
+		  
 		long result = (long) q.getSingleResult();
 		System.out.println("result count: "+ result);
 		return (int)result;
@@ -106,8 +112,10 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	@Override
 	public List<ProduitEpargne> findAllProduit(String type) {
 		try {
-			String sql = "select p from ProduitEpargne p join p.typeEpargne t where t.abrev ='"+ type +"' "
-					+ "and p.supprimer='false'";
+			String sql = "select p from ProduitEpargne p join p.typeEpargne t where "
+					+ "p.supprimer='false'";
+			if(!type.equals(""))
+				sql += " and t.abrev ='"+ type +"'";
 			TypedQuery<ProduitEpargne> q = em.createQuery(sql, ProduitEpargne.class);
 			
 			List<ProduitEpargne> results = q.getResultList();
@@ -352,6 +360,43 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		}
 	}
 
+	@Override
+	public boolean saveConfigGeneralPEP(String idProduit,
+			ConfigGeneralPEP confGen) {
+		ProduitEpargne p = em.find(ProduitEpargne.class, idProduit);
+		try {
+			p.setConfigGeneralPEP(confGen); 
+			
+			transaction.begin();
+			em.flush();
+			transaction.commit();
+			em.refresh(p);
+			System.out.println("Configuration général PEP enregistré");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public boolean saveConfigGlPEP(String idProduit, ConfigGLPEP confPEP) {
+		ProduitEpargne p = em.find(ProduitEpargne.class, idProduit);
+		try {
+			p.setConfigGlPep(confPEP);
+			
+			transaction.begin();
+			em.flush();
+			transaction.commit();
+			em.refresh(p);
+			System.out.println("Configuration GL PEP enregistré");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	//LIST TYPE EPARGNE
 	@Override
 	public List<TypeEpargne> getTypeEpargne() {
@@ -523,9 +568,11 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			Utilisateur ut = em.find(Utilisateur.class, idUser);			
 			///incrémenter le tcode dans la table grandlivre
 			String indexTcode = CodeIncrement.genTcode(em);
+			
 			Individuel ind = null;
 			Groupe grp = null;
 			CompteEpargne cptEp = em.find(CompteEpargne.class, numCptEp);
+			
 			if(cptEp.getIndividuel() != null) 
 				ind = cptEp.getIndividuel();
 			if(cptEp.getGroupe() != null)
@@ -760,54 +807,10 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				&& (ind.isApprouver() == false || ind.isSupprimer() == true)) {
 			return false;
 		} else {
-			/********************** Inversement Imputation comptable ******************/
+			/********************** Modification transaction épargne ******************/
 			double ancienMontant = tr.getMontant();
 
-			// Modification imputation comptable
-			// Compte comptable à débiter
-			Account Deb = null;
-
-			if (tr.getTypePaie().equalsIgnoreCase("cash")) {
-				Deb = tr.getCaisse().getAccount();
-			} else if (tr.getTypePaie().equalsIgnoreCase("cheque")) {
-				Deb = CodeIncrement.getAcount(em, ce.getProduitEpargne()
-						.getConfigGlEpargne().getCptCheque());
-			} else if (tr.getTypePaie().equalsIgnoreCase("mobile")) {
-				Deb = CodeIncrement.getAcount(em, ce.getProduitEpargne()
-						.getConfigGlEpargne().getChargeSMScpt());
-			}
-			// Compte comptable à créditer
-			Account Cred = CodeIncrement.getAcount(em, ce.getProduitEpargne()
-					.getConfigGlEpargne().getEpargneInd());
-
-			if (tr.getTypeTransEp().equalsIgnoreCase("DE")) {
-				String desc = "Modification trans. du compte "
-						+ ce.getNumCompteEp();
-
-				ComptabliteServiceImpl.saveImputationEpargne(
-						tr.getIdTransactionEp(), dateTrans, desc, pieceCompta,
-						0, ancienMontant, ut, ind, grp, ce, null, Cred);
-				
-				ComptabliteServiceImpl.saveImputationEpargne(
-						tr.getIdTransactionEp(), dateTrans, desc, pieceCompta,
-						ancienMontant, 0, ut, ind, grp, ce, null, Deb);
-				
-				ancienMontant = (ancienMontant * -1);
-			} else if (tr.getTypeTransEp().equalsIgnoreCase("RE")) {
-				String desc = "Modification trans. du compte "
-						+ ce.getNumCompteEp();
-				ComptabliteServiceImpl.saveImputationEpargne(
-						tr.getIdTransactionEp(), dateTrans, desc, pieceCompta,
-						0, ancienMontant, ut, ind, grp, ce, null, Deb);
-
-				ComptabliteServiceImpl.saveImputationEpargne(
-						tr.getIdTransactionEp(), dateTrans, desc, pieceCompta,
-						ancienMontant, 0, ut, ind, grp, ce, null, Cred);
-				ancienMontant = (ancienMontant * 1);
-			}
 			
-			/*****************************************************************************************/
-
 			String typ = "";
 			String vp = "";
 
@@ -858,30 +861,55 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			// Compte comptable à créditer
 			Account accCred = CodeIncrement.getAcount(em, ce
 					.getProduitEpargne().getConfigGlEpargne().getEpargneInd());
+			
+			//List<Grandlivre> gs = CodeIncrement.getGrandLivreByCodeTrans(em, codeTrans);
+			Grandlivre debit = CodeIncrement.getDebitGL(em, codeTrans);
+			Grandlivre credit = CodeIncrement.getCreditGL(em, codeTrans);
+			String nouvDesc = "Modification trans. du compte "
+					+ ce.getNumCompteEp();
 
 			if (typeTrans.equalsIgnoreCase("DE")) {
 				double solde = (ce.getSolde() + (ancienMontant) + montant);
 				ce.setSolde(solde);
 				tr.setSolde(solde); 
 				try {
-					String nouvDesc = "Ressaisie trans. du compte "
-							+ ce.getNumCompteEp();
+									
+					transaction.begin();
+					em.flush();
+					em.flush();					
+					transaction.commit();
+					em.refresh(tr);
+					em.refresh(ce);
+					
+					debit.setDate(dateTrans);
+					debit.setDescr(nouvDesc);
+					debit.setPiece(pieceCompta);
+					debit.setDebit(montant);
+					debit.setCredit(0);
+					debit.setUtilisateur(ut);
+					debit.setCodeInd(ind);
+					debit.setGroupe(grp);
+					debit.setAgence(null);
+					debit.setCompteEpargne(ce);
+					debit.setAccount(accDeb);
+					
+					credit.setDate(dateTrans);
+					credit.setDescr(nouvDesc);
+					credit.setPiece(pieceCompta);
+					credit.setDebit(0);
+					credit.setCredit(montant);
+					credit.setUtilisateur(ut);
+					credit.setCodeInd(ind);
+					credit.setGroupe(grp);
+					credit.setAgence(null);
+					credit.setCompteEpargne(ce);
+					credit.setAccount(accCred);
 					transaction.begin();
 					em.flush();
 					em.flush();
 					transaction.commit();
-					em.refresh(tr);
-					em.refresh(ce);
-
-					ComptabliteServiceImpl.saveImputationEpargne(
-							tr.getIdTransactionEp(), dateTrans, nouvDesc,
-							pieceCompta, 0, montant, ut, ind, grp, ce, null,
-							accDeb);
-
-					ComptabliteServiceImpl.saveImputationEpargne(
-							tr.getIdTransactionEp(), dateTrans, nouvDesc,
-							pieceCompta, montant, 0, ut, ind, grp, ce, null,
-							accCred);
+					em.refresh(debit);
+					em.refresh(credit);
 
 					System.out.println("Modification transaction réussie");
 					return true;
@@ -895,25 +923,44 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				ce.setSolde(solde);
 				tr.setSolde(solde);
 				try {
-					String nouvDesc = "Ressaisie trans. du compte "
-							+ ce.getNumCompteEp();
+									
 					transaction.begin();
 					em.flush();
 					em.flush();
 					transaction.commit();
 					em.refresh(tr);
 					em.refresh(ce);
-
-					ComptabliteServiceImpl.saveImputationEpargne(
-							tr.getIdTransactionEp(), dateTrans, nouvDesc,
-							pieceCompta, 0, montant, ut, ind, grp, ce, null,
-							accCred);
 					
-					ComptabliteServiceImpl.saveImputationEpargne(
-							tr.getIdTransactionEp(), dateTrans, nouvDesc,
-							pieceCompta, montant, 0, ut, ind, grp, ce, null,
-							accDeb);
-
+					debit.setDate(dateTrans);
+					debit.setDescr(nouvDesc);
+					debit.setPiece(pieceCompta);
+					debit.setDebit(montant);
+					debit.setCredit(0);
+					debit.setUtilisateur(ut);
+					debit.setCodeInd(ind);
+					debit.setGroupe(grp);
+					debit.setAgence(null);
+					debit.setCompteEpargne(ce);
+					debit.setAccount(accCred);
+					
+					credit.setDate(dateTrans);
+					credit.setDescr(nouvDesc);
+					credit.setPiece(pieceCompta);
+					credit.setDebit(0);
+					credit.setCredit(montant);
+					credit.setUtilisateur(ut);
+					credit.setCodeInd(ind);
+					credit.setGroupe(grp);
+					credit.setAgence(null);
+					credit.setCompteEpargne(ce);
+					credit.setAccount(accDeb);
+					transaction.begin();
+					em.flush();
+					em.flush();
+					transaction.commit();
+					em.refresh(debit);
+					em.refresh(credit);
+					
 					System.out.println("Modification transaction réussie");
 					return true;
 				} catch (Exception e) {
@@ -1288,6 +1335,17 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		System.out.println("fin mois: "+ dateFinMois); 
 		
 		if(date1.equalsIgnoreCase(dateFinMois)){
+			try {
+				CounterExecution ct = new CounterExecution();
+				ct.setDate(date1);
+				ct.setExec(true);
+				transaction.begin();
+				em.persist(ct);
+				transaction.commit();
+				em.refresh(ct); 
+			} catch (Exception e) {
+				e.printStackTrace(); 
+			}
 			List<CompteEpargne> cmpts = getCompteDAVDist(dateDebMois, dateFinMois);
 			for (CompteEpargne compteEpargne : cmpts) {
 				ConfigInteretProdEp confI = compteEpargne.getProduitEpargne().getConfigInteretProdEp();
@@ -1369,7 +1427,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
   * ***/
 	@Override
 	public List<TransactionEpargne> rapportTransactions(String agence, String client, String type,
-			String idProd, String numCompte, String dateDeb, String dateFin) {
+			String idProd, String trans, String dateDeb, String dateFin) {
 		List<TransactionEpargne> result = new ArrayList<TransactionEpargne>();
 		
 		//si les critères sont null
@@ -1377,7 +1435,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		
 		//si les critères ne sont pas null
 		if(!agence.equals("") || !client.equals("") || !type.equals("") || !idProd.equals("") 
-				|| !numCompte.equals("") ||	!dateDeb.equals("") || !dateFin.equals("") ){
+				|| !trans.equals("") ||	!dateDeb.equals("") || !dateFin.equals("") ){
 		
 			String ag = agence;
 
@@ -1395,7 +1453,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 
 			// Test agence, client, produit , dateDeb, dateFin non vide
 			if (!agence.equals("") && !client.equals("") && !idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null ";
@@ -1414,7 +1472,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 
 			//Agence , client , produit
 			if(!agence.equals("") && !client.equals("") && !idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && numCompte.equals("")){
+					&& dateDeb.equals("") && dateFin.equals("") && trans.equals("")){
 					
 					if(!ind.equals("") && grp.equals("")){
 						sql += "join e.individuel i where e.individuel is not null ";					
@@ -1430,7 +1488,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			// agence, client, produit , dateDeb, dateFin, numCompte non vide
 			if (!agence.equals("") && !client.equals("") && !idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && !numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && !trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null ";
@@ -1443,28 +1501,28 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 						+ "%' and  p.idProdEpargne = '" + idProd
 						+ "' and t.dateTransaction between '" + dateDeb
 						+ "' and '" + dateFin + "'" + " and tp.abrev = '"
-						+ type + "' and e.numCompteEp = '" + numCompte + "'";
+						+ type + "' and t.typeTransEp = '" + trans + "'";
 			}
 
 			// Agence non vide
 			if (!agence.equals("") && client.equals("") && idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && trans.equals("")) {
 				// join e.individuel i join e.groupe g
 				sql += " where e.numCompteEp like '" + ag + "%' "
 						+ "and tp.abrev = '" + type + "'";
 			}
 			
-			// Agence te numCompte non vide
+			// Agence et Typr transaction non vide
 			if (!agence.equals("") && client.equals("") && idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && !numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && !trans.equals("")) {
 				// join e.individuel i join e.groupe g
 				sql += " where e.numCompteEp like '" + ag + "%' "
-						+ "and tp.abrev = '" + type + "' and e.numCompteEp = '" + numCompte + "'";
+						+ "and tp.abrev = '" + type + "' and t.typeTransEp = '" + trans + "'";
 			}
 
 			// Agence et client non vide
 			if (!agence.equals("") && !client.equals("") && idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null and tp.abrev = '"
@@ -1479,7 +1537,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			// Agence et client et numCompte non vide
 			if (!agence.equals("") && !client.equals("") && idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && !numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && !trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null and tp.abrev = '"
@@ -1489,12 +1547,12 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 					sql += "join e.groupe g where e.groupe is not null and tp.abrev = '"
 							+ type + "'";
 				}
-				sql += " and e.numCompteEp like '" + ag + "%' and e.numCompteEp = '" + numCompte + "'";
+				sql += " and e.numCompteEp like '" + ag + "%' and t.typeTransEp = '" + trans + "'";
 			}
 
 			// Agence et client , dateDeb et dateFin non vide
 			if (!agence.equals("") && !client.equals("") && idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.numCompteEp like '"
@@ -1514,7 +1572,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			// Agence et client , dateDeb et dateFin et numCompte non vide
 			if (!agence.equals("") && !client.equals("") && idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && !numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && !trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.numCompteEp like '"
@@ -1528,13 +1586,13 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 							+ "%' and e.groupe is not null "
 							+ "and t.dateTransaction between '" + dateDeb
 							+ "' and '" + dateFin + "'" + " and tp.abrev = '"
-							+ type + "' and e.numCompteEp = '" + numCompte + "'";
+							+ type + "' and t.typeTransEp = '" + trans + "'";
 				}
 			}
 
 			// agence , produit non vide
 			if (!agence.equals("") && client.equals("") && !idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && trans.equals("")) {
 
 				sql += "where e.numCompteEp like '"
 						+ ag
@@ -1546,19 +1604,19 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			// agence , produit et numCompte non vide
 			if (!agence.equals("") && client.equals("") && !idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && !numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && !trans.equals("")) {
 
 				sql += "where e.numCompteEp like '"
 						+ ag
 						+ "%' "
 						+ "and  p.idProdEpargne = '"
 						+ idProd
-						+ "' and tp.abrev = '" + type + "' and e.numCompteEp = '" + numCompte + "'";
+						+ "' and tp.abrev = '" + type + "' and t.typeTransEp = '" + trans + "'";
 			}
 
 			// agence, produit, periode non vide
 			if (!agence.equals("") && client.equals("") && !idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && trans.equals("")) {
 
 				sql += "where e.numCompteEp like '"
 						+ ag + "%' " + "and  p.idProdEpargne = '"+ idProd + "' and t.dateTransaction between '"
@@ -1568,17 +1626,17 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			// agence, produit, periode et numCompte non vide
 			if (!agence.equals("") && client.equals("") && !idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && !numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && !trans.equals("")) {
 
 				sql += "where e.numCompteEp like '"
 						+ ag + "%' " + "and  p.idProdEpargne = '"+ idProd + "' and t.dateTransaction between '"
 						+ dateDeb+ "' and '"+ dateFin+ "'"+ " and tp.abrev = '"
-						+ type + "' and e.numCompteEp = '" + numCompte + "'";
+						+ type + "' and t.typeTransEp = '" + trans + "'";
 			}
 
 			// Client non vide
 			if (!client.equals("") && agence.equals("") && idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null and tp.abrev = '"
@@ -1591,7 +1649,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			}
 			// Client et numCompte non vide
 			if (!client.equals("") && agence.equals("") && idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && !numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && !trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null and tp.abrev = '"
@@ -1599,13 +1657,13 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				}
 				if (ind.equals("") && !grp.equals("")) {
 					sql += "join e.groupe g where e.groupe is not null and tp.abrev = '"
-							+ type + "' and e.numCompteEp = '" + numCompte + "'";
+							+ type + "' and t.typeTransEp = '" + trans + "'";
 				}
 			}
 
 			// Client , produit non vide
 			if (!client.equals("") && agence.equals("") && !idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null "
@@ -1622,7 +1680,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			// Client , produit et numCompte non vide
 			if (!client.equals("") && agence.equals("") && !idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && !numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && !trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null "
@@ -1633,13 +1691,13 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				if (ind.equals("") && !grp.equals("")) {
 					sql += "join e.groupe g where e.groupe is not null "
 							+ "and  p.idProdEpargne = '" + idProd
-							+ "' and tp.abrev = '" + type + "' and e.numCompteEp = '" + numCompte + "'";
+							+ "' and tp.abrev = '" + type + "' and t.typeTransEp = '" + trans + "'";
 				}
 			}
 
 			// Client , produit et dates non vide
 			if (!client.equals("") && agence.equals("") && !idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null "
@@ -1663,7 +1721,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			// Client , produit et dates et numCompte non vide
 			if (!client.equals("") && agence.equals("") && !idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && !numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && !trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null "
@@ -1674,20 +1732,20 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 							+ "' "
 							+ "and t.dateTransaction between '"
 							+ dateDeb
-							+ "' and '" + dateFin + "' and e.numCompteEp = '" + numCompte + "'";
+							+ "' and '" + dateFin + "' and t.typeTransEp = '" + trans + "'";
 				}
 				if (ind.equals("") && !grp.equals("")) {
 					sql += "join e.groupe g where e.groupe is not null "
 							+ "and p.idProdEpargne = '" + idProd
 							+ "' and tp.abrev = '" + type + "' "
 							+ "and t.dateTransaction between '" + dateDeb
-							+ "' and '" + dateFin + "' and e.numCompteEp = '" + numCompte + "'";
+							+ "' and '" + dateFin + "' and t.typeTransEp = '" + trans + "'";
 				}
 			}
 
 			// Client et dates non vide
 			if (!client.equals("") && agence.equals("") && idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null "
@@ -1708,7 +1766,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			// Client et dates et numCompte non vide
 			if (!client.equals("") && agence.equals("") && idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && !trans.equals("")) {
 
 				if (!ind.equals("") && grp.equals("")) {
 					sql += "join e.individuel i where e.individuel is not null "
@@ -1717,20 +1775,20 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 							+ "' "
 							+ "and t.dateTransaction between '"
 							+ dateDeb
-							+ "' and '" + dateFin + "' and e.numCompteEp = '" + numCompte + "'";
+							+ "' and '" + dateFin + "' and t.typeTransEp = '" + trans + "'";
 				}
 				if (ind.equals("") && !grp.equals("")) {
 					sql += "join e.groupe g where e.groupe is not null "
 							+ "and tp.abrev = '" + type + "' "
 							+ "and t.dateTransaction between '" + dateDeb
-							+ "' and '" + dateFin + "' and e.numCompteEp = '" + numCompte + "'";
+							+ "' and '" + dateFin + "' and t.typeTransEp = '" + trans + "'";
 				}
 			}
 
 
 			// produit non vide
 			if (client.equals("") && agence.equals("") && !idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && trans.equals("")) {
 
 				sql += "where p.idProdEpargne = '" + idProd
 						+ "' and tp.abrev = '" + type + "'";
@@ -1738,15 +1796,15 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			// produit et numCompte non vide
 			if (client.equals("") && agence.equals("") && !idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && !numCompte.equals("")) {
+					&& dateDeb.equals("") && dateFin.equals("") && !trans.equals("")) {
 	
 				sql += "where p.idProdEpargne = '" + idProd
-						+ "' and tp.abrev = '" + type + "' and e.numCompteEp = '" + numCompte + "'";
+						+ "' and tp.abrev = '" + type + "' and t.typeTransEp = '" + trans + "'";
 			}
 
 			// produit et dates non vide
 			if (client.equals("") && agence.equals("") && !idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && trans.equals("")) {
 				sql += "where p.idProdEpargne = '" + idProd
 						+ "' and tp.abrev = '" + type + "' "
 						+ "and t.dateTransaction between '" + dateDeb
@@ -1755,30 +1813,30 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			
 			// produit et dates et numCompte non vide
 			if (client.equals("") && agence.equals("") && !idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && !numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && !trans.equals("")) {
 				sql += "where p.idProdEpargne = '" + idProd
 						+ "' and tp.abrev = '" + type + "' "
 						+ "and t.dateTransaction between '" + dateDeb
-						+ "' and '" + dateFin + "' and e.numCompteEp = '" + numCompte + "'";
+						+ "' and '" + dateFin + "' and t.typeTransEp = '" + trans + "'";
 			}
 			
 			// numCompte non vide
 			if (client.equals("") && agence.equals("") && idProd.equals("")
-					&& dateDeb.equals("") && dateFin.equals("") && !numCompte.equals("")) {
-				sql += "where tp.abrev = '" + type + "' and e.numCompteEp = '" + numCompte + "'";
+					&& dateDeb.equals("") && dateFin.equals("") && !trans.equals("")) {
+				sql += "where tp.abrev = '" + type + "' and t.typeTransEp = '" + trans + "'";
 			}
 			
 			//dates et numCompte non vide
 			if (client.equals("") && agence.equals("") && idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && !numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && !trans.equals("")) {
 				sql += "where tp.abrev = '" + type + "' "
 						+ "and t.dateTransaction between '" + dateDeb
-						+ "' and '" + dateFin + "' and e.numCompteEp = '" + numCompte + "'";
+						+ "' and '" + dateFin + "' and t.typeTransEp = '" + trans + "'";
 			}
 
 			// dates non vide
 			if (client.equals("") && agence.equals("") && idProd.equals("")
-					&& !dateDeb.equals("") && !dateFin.equals("") && numCompte.equals("")) {
+					&& !dateDeb.equals("") && !dateFin.equals("") && trans.equals("")) {
 				sql += "where tp.abrev = '" + type + "' "
 						+ "and t.dateTransaction between '" + dateDeb
 						+ "' and '" + dateFin + "'";
@@ -1786,7 +1844,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 
 			if (agence.equals("") && client.equals("") && !type.equals("")
 					&& idProd.equals("") && dateDeb.equals("")
-					&& dateFin.equals("") && numCompte.equals("")) {
+					&& dateFin.equals("") && trans.equals("")) {
 
 				sql += "where tp.abrev = '" + type + "'";
 			}
@@ -2267,6 +2325,21 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 							+ " and tp.abrev = '"+ type +"'";
 				}
 			
+			//Agence , client , produit , une date
+			if(!agence.equals("") && !client.equals("") && !idProd.equals("")
+					&& !dateDeb.equals("") && dateFin.equals("")){
+					
+					if(!ind.equals("") && grp.equals("")){
+						sql += "join e.individuel i where e.individuel is not null ";					
+					}
+					if(ind.equals("") && !grp.equals("")){
+						sql += "join e.groupe g where e.groupe is not null ";			
+					}
+					//List<E>
+					sql += "and e.numCompteEp like '"+ ag +"%' and t.dateTransaction <= '"+dateDeb+"' "
+							+ " and  p.idProdEpargne = '"+idProd+"' "
+							+ " and tp.abrev = '"+ type +"'";
+				}
 			
 			//Agence non vide
 			if(!agence.equals("") && client.equals("") && idProd.equals("")
@@ -2274,6 +2347,14 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				//join e.individuel i join e.groupe g
 				sql += " where e.numCompteEp like '"+ ag +"%' "
 						+ "and tp.abrev = '"+ type +"'";
+			}
+			
+			//Agence, une date non vide
+			if(!agence.equals("") && client.equals("") && idProd.equals("")
+					&& !dateDeb.equals("") && dateFin.equals("")){
+				//join e.individuel i join e.groupe g
+				sql += " where e.numCompteEp like '"+ ag +"%' "
+						+ " and t.dateTransaction <= '"+dateDeb+"' and tp.abrev = '"+ type +"'";
 			}
 			
 			//Agence et client non vide
@@ -2287,6 +2368,19 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 					sql += "join e.groupe g where e.groupe is not null and tp.abrev = '"+ type +"'";			
 				}
 				sql +=" and e.numCompteEp like '"+ ag +"%'";
+			}
+			
+			//Agence et client, une date non vide
+			if(!agence.equals("") && !client.equals("") && idProd.equals("")
+					&& !dateDeb.equals("") && dateFin.equals("")){
+				
+				if(!ind.equals("") && grp.equals("")){
+					sql += "join e.individuel i where e.individuel is not null and tp.abrev = '"+ type +"'";					
+				}
+				if(ind.equals("") && !grp.equals("")){
+					sql += "join e.groupe g where e.groupe is not null and tp.abrev = '"+ type +"'";			
+				}
+				sql +=" and t.dateTransaction <= '"+dateDeb+"' and e.numCompteEp like '"+ ag +"%'";
 			}
 			
 			//Agence et client , dateDeb et dateFin non vide
@@ -2313,6 +2407,14 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 						+ "and  p.idProdEpargne = '"+idProd+"' and tp.abrev = '"+ type +"'";
 			}
 			
+			//agence , produit, une date non vide
+			if(!agence.equals("") && client.equals("") && !idProd.equals("")
+					&& !dateDeb.equals("") && dateFin.equals("")){
+				
+				sql += "where e.numCompteEp like '"+ ag +"%' "
+						+ " and t.dateTransaction <= '"+dateDeb+"' and  p.idProdEpargne = '"+idProd+"' and tp.abrev = '"+ type +"'";
+			}
+			
 			//agence, produit, periode non vide
 			if(!agence.equals("") && client.equals("") && !idProd.equals("")
 					&& !dateDeb.equals("") && !dateFin.equals("")){
@@ -2334,6 +2436,18 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				}
 			}
 			
+			//Client, une date non vide
+			if(!client.equals("") && agence.equals("") && idProd.equals("")
+					&& !dateDeb.equals("") && dateFin.equals("")){
+				
+				if(!ind.equals("") && grp.equals("")){
+					sql += "join e.individuel i where e.individuel is not null and t.dateTransaction <= '"+dateDeb+"' and tp.abrev = '"+ type +"'";					
+				}
+				if(ind.equals("") && !grp.equals("")){
+					sql += "join e.groupe g where e.groupe is not null and t.dateTransaction <= '"+dateDeb+"' and tp.abrev = '"+ type +"'";			
+				}
+			}
+			
 			//Client , produit non vide
 			if(!client.equals("") && agence.equals("") && !idProd.equals("")
 					&& dateDeb.equals("") && dateFin.equals("")){
@@ -2345,6 +2459,20 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 				if(ind.equals("") && !grp.equals("")){
 					sql += "join e.groupe g where e.groupe is not null "
 							+ "and  p.idProdEpargne = '"+idProd+"' and tp.abrev = '"+ type +"'";			
+				}	
+			}
+			
+			//Client , produit, une date non vide
+			if(!client.equals("") && agence.equals("") && !idProd.equals("")
+					&& !dateDeb.equals("") && dateFin.equals("")){
+				
+				if(!ind.equals("") && grp.equals("")){
+					sql += "join e.individuel i where e.individuel is not null "
+							+ "and t.dateTransaction <= '"+dateDeb+"' and  p.idProdEpargne = '"+idProd+"' and tp.abrev = '"+ type +"'";					
+				}
+				if(ind.equals("") && !grp.equals("")){
+					sql += "join e.groupe g where e.groupe is not null "
+							+ "and t.dateTransaction <= '"+dateDeb+"' and  p.idProdEpargne = '"+idProd+"' and tp.abrev = '"+ type +"'";			
 				}	
 			}
 			
@@ -2388,6 +2516,14 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 					sql += "where p.idProdEpargne = '"+idProd+"' and tp.abrev = '"+ type +"'";
 			}
 			
+			//produit, une date non vide
+			if(client.equals("") && agence.equals("") && !idProd.equals("")
+					&& !dateDeb.equals("") && dateFin.equals("")){
+				
+				
+				sql += "where p.idProdEpargne = '"+idProd+"' and t.dateTransaction <= '"+dateDeb+"' and tp.abrev = '"+ type +"'";
+			}
+			
 			//produit et dates non vide
 			if(client.equals("") && agence.equals("") && !idProd.equals("")
 					&& !dateDeb.equals("") && !dateFin.equals("")){
@@ -2400,6 +2536,13 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 					&& !dateDeb.equals("") && !dateFin.equals("")){
 				sql += "where tp.abrev = '"+ type +"' "
 						+ "and t.dateTransaction between '"+dateDeb+"' and '"+dateFin+"'";
+			}
+			
+			//une date non vide
+			if(client.equals("") && agence.equals("") && idProd.equals("")
+					&& !dateDeb.equals("") && dateFin.equals("")){
+				sql += "where tp.abrev = '"+ type +"' "
+						+ "and t.dateTransaction <= '"+dateDeb+"'";
 			}
 			
 			if(agence.equals("") && client.equals("") && !type.equals("") && idProd.equals("")
@@ -2428,10 +2571,10 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	 * ***/
 	@Override
 	public List<SoldeEpargne> getSoldeEpargne(String agence, String client, String type,
-			String idProd, String dateDeb, String dateFin) {
+			String idProd, String dateDeb) {
 		List<SoldeEpargne> result = new ArrayList<SoldeEpargne>();
 		
-		List<CompteEpargne> compteEp = getCompteDistinc(agence, client, type, idProd, dateDeb, dateFin);
+		List<CompteEpargne> compteEp = getCompteDistinc(agence, client, type, idProd, dateDeb, "");
 		
 		for (CompteEpargne compte : compteEp) {
 			String numCmpt = compte.getNumCompteEp();
@@ -2441,8 +2584,8 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			String sql = "SELECT MAX(t.dateTransaction) FROM TransactionEpargne t JOIN t.compteEpargne cp "
 					+ "WHERE cp.numCompteEp = '"+ numCmpt +"'";
 			
-			if(!dateDeb.equals("") && !dateFin.equals("")){
-				sql += " and t.dateTransaction between '"+dateDeb+"' and '"+dateFin+"'";
+			if(!dateDeb.equals("")){
+				sql += " and t.dateTransaction <= '"+dateDeb+"'";
 			}
 			
 			Query q = em.createQuery(sql);
@@ -2450,18 +2593,27 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			String dateMax = "";
 			double montant = 0;
 			double solde = 0;
+			String trans = "";
 			
 			if(q.getSingleResult() != null){
-				dateMax = (String) q.getSingleResult();
-				Query query = em.createQuery("select sum(t.montant) from TransactionEpargne t join t.compteEpargne e"
+				dateMax = (String) q.getSingleResult();//sum(t.montant)
+				Query query = em.createQuery("select t from TransactionEpargne t join t.compteEpargne e"
 						+ " where t.dateTransaction = '"+dateMax+"' and e.numCompteEp='"+compte.getNumCompteEp()+"'" );
-				if(query.getSingleResult() != null)
-					montant = (double) query.getSingleResult();
+				if(query.getSingleResult() != null){
+					TransactionEpargne tr = (TransactionEpargne) query.getSingleResult();
+					montant = tr.getMontant();
+					solde = tr.getSolde();
+					if(tr.getTypeTransEp().equalsIgnoreCase("DE"))
+						trans = "Dépôt";
+					if(tr.getTypeTransEp().equalsIgnoreCase("RE"))
+						trans = "Retrait";
+					
+				}
 				
-				Query query2 = em.createQuery("select sum(t.solde) from TransactionEpargne t join t.compteEpargne e"
+				/*Query query2 = em.createQuery("select t.solde from TransactionEpargne t join t.compteEpargne e"
 						+ " where t.dateTransaction = '"+dateMax+"' and e.numCompteEp='"+compte.getNumCompteEp()+"'" );
-				if(query.getSingleResult() != null)
-					solde = (double) query2.getSingleResult();
+				if(query.getSingleResult() != null)//sum(t.solde)
+					solde = (double) query2.getSingleResult();*/
 			}
 			
 			String code= "";
@@ -2484,6 +2636,8 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			}else{
 				fermer = "Non";
 			}
+			
+			
 			donnee.setNumCompte(compte.getNumCompteEp());
 			donnee.setCodeProd(compte.getProduitEpargne().getIdProdEpargne());
 			donnee.setNomPro(compte.getProduitEpargne().getNomProdEpargne());
@@ -2493,6 +2647,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			donnee.setMontant(montant);
 			donnee.setSolde(solde);
 			donnee.setDateTrans(dateMax);
+			donnee.setTypeTrans(trans); 
 			donnee.setFermer(fermer);
 			donnee.setSoldeFinPeriode(0);
 			
@@ -3689,13 +3844,25 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 	//Retrait automatique sur DAT
 	@Override
 	public List<CompteDAT> retraitDATAuto(String dateRetrait, int user) {
-
-		List<CompteDAT> result = new ArrayList<CompteDAT>();
 		
+		List<CompteDAT> result = new ArrayList<CompteDAT>();
+			
 		Utilisateur ut = em.find(Utilisateur.class, user);
+		
 		//Chercher tous les comptes DAT
-		TypedQuery<CompteDAT> query = em.createQuery("select d from CompteDAT d", CompteDAT.class);
+		TypedQuery<CompteDAT> query = em.createQuery("select d from CompteDAT d where d.ret = 'false'", CompteDAT.class);
 		if(!query.getResultList().isEmpty()){
+			try {
+				CounterExecution ct = new CounterExecution();
+				ct.setDate(dateRetrait);
+				ct.setExec(true);
+				transaction.begin();
+				em.persist(ct);
+				transaction.commit();
+				em.refresh(ct); 
+			} catch (Exception e) {
+				e.printStackTrace(); 
+			}
 			//parcourir les comptes DAT
 			for (CompteDAT compte : query.getResultList()) {
 				System.out.println("Compte DAT n° :"+ compte.getNumCompteDAT() + " echeance :"+ compte.getDateEcheance());
@@ -4028,10 +4195,21 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 
 	//-------------------------------------------------------------------------------------------------------
 	//Ouverture compte épargne
-	@Override
+	/*@Override
 	public String ouvrirComptePep(ComptePep compte, String idProduit,
 			String codeInd, String codeGrp, int userId) {
+		
+	}
+	*/
+
+	@Override
+	public String ouvrirComptePep(ComptePep compte, String idProduit,
+			String codeInd, String codeGrp, int userId, String trans,
+			String piece, String typePaie, String numTel, String numCheq,
+			String CompteCaisse, double montant) {
+		
 		String result = "";
+		
 		ProduitEpargne produit = em.find(ProduitEpargne.class, idProduit);
 		Utilisateur ut = em.find(Utilisateur.class, userId);
 		Individuel ind = null;
@@ -4046,17 +4224,48 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 			compte.setNumCompte(grp.getCodeGrp()+"/"+produit.getIdProdEpargne());
 		}
 		
+		String dateFin = CodeIncrement.getDateFinDepot(compte.getPeriode(), compte.getFrequence(), compte.getDateDebutDepot());
+		System.out.println("Date fin :"+ dateFin);
+		
 		compte.setProduitEpargne(produit);
 		compte.setIndividuel(ind); 
 		compte.setGroupe(grp);
 		compte.setUtilisateur(ut); 
+		compte.setTotPeriode(compte.getPeriode());
+		compte.setDateFinDepot(dateFin); 
+		
+		List<CalendrierPepView> calView = 
+				CodeIncrement.getCalPrevuPep(compte.getNumCompte(), 
+						compte.getPeriode(), compte.getFrequence(), montant, compte.getDateDebutDepot(), compte.getTauxInt());
 		try {
 			transaction.begin();
 			em.persist(compte);
+			for (CalendrierPepView cal : calView) {
+				CalendrierPep cp = new CalendrierPep(cal.getDate(), cal.getCapital(), cal.getDuree(), cal.getInteret(), compte);
+				em.persist(cp); 
+			}
 			transaction.commit();
 			em.refresh(compte); 
-			System.out.println("Ouverture compte pep reussi");
-			result = "Ouverture compte réussi";
+			
+			TransactionPep transc = new TransactionPep();
+			transc.setDateTransaction(compte.getDateDebutDepot());
+			transc.setDescription("1er dépôt");
+			transc.setMontant(montant);
+			transc.setPeriode(compte.getPeriode());
+			transc.setPieceCompta(piece);
+			transc.setTypePaie(typePaie);
+			transc.setTypeTrans(trans); 
+			
+			boolean s = saveTransPep(transc, compte.getNumCompte(), userId, numTel, numCheq, CompteCaisse);
+			
+			if(s == true){
+				System.out.println("Ouverture compte pep reussi");
+				result = "Ouverture compte réussi";
+			}else{
+				System.out.println("Erreur ouverture compte pep");
+				result = "Erreur ouverture compte pep";
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("Erreur Ouverture compte pep");
@@ -4065,6 +4274,7 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		
 		return result;
 	}
+	
 
 	@Override
 	public boolean modifierComptePep(String idCompte, ComptePep compte,
@@ -4168,13 +4378,183 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 
 	//--------------------------------------------------------------------------------------------------
 	/****************************** Transaction plan d'épargne *****************************************/
+
 	@Override
 	public boolean saveTransPep(TransactionPep trans, String numCptEp,
-			int idUser) {
-		// TODO Auto-generated method stub
+			int idUser, String numTel, String numCheq, String CompteCaisse) {
+		
+		Utilisateur ut = em.find(Utilisateur.class, idUser);
+		ComptePep cp = em.find(ComptePep.class, numCptEp);
+		
+		if(trans.getTypeTrans().equalsIgnoreCase("DE")){
+			
+			///incrémenter le tcode dans la table grandlivre
+			String indexTcode = CodeIncrement.genTcode(em);
+			
+			Individuel ind = null;
+			Groupe grp = null;
+		
+			if(cp.getIndividuel() != null) 
+				ind = cp.getIndividuel();
+			if(cp.getGroupe() != null)
+				grp = cp.getGroupe();
+			
+			ConfigGLPEP confGl = cp.getProduitEpargne().getConfigGlPep();
+			
+			//Compte comptable à débiter
+			Account accDeb = null;		
+			Caisse cptCaisse = null;
+			String vp = "";			
+			if(trans.getTypePaie().equalsIgnoreCase("cash")){	
+				
+				cptCaisse = em.find(Caisse.class, CompteCaisse);			
+				vp = String.valueOf(cptCaisse.getAccount().getNumCpt());					
+				accDeb = cptCaisse.getAccount();
+				
+			}else if(trans.getTypePaie().equalsIgnoreCase("cheque")){
+				accDeb = CodeIncrement.getAcount(em, confGl.getCmptCheque());
+				vp = numCheq;
+			}else if(trans.getTypePaie().equalsIgnoreCase("mobile")){
+				accDeb = CodeIncrement.getAcount(em, confGl.getCmptDiffCash());
+				vp = numTel;
+			}
+			
+			double inter = ((trans.getMontant() * cp.getTauxInt()) / 100) * cp.getPeriode();
+			
+			trans.setPeriode(cp.getPeriode());
+			cp.setSolde(cp.getSolde() + trans.getMontant());
+			cp.setTotalInteret(cp.getTotalInteret() + inter);
+			cp.setPeriode(cp.getPeriode() - 1);
+			
+			trans.setValPaie(vp); 
+			trans.setInteret(inter);
+			trans.setSoldeProgressif(trans.getMontant() + inter);
+			trans.setIdTransaction(indexTcode); 
+			trans.setUtilisateur(ut);
+			trans.setComptePep(cp); 
+			
+			try {
+				transaction.begin();
+				em.persist(trans);
+				em.merge(cp);
+				transaction.commit();
+				em.refresh(trans);
+				em.refresh(cp); 
+				String desc = "Dépôt pep du compte "+numCptEp;
+				
+				ComptabliteServiceImpl.
+				saveImputationPEP(indexTcode, trans.getDateTransaction(), desc, trans.getPieceCompta(),
+						0, trans.getMontant(), ut, ind, grp, cp, null, accDeb);
+
+				Account accCred = CodeIncrement.getAcount(em, confGl.getCmptPep());
+				ComptabliteServiceImpl.
+				saveImputationPEP(indexTcode, trans.getDateTransaction(), desc, trans.getPieceCompta(),
+						trans.getMontant(), 0, ut, ind, grp, cp, null, accCred);
+				
+				System.out.println("Transaction pep enregistré");
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("Erreur transaction pep");
+				return false;
+			}
+			
+		}
+		
 		return false;
 	}
+	
+	@Override
+	public boolean saveRetraitPep(TransactionPep trans, String numCptEp,
+			int idUser, String numTel, String numCheq, String CompteCaisse) {
+		Utilisateur ut = em.find(Utilisateur.class, idUser);
+		ComptePep cp = em.find(ComptePep.class, numCptEp);
+		
+		if(trans.getTypeTrans().equalsIgnoreCase("RE")){
+			
+			///incrémenter le tcode dans la table grandlivre
+			String indexTcode = CodeIncrement.genTcode(em);
+			
+			Individuel ind = null;
+			Groupe grp = null;
+		
+			if(cp.getIndividuel() != null) 
+				ind = cp.getIndividuel();
+			if(cp.getGroupe() != null)
+				grp = cp.getGroupe();
+			
+			ConfigGLPEP confGl = cp.getProduitEpargne().getConfigGlPep();
+			
+			//Compte comptable à débiter
+			Account accCred = null;		
+			Caisse cptCaisse = null;
+			String vp = "";			
+			if(trans.getTypePaie().equalsIgnoreCase("cash")){	
+				
+				cptCaisse = em.find(Caisse.class, CompteCaisse);			
+				vp = String.valueOf(cptCaisse.getAccount().getNumCpt());					
+				accCred = cptCaisse.getAccount();
+				
+			}else if(trans.getTypePaie().equalsIgnoreCase("cheque")){
+				accCred = CodeIncrement.getAcount(em, confGl.getCmptCheque());
+				vp = numCheq;
+			}else if(trans.getTypePaie().equalsIgnoreCase("mobile")){
+				accCred = CodeIncrement.getAcount(em, confGl.getCmptDiffCash());
+				vp = numTel;
+			}
+			
+			double montant = cp.getSolde() + cp.getTotalInteret();
+			
+			cp.setRet(true); 
+			
+			trans.setPeriode(cp.getPeriode());
+			trans.setValPaie(vp); 
+			trans.setInteret(cp.getTotalInteret());
+			trans.setSoldeProgressif(montant);
+			trans.setMontant(montant); 
+			trans.setIdTransaction(indexTcode); 
+			trans.setUtilisateur(ut);
+			trans.setComptePep(cp); 
+			
+			try {
+				transaction.begin();
+				em.persist(trans);
+				em.merge(cp);
+				transaction.commit();
+				em.refresh(trans);
+				em.refresh(cp); 
+				String desc = "Total retrait pep du compte "+numCptEp;
+				Account accDeb = CodeIncrement.getAcount(em, confGl.getCmptPep());
+				ComptabliteServiceImpl.
+				saveImputationPEP(indexTcode, trans.getDateTransaction(), desc, trans.getPieceCompta(),
+						0, montant, ut, ind, grp, cp, null, accDeb);
 
+				String desc1 = "Retrait capital pep du compte "+numCptEp;
+				ComptabliteServiceImpl.
+				saveImputationPEP(indexTcode, trans.getDateTransaction(), desc1, trans.getPieceCompta(),
+						cp.getSolde(), 0, ut, ind, grp, cp, null, accCred);
+				
+				String desc2 = "Retrait intérêt pep du compte "+numCptEp;
+				Account accCred2 = CodeIncrement.getAcount(em, confGl.getCmptIntPayePep());
+				ComptabliteServiceImpl.
+				saveImputationPEP(indexTcode, trans.getDateTransaction(), desc2, trans.getPieceCompta(),
+						cp.getTotalInteret(), 0, ut, ind, grp, cp, null, accCred2);
+				
+				System.out.println("Transaction pep enregistré");
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("Erreur transaction pep");
+				return false;
+			}
+			
+		}
+		
+		return false;
+	}
+	
+	
+	//Get unique transaction
 	@Override
 	public TransactionPep getUniqueTransPep(String idTrans) {
 		return em.find(TransactionPep.class, idTrans);
@@ -4187,6 +4567,12 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		if(!q.getResultList().isEmpty())
 			return q.getResultList();
 		return null;
+	}
+	
+	@Override
+	public List<TransactionPep> getTransPepByCompte(String idCompte) {
+		ComptePep c = em.find(ComptePep.class, idCompte);
+		return c.getTransaction();
 	}
 
 	@Override
@@ -4211,7 +4597,268 @@ public class ProduitEpargneServiceImpl implements ProduitEpargneService {
 		}
 	}
 
+	//Verification excecution
+	@Override
+	public boolean verifierExecution(String date) {
+		String sql = "select c from CounterExecution c where c.date='"+date+"' and c.exec='true'";
+		TypedQuery<CounterExecution> q = em.createQuery(sql, CounterExecution.class);
+		if(!q.getResultList().isEmpty())
+			return true;
+		return false;
+	}
 
+	@Override
+	public List<CalendrierPepView> getCalendrierViewPep(String produit,
+			String codInd, String codGroupe, String dateOverture, int duree,
+			String frequence, double montant, double taux) {
+				
+		ProduitEpargne p = em.find(ProduitEpargne.class, produit);
+		Individuel ind = null;
+		Groupe grp = null;
+		String numCompte = "";
+		if(!codInd.equals("")){
+			ind = em.find(Individuel.class, codInd);
+			 numCompte = ind.getCodeInd()+"/"+p.getIdProdEpargne();
+		}
+		if(!codGroupe.equals("")){
+			grp = em.find(Groupe.class, codGroupe);
+			numCompte = grp.getCodeGrp()+"/"+p.getIdProdEpargne();
+		}	
+		String dateFin = CodeIncrement.getDateFinDepot(duree, frequence, dateOverture);
+		System.out.println("Date fin :"+ dateFin);
+		
+		List<CalendrierPepView> result = CodeIncrement.
+				getCalPrevuPep(numCompte, duree, frequence, montant, dateOverture, taux);	
+		return result;
+	}
+
+	//Vider calendrier view Pep
+	@Override
+	public boolean viderCalendrierPepView() {
+		Query query = em.createNativeQuery("TRUNCATE TABLE calendrierPepView");
+		try {
+			transaction.begin();
+			query.executeUpdate();
+			transaction.commit();
+			System.out.println("Table calendrier pep view"
+					+ " vide");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	//Chercher compte plan épargne par client 
+	@Override
+	public List<ComptePep> findComptePepByCli(String codeInd, String codeGrp) {
 	
+		System.out.println("codeInd : "+ codeInd);
+		System.out.println("codeGrp : "+ codeGrp);
+		
+		String sql = "SELECT c FROM ComptePep c  ";
+		
+		if(!codeInd.equals("") && codeGrp.equals("")){
+			sql += "JOIN c.individuel i WHERE "
+					+ " i.codeInd ='"+ codeInd +"'";
+		}
+		
+		if(!codeGrp.equals("") && codeInd.equals("")){
+			sql += " JOIN c.groupe g WHERE"
+					+ " g.codeGrp = '"+ codeGrp +"'";
+		}
+		
+		System.out.println("requete : "+ sql);
+		
+		TypedQuery<ComptePep> q = em.createQuery(sql, ComptePep.class);
+		
+		if(!q.getResultList().isEmpty()){
+			System.out.println("Match result");
+			List<ComptePep> c = q.getResultList();
+			for (ComptePep compteEpargne : c) {
+				System.out.println("Num compte : "+ compteEpargne.getNumCompte());
+			}
+			return q.getResultList();
+		}
+		System.out.println("No result");
+		return null;
+	}
+
+	@Override
+	public List<CalendrierPep> getCalPepByCompte(String idCompte) {
+		
+		String sql = "select c from CalendrierPep c join c.comptePep p where p.numCompte = '"+idCompte+"' "
+				+ "order by c.date";
+		TypedQuery<CalendrierPep> q = em.createQuery(sql, CalendrierPep.class);
+		return q.getResultList();
+	}
+
+	@Override
+	public long calculDate(String idCompte, String date) {
+		ComptePep c = em.find(ComptePep.class, idCompte);
+		String dateCal = c.getDateFinDepot();
+		try { 
+			
+			LocalDate dateparm = LocalDate.parse(date);
+			LocalDate dateDu = LocalDate.parse(dateCal);
+			System.out.println("date aujourd'hui : "+dateparm);
+			System.out.println("date retrait autorisé : "+dateDu);
+	
+			Long val = ChronoUnit.DAYS.between(dateDu, dateparm);			
+			System.out.println("valeur calcul date : "+val + "\n");			
+			return val;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	//Rapport nouveaux comptes plan d'épargne
+	@Override
+	public List<ComptePep> rapportNouveauPEP(String agence, String client,
+			String produit, String dateDeb, String dateFin) {
+		String sql = "select c from ComptePep c ";
+		
+		if(!agence.equals("") || !client.equals("") || !produit.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
+			
+			String ind = "";
+			String grp = "";
+			
+			if(!client.equals("")){
+				
+				if (client.equalsIgnoreCase("individuel")) {
+					ind = client;
+					grp = "";
+					sql +="join c.individuel i ";
+				} else if (client.equalsIgnoreCase("groupe")) {
+					grp = client;
+					ind = "";
+					sql += "join c.groupe g ";
+				}
+				
+			}
+			
+			if(!produit.equals("")){
+				sql += "join c.produitEpargne p ";
+			}
+			sql += "where ";
+				
+			if(!agence.equals("")){
+				sql+=" c.numCompte like '"+agence+"%' ";
+				if(!client.equals("") || !produit.equals("") || (!dateDeb.equals("") && !dateFin.equals("")))
+					sql +="and ";
+			}
+			if(!client.equals("")){
+				
+				if(!ind.equals("") && grp.equals("")){
+					sql += " c.individuel is not null ";
+					if(!produit.equals("") || (!dateDeb.equals("") && !dateFin.equals("")))
+						sql +="and ";
+				}
+				if(ind.equals("") && !grp.equals("")){
+					sql += " c.groupe is not null ";
+					if(!produit.equals("") || (!dateDeb.equals("") && !dateFin.equals("")))
+						sql +="and ";
+				}
+			}
+			if(!produit.equals("")){
+				sql +=" p.idProdEpargne = '"+ produit +"' ";
+				if((!dateDeb.equals("") && !dateFin.equals("")))
+					sql +="and ";
+			}
+			
+			if(!dateDeb.equals("") && !dateFin.equals("")){
+				sql +=" c.dateDebutDepot between '"+dateDeb+"' and '"+dateFin+"'";
+			}
+		}
+		System.out.println("sql nouveaux compte PEP: "+ sql);
+		TypedQuery<ComptePep> q = em.createQuery(sql, ComptePep.class);
+		if(!q.getResultList().isEmpty())
+			return q.getResultList();
+		return null;
+	}
+
+	@Override
+	public List<TransactionPep> rapportTransactionPEP(String agence,
+			String client, String produit, String trans, String dateDeb,
+			String dateFin) {
+		String sql = "select t from TransactionPep t ";
+		if(!agence.equals("") || !client.equals("") || !produit.equals("") || !trans.equals("")
+				|| !dateDeb.equals("") || !dateFin.equals("")){
+			
+			String ind = "";
+			String grp = "";
+			
+			if(!client.equals("")){
+				
+				if (client.equalsIgnoreCase("individuel")) {
+					ind = client;
+					grp = "";
+					sql +="join t.comptePep c join c.individuel i ";
+				} else if (client.equalsIgnoreCase("groupe")) {
+					grp = client;
+					ind = "";
+					sql += "join t.comptePep c join c.groupe g ";
+				}
+				
+			}
+			
+			if(!produit.equals("")){
+				sql += "join t.comptePep c join c.produitEpargne p ";
+			}
+			sql += "where ";
+				
+			if(!agence.equals("")){
+				sql+=" c.numCompte like '"+agence+"%' ";
+				if(!client.equals("") || !produit.equals("") || !trans.equals("") || (!dateDeb.equals("") && !dateFin.equals("")))
+					sql +="and ";
+			}
+			if(!client.equals("")){
+				
+				if(!ind.equals("") && grp.equals("")){
+					sql += "c.individuel is not null ";
+					if(!produit.equals("") || !trans.equals("") || (!dateDeb.equals("") && !dateFin.equals("")))
+						sql +="and ";
+				}
+				if(ind.equals("") && !grp.equals("")){
+					sql += "c.groupe is not null ";
+					if(!produit.equals("") || !trans.equals("") || (!dateDeb.equals("") && !dateFin.equals("")))
+						sql +="and ";
+				}
+			}
+			if(!produit.equals("")){
+				sql +="p.idProdEpargne = '"+ produit +"' ";
+				if(!trans.equals("") || (!dateDeb.equals("") && !dateFin.equals("")))
+					sql +="and ";
+			}
+			
+			if(!trans.equals("")){
+				sql += "t.typeTrans ='"+trans+"' ";
+				if((!dateDeb.equals("") && !dateFin.equals("")))
+					sql +="and ";
+			}
+			
+			if(!dateDeb.equals("") && !dateFin.equals("")){
+				sql +=" t.dateTransaction between '"+dateDeb+"' and '"+dateFin+"'";
+			}
+		}
+		System.out.println("sql transaction compte PEP: "+ sql);
+		TypedQuery<TransactionPep> q = em.createQuery(sql, TransactionPep.class);
+		if(!q.getResultList().isEmpty())
+			return q.getResultList();
+		return null;
+	}
+
+	//Rapport relevés de compte
+	@Override
+	public List<TransactionPep> getReleverComptePEP(String numCompte) {
+		String sql = "select t from TransactionPep t join t.comptePep c where "
+				+ "c.numCompte = '"+numCompte+"' order by t.dateTransaction asc";
+		TypedQuery<TransactionPep> q = em.createQuery(sql, TransactionPep.class);
+		if(!q.getResultList().isEmpty())
+			return q.getResultList();
+		return null;
+	}
+
 }
 

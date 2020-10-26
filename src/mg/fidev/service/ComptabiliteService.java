@@ -17,11 +17,11 @@ import mg.fidev.model.CompteAuxilliaire;
 import mg.fidev.model.ConfigTransactionCompta;
 import mg.fidev.model.Grandlivre;
 import mg.fidev.model.OperationView;
-import mg.fidev.utils.AfficheBalance;
-import mg.fidev.utils.AfficheBilan;
-import mg.fidev.utils.AfficheListeCreditDeclasser;
-import mg.fidev.utils.HeaderCompta;
-import mg.fidev.utils.MouvementCompta;
+import mg.fidev.utils.compta.AfficheBalance;
+import mg.fidev.utils.compta.AfficheBilan;
+import mg.fidev.utils.compta.HeaderCompta;
+import mg.fidev.utils.compta.MouvementCompta;
+import mg.fidev.utils.credit.AfficheListeCreditDeclasser;
 
 
 @WebService(name="comptabliteService", targetNamespace = "http://fidev.mg.comptabliteService", serviceName = "comptabliteService"
@@ -377,6 +377,7 @@ public interface ComptabiliteService {
 	@WebResult(name="resultat")
 	public List<Grandlivre> getAnalyseCompteAn(
 			@XmlElement(required=false) @WebParam(name="compte")String compte,
+			@XmlElement(required=false) @WebParam(name="compte2")String compte2,
 			@XmlElement(required=false) @WebParam(name="dateDeb")String dateDeb,
 			@XmlElement(required=false) @WebParam(name="dateFin")String dateFin);
 	
@@ -385,6 +386,7 @@ public interface ComptabiliteService {
 	@WebResult(name="resultat")
 	public List<Grandlivre> getAnalyseCompteBud(
 			@XmlElement(required=false) @WebParam(name="compte")String compte,
+			@XmlElement(required=false) @WebParam(name="compte2")String compte2,
 			@XmlElement(required=false) @WebParam(name="dateDeb")String dateDeb,
 			@XmlElement(required=false) @WebParam(name="dateFin")String dateFin);
 	
@@ -393,6 +395,7 @@ public interface ComptabiliteService {
 	@WebResult(name="resultat")
 	public List<Grandlivre> getAnalyseCompteAux(
 			@XmlElement(required=false) @WebParam(name="compte")String compte,
+			@XmlElement(required=false) @WebParam(name="compte2")String compte2,
 			@XmlElement(required=false) @WebParam(name="dateDeb")String dateDeb,
 			@XmlElement(required=false) @WebParam(name="dateFin")String dateFin);
 	

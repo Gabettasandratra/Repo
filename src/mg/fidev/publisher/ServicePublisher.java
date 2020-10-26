@@ -19,7 +19,7 @@ public class ServicePublisher {
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/produit", new ProduitEpargneServiceImpl());
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/credit", new CreditServiceImpl());
 		Endpoint.publish("http://127.0.0.1:8082/service2.0/comptabilite", new ComptabliteServiceImpl());
-		System.out.println("-- Service Online --");    
+		System.out.println("-- Service Online --");  
 		
 		
 		/*LocalDate localDate = LocalDate.now();

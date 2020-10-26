@@ -21,6 +21,7 @@ import mg.fidev.model.ClotureCompte;
 import mg.fidev.model.CompteAuxilliaire;
 import mg.fidev.model.CompteDAT;
 import mg.fidev.model.CompteEpargne;
+import mg.fidev.model.ComptePep;
 import mg.fidev.model.ConfigGlCredit;
 import mg.fidev.model.ConfigTransactionCompta;
 import mg.fidev.model.DemandeCredit;
@@ -31,19 +32,19 @@ import mg.fidev.model.ListeRouge;
 import mg.fidev.model.OperationView;
 import mg.fidev.model.Utilisateur;
 import mg.fidev.service.ComptabiliteService;
-import mg.fidev.utils.AfficheBalance;
-import mg.fidev.utils.AfficheBilan;
-import mg.fidev.utils.AfficheListeCreditDeclasser;
 import mg.fidev.utils.CodeIncrement;
-import mg.fidev.utils.CompteCompta;
-import mg.fidev.utils.HeaderCompta;
-import mg.fidev.utils.MouvementCompta;
-import mg.fidev.utils.PositionCompta4;
-import mg.fidev.utils.PositionCompta5;
-import mg.fidev.utils.PositionCompta6;
-import mg.fidev.utils.PositionCompta7;
-import mg.fidev.utils.PositionCompta8;
-import mg.fidev.utils.RubriqueCompta;
+import mg.fidev.utils.compta.AfficheBalance;
+import mg.fidev.utils.compta.AfficheBilan;
+import mg.fidev.utils.compta.CompteCompta;
+import mg.fidev.utils.compta.HeaderCompta;
+import mg.fidev.utils.compta.MouvementCompta;
+import mg.fidev.utils.compta.PositionCompta4;
+import mg.fidev.utils.compta.PositionCompta5;
+import mg.fidev.utils.compta.PositionCompta6;
+import mg.fidev.utils.compta.PositionCompta7;
+import mg.fidev.utils.compta.PositionCompta8;
+import mg.fidev.utils.compta.RubriqueCompta;
+import mg.fidev.utils.credit.AfficheListeCreditDeclasser;
 
 @WebService(name="comptabliteService", targetNamespace="http://fidev.mg.comptabliteService", serviceName="comptabliteService",
 portName="comptabliteServicePort", endpointInterface="mg.fidev.service.ComptabiliteService")
@@ -159,6 +160,42 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		}
 		
 	}
+	
+	//Enregistrement transaction debit, credit pour plan d'épargne
+		public static void saveImputationPEP(String indexTcode, String date, String description, String piece, double credit,
+				double debit, Utilisateur ut, Individuel ind, Groupe grp, ComptePep pep, Agence ag, Account ac){
+			System.out.println("Imputation pour épargne");
+			double sd = 0;	
+
+			if(debit != 0.0){
+				sd = ac.getSoldeProgressif() + debit;
+				System.out.println("Transaction débit");
+			}
+			if(credit != 0.0){
+				sd = ac.getSoldeProgressif() - credit;
+				System.out.println("Transaction crédit");			
+			}
+									
+			ac.setSoldeProgressif(sd);	
+			
+			Grandlivre g = new 
+				Grandlivre(indexTcode, date, description, piece, credit, debit, sd, ut,
+						ind, grp, ag, pep, ac)	;
+			
+			System.out.println("Account numéro :"+ ac.getNumCpt());
+			try {
+				transaction.begin();
+				em.flush();
+				em.persist(g);
+				transaction.commit();
+				em.refresh(g); 
+				System.out.println("Transaction enregistré");
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.err.println("Erreur enregistrement imputation");
+			}
+			
+		}
 	
 	//Liste des comptes à 4 positions de plus
 	@Override
@@ -1914,15 +1951,24 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 
 	//Analyse compte analytique
 	@Override
-	public List<Grandlivre> getAnalyseCompteAn(String compte, String dateDeb,
+	public List<Grandlivre> getAnalyseCompteAn(String compte,String compte2, String dateDeb,
 			String dateFin) {
 		String sql = "select g from Grandlivre g join g.analytique a ";
 		if(!compte.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
 			
 			sql +="where ";
 		
-			if(!compte.equals("")){
+			if(!compte.equals("") && compte2.equals("")){
 				sql+= " a.id ='"+compte+"'";
+				if(!dateDeb.equals("") && dateFin.equals("")){
+					sql+= " AND g.date ='"+dateDeb+"'";				
+				}
+				if(!dateDeb.equals("") && !dateFin.equals("")){
+					sql+= " AND g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+				}	   
+			}
+			if(!compte.equals("") && !compte2.equals("")){
+				sql+= " a.id BETWEEN '"+compte+"' and '"+compte2+"'";
 				if(!dateDeb.equals("") && dateFin.equals("")){
 					sql+= " AND g.date ='"+dateDeb+"'";				
 				}
@@ -1956,15 +2002,25 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 
 	//Analyse compte budgétaires
 	@Override
-	public List<Grandlivre> getAnalyseCompteBud(String compte, String dateDeb,
+	public List<Grandlivre> getAnalyseCompteBud(String compte,String compte2, String dateDeb,
 			String dateFin) {
 		String sql = "select g from Grandlivre g join g.budget a ";
-		if(!compte.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
+		if(!compte.equals("") || !compte2.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
 			
 			sql +="where ";
 		
-			if(!compte.equals("")){
+			if(!compte.equals("") && compte2.equals("")){
 				sql+= " a.code ='"+compte+"'";
+				if(!dateDeb.equals("") && dateFin.equals("")){
+					sql+= " AND g.date ='"+dateDeb+"'";				
+				}
+				if(!dateDeb.equals("") && !dateFin.equals("")){
+					sql+= " AND g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+				}	   
+			}
+			
+			if(!compte.equals("") && !compte2.equals("")){
+				sql+= " a.code BETWEEN '"+compte+"' and '"+compte2+"'";
 				if(!dateDeb.equals("") && dateFin.equals("")){
 					sql+= " AND g.date ='"+dateDeb+"'";				
 				}
@@ -1997,15 +2053,25 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 
 	//Analyse compte auxilliaires
 	@Override
-	public List<Grandlivre> getAnalyseCompteAux(String compte, String dateDeb,
+	public List<Grandlivre> getAnalyseCompteAux(String compte,String compte2, String dateDeb,
 			String dateFin) {
 		String sql = "select g from Grandlivre g join g.auxilliaire a ";
-		if(!compte.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
+		if(!compte.equals("") || !compte2.equals("") || !dateDeb.equals("") || !dateFin.equals("")){
 			
 			sql +="where ";
 		
-			if(!compte.equals("")){
+			if(!compte.equals("") && compte2.equals("")){
 				sql+= " a.id ='"+compte+"'";
+				if(!dateDeb.equals("") && dateFin.equals("")){
+					sql+= " AND g.date ='"+dateDeb+"'";				
+				}
+				if(!dateDeb.equals("") && !dateFin.equals("")){
+					sql+= " AND g.date BETWEEN '"+dateDeb+"' AND '"+dateFin+"'";
+				}	   
+			}
+			
+			if(!compte.equals("") && !compte2.equals("")){
+				sql+= " a.id BETWEEN '"+compte+"' and '"+compte2+"'";
 				if(!dateDeb.equals("") && dateFin.equals("")){
 					sql+= " AND g.date ='"+dateDeb+"'";				
 				}
@@ -2026,6 +2092,7 @@ public class ComptabliteServiceImpl implements ComptabiliteService {
 		
 		sql +=" order by g.tcode asc";
 		//sql +=" order by ac.numCpt asc";
+		System.out.println("sql analyse compte "+ sql);
 		
 		TypedQuery<Grandlivre> query = em.createQuery(sql,Grandlivre.class);
 		if(!(query.getResultList().isEmpty()))

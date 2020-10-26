@@ -47,6 +47,27 @@ public class Utilisateur implements Serializable {
 	
 	@Column(name="photo")
 	private String photo;
+	
+	@Column(name="adresse")
+	private String adresse;
+	
+	@Column(name="dateInscrit")
+	private String dateInscrit;
+	
+	@Column(name="autreNom")
+	private String autreNom;
+	
+	@Column(name="validiterCompte")
+	private int validiterCompte;
+	
+	@Column(name="validiterMdp")
+	private int validiterMdp;
+	
+	private boolean autoriser;
+	
+	private String dateExpireCompte;
+	
+	private String dateExpireMdp;
 
 	//bi-directional many-to-one association to CommissionCredit
 	@OneToMany(mappedBy="utilisateur")
@@ -128,7 +149,7 @@ public class Utilisateur implements Serializable {
 	private List<Remboursement> remboursements;
 
 	//bi-directional many-to-many association to Agence
-	@ManyToMany
+	@ManyToMany(cascade=CascadeType.PERSIST)
 	@JoinTable(name="utilisateur_agence"
 		, joinColumns={@JoinColumn(name="UtilisateuridUtilisateur")
 			}, inverseJoinColumns={@JoinColumn(name="AgencecodeAgence")}
@@ -137,7 +158,7 @@ public class Utilisateur implements Serializable {
 	private List<Agence> agences;
 
 	//bi-directional many-to-many association to CompteCaisse
-	@ManyToMany(cascade=CascadeType.ALL)
+	@ManyToMany(cascade=CascadeType.PERSIST)
 	@JoinTable(
 		name="utilisateur_compte_caisse"
 		, joinColumns={
@@ -226,6 +247,70 @@ public class Utilisateur implements Serializable {
 
 	public void setPhoto(String photo) {
 		this.photo = photo;
+	}
+
+	public String getAdresse() {
+		return adresse;
+	}
+
+	public void setAdresse(String adresse) {
+		this.adresse = adresse;
+	}
+
+	public String getDateInscrit() {
+		return dateInscrit;
+	}
+
+	public void setDateInscrit(String dateInscrit) {
+		this.dateInscrit = dateInscrit;
+	}
+
+	public String getAutreNom() {
+		return autreNom;
+	}
+
+	public void setAutreNom(String autreNom) {
+		this.autreNom = autreNom;
+	}
+
+	public int getValiditerCompte() {
+		return validiterCompte;
+	}
+
+	public void setValiditerCompte(int validiterCompte) {
+		this.validiterCompte = validiterCompte;
+	}
+
+	public int getValiditerMdp() {
+		return validiterMdp;
+	}
+
+	public void setValiditerMdp(int validiterMdp) {
+		this.validiterMdp = validiterMdp;
+	}
+
+	public boolean isAutoriser() {
+		return autoriser;
+	}
+
+	public void setAutoriser(boolean autoriser) {
+		this.autoriser = autoriser;
+	}
+
+	public String getDateExpireCompte() {
+		return dateExpireCompte;
+	}
+
+	public void setDateExpireCompte(String dateExpireCompte) {
+		this.dateExpireCompte = dateExpireCompte;
+	}
+
+	public String getDateExpireMdp() {
+		return dateExpireMdp;
+	}
+
+	public void setDateExpireMdp(String dateExpireMdp) {
+		this.dateExpireMdp = dateExpireMdp;
 	}
 
 	public List<CommissionCredit> getCommissionCredits() {

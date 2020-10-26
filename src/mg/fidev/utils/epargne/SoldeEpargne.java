@@ -1,4 +1,4 @@
-package mg.fidev.utils;
+package mg.fidev.utils.epargne;
 
 import java.io.Serializable;
 
@@ -36,6 +36,9 @@ public class SoldeEpargne implements Serializable {
 	
 	@XmlElement(name = "montant", required = false, nillable = true)
 	private double montant;
+	
+	@XmlElement(name = "typeTrans", required = false, nillable = true)
+	private String typeTrans;
 	
 	@XmlElement(name = "soldeFinPeriode", required = false, nillable = true)
 	private double soldeFinPeriode;
@@ -97,6 +100,14 @@ public class SoldeEpargne implements Serializable {
 
 	public void setMontant(double montant) {
 		this.montant = montant;
+	}
+
+	public String getTypeTrans() {
+		return typeTrans;
+	}
+
+	public void setTypeTrans(String typeTrans) {
+		this.typeTrans = typeTrans;
 	}
 
 	public double getSolde() {

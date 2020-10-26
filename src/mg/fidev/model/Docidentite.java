@@ -3,6 +3,7 @@ package mg.fidev.model;
 import java.io.Serializable;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -38,6 +39,12 @@ public class Docidentite implements Serializable {
 	private int priorite;
 
 	private String typedoc;
+	
+	@Column(name="recto")
+	private String recto;
+	
+	@Column(name="verso")
+	private String verso;
 
 	//bi-directional many-to-one association to Individuel
 	@ManyToOne(cascade = CascadeType.ALL)
@@ -97,6 +104,22 @@ public class Docidentite implements Serializable {
 
 	public void setTypedoc(String typedoc) {
 		this.typedoc = typedoc;
+	}
+
+	public String getRecto() {
+		return recto;
+	}
+
+	public void setRecto(String recto) {
+		this.recto = recto;
+	}
+
+	public String getVerso() {
+		return verso;
+	}
+
+	public void setVerso(String verso) {
+		this.verso = verso;
 	}
 
 	public Individuel getIndividuel() {

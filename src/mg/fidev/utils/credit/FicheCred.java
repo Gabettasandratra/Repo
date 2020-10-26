@@ -1,4 +1,4 @@
-package mg.fidev.utils;
+package mg.fidev.utils.credit;
 
 import java.io.Serializable;
 

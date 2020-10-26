@@ -8,13 +8,16 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 import mg.fidev.model.Account;
 import mg.fidev.model.CalView;
 import mg.fidev.model.Calapresdebl;
+import mg.fidev.model.CalendrierPepView;
 import mg.fidev.model.ConfigCreditGroup;
 import mg.fidev.model.ConfigCreditIndividuel;
 import mg.fidev.model.DemandeCredit;
+import mg.fidev.model.Grandlivre;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
 import mg.fidev.model.JourFerier;
@@ -209,6 +212,29 @@ public class CodeIncrement {
 		 return null;
 	 }     
 	
+	 
+	 //Chercher Grand livre par code transaction
+	 public static List<Grandlivre> getGrandLivreByCodeTrans(EntityManager em, String tcode){
+		 
+		 String sql = "select g from Grandlivre g where g.tcode = '"+tcode+"'";
+		 TypedQuery<Grandlivre> q = em.createQuery(sql, Grandlivre.class);
+		 
+		 if(!q.getResultList().isEmpty())
+			 return q.getResultList();		 
+		 return null;
+	 }
+	 
+	 public static Grandlivre getDebitGL(EntityManager em, String tcode){
+		 String sql = "select g from Grandlivre g where g.tcode = '"+tcode+"' and g.debit > 0 ";
+		 Grandlivre q = (Grandlivre) em.createQuery(sql).getSingleResult();
+		 return q;
+	 }
+	 
+	 public static Grandlivre getCreditGL(EntityManager em, String tcode){
+		 String sql = "select g from Grandlivre g where g.tcode = '"+tcode+"' and g.credit > 0 ";
+		 Grandlivre q = (Grandlivre) em.createQuery(sql).getSingleResult();
+		 return q;
+	 }
 	
 	/**********************************************************************************************************************/
 	
@@ -565,6 +591,280 @@ public class CodeIncrement {
 		}
 	
 		return listcal;
+	}
+	
+	//--------------------------------------------------------------------------------------------------------
+	/*********************************** CALENDRIER PREVU PLAN EPARGNE **************************************/
+	
+	public static List<CalendrierPepView> getCalPrevuPep(String numCompte, int duree, String frequence, double montant, String date, double taux){
+		
+		List<CalendrierPepView> result = new ArrayList<CalendrierPepView>();
+		
+		LocalDate dtm = LocalDate.parse(date);
+		List<JourFerier> jours = UserServiceImpl.listJoursFerier();
+		int tmp = duree;
+		switch (frequence) {
+		case "Quotidiennement":
+			for (int i = 1; duree >= i; duree--) {
+				
+				if(duree != tmp)
+					dtm = dtm.plusDays(1);
+				
+				for (JourFerier jourFerier : jours) {
+					if(dtm.toString().equals(jourFerier.getDate())){
+						dtm = dtm.plusDays(1);
+					}
+				}
+				if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+					dtm = dtm.plusDays(2);
+				} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+					dtm = dtm.plusDays(1);
+				}				
+				double interet = ((montant * taux)/100)*duree;				
+				CalendrierPepView c = new CalendrierPepView(dtm.toString(), montant, duree, interet, numCompte);				
+				result.add(c);
+				
+			}
+			break;
+		case "Hebdomadairement":
+			for (int i = 1; duree >= i; duree--) {
+				if(duree != tmp)
+					dtm = dtm.plusWeeks(1);
+					
+				for (JourFerier jourFerier : jours) {
+					if (dtm.toString().equals(jourFerier.getDate())) {
+						dtm = dtm.plusDays(1);
+					}
+				}
+				if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+					dtm = dtm.plusDays(2);
+				} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+					dtm = dtm.plusDays(1);
+				}
+				double interet = ((montant * taux) / 100) * duree;
+				CalendrierPepView c = new CalendrierPepView(dtm.toString(),
+						montant, duree, interet, numCompte);
+				result.add(c);
+
+			}
+			break;
+		case "Quinzaine":
+			
+			for (int i = 1; duree >= i; duree--) {
+
+				if(duree != tmp)
+					dtm = dtm.plusWeeks(2);
+									
+				for (JourFerier jourFerier : jours) {
+					if (dtm.toString().equals(jourFerier.getDate())) {
+						dtm = dtm.plusDays(1);
+					}
+				}
+				if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+					dtm = dtm.plusDays(2);
+				} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+					dtm = dtm.plusDays(1);
+				}
+				double interet = ((montant * taux) / 100) * duree;
+				CalendrierPepView c = new CalendrierPepView(dtm.toString(),
+						montant, duree, interet, numCompte);
+				result.add(c);
+
+			}
+			
+			break;
+		case "Mensuellement":
+			
+			for (int i = 1; duree >= i; duree--) {
+
+				if(duree != tmp)
+					dtm = dtm.plusMonths(1);
+					
+				for (JourFerier jourFerier : jours) {
+					if (dtm.toString().equals(jourFerier.getDate())) {
+						dtm = dtm.plusDays(1);
+					}
+				}
+				if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+					dtm = dtm.plusDays(2);
+				} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+					dtm = dtm.plusDays(1);
+				}
+				double interet = ((montant * taux) / 100) * duree;
+				CalendrierPepView c = new CalendrierPepView(dtm.toString(),
+						montant, duree, interet, numCompte);
+				result.add(c);
+
+			}
+			
+			break;
+		case "DeuxMois":
+			
+			for (int i = 1; duree >= i; duree--) {
+
+				if(duree != tmp)
+					dtm = dtm.plusMonths(2);				
+				
+				for (JourFerier jourFerier : jours) {
+					if (dtm.toString().equals(jourFerier.getDate())) {
+						dtm = dtm.plusDays(1);
+					}
+				}
+				if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+					dtm = dtm.plusDays(2);
+				} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+					dtm = dtm.plusDays(1);
+				}
+				double interet = ((montant * taux) / 100) * duree;
+				CalendrierPepView c = new CalendrierPepView(dtm.toString(),
+						montant, duree, interet, numCompte);
+				result.add(c);
+
+			}
+					
+			break;
+		case "Trimestriel":
+			
+			for (int i = 1; duree >= i; duree--) {
+
+				if(duree != tmp)
+					dtm = dtm.plusMonths(3);
+					
+				for (JourFerier jourFerier : jours) {
+					if (dtm.toString().equals(jourFerier.getDate())) {
+						dtm = dtm.plusDays(1);
+					}
+				}
+				if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+					dtm = dtm.plusDays(2);
+				} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+					dtm = dtm.plusDays(1);
+				}
+				double interet = ((montant * taux) / 100) * duree;
+				CalendrierPepView c = new CalendrierPepView(dtm.toString(),
+						montant, duree, interet, numCompte);
+				result.add(c);
+
+			}
+			
+			break;
+		default:
+			break;
+		}
+		
+		return result;
+	}
+	
+	public static String getDateFinDepot(int duree, String frequence, String date){
+		String result = "";
+		
+		LocalDate dtm = LocalDate.parse(date);
+		List<JourFerier> jours = UserServiceImpl.listJoursFerier();
+		switch (frequence) {
+		case "Quotidiennement":
+			dtm = dtm.plusDays(duree + 1);
+			
+			for (JourFerier jourFerier : jours) {
+				if(dtm.toString().equals(jourFerier.getDate())){
+					dtm = dtm.plusDays(1);
+				}
+			}
+			if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+				dtm = dtm.plusDays(2);
+			} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+				dtm = dtm.plusDays(1);
+			}	
+			result = dtm.toString();
+			break;
+		case "Hebdomadairement":
+			
+			dtm = dtm.plusWeeks(duree - 1);
+
+			for (JourFerier jourFerier : jours) {
+				if (dtm.toString().equals(jourFerier.getDate())) {
+					dtm = dtm.plusDays(1);
+				}
+			}
+			if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+				dtm = dtm.plusDays(2);
+			} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+				dtm = dtm.plusDays(1);
+			}
+			result = dtm.toString();
+			break;
+		case "Quinzaine":
+			
+				dtm = dtm.plusWeeks((duree -1 )*2);
+
+				for (JourFerier jourFerier : jours) {
+					if (dtm.toString().equals(jourFerier.getDate())) {
+						dtm = dtm.plusDays(1);
+					}
+				}
+				if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+					dtm = dtm.plusDays(2);
+				} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+					dtm = dtm.plusDays(1);
+				}
+				result = dtm.toString();
+			
+			break;
+		case "Mensuellement":
+			
+			dtm = dtm.plusMonths((duree -1 ));
+
+			for (JourFerier jourFerier : jours) {
+				if (dtm.toString().equals(jourFerier.getDate())) {
+					dtm = dtm.plusDays(1);
+				}
+			}
+			if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+				dtm = dtm.plusDays(2);
+			} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+				dtm = dtm.plusDays(1);
+			}
+			result = dtm.toString();		
+			
+			break;
+		case "DeuxMois":
+			
+			dtm = dtm.plusMonths((duree -1 ) * 2);
+
+			for (JourFerier jourFerier : jours) {
+				if (dtm.toString().equals(jourFerier.getDate())) {
+					dtm = dtm.plusDays(1);
+				}
+			}
+			if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+				dtm = dtm.plusDays(2);
+			} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+				dtm = dtm.plusDays(1);
+			}
+			result = dtm.toString();
+					
+			break;
+		case "Trimestriel":
+			
+			dtm = dtm.plusMonths((duree - 1 ) * 3);
+
+			for (JourFerier jourFerier : jours) {
+				if (dtm.toString().equals(jourFerier.getDate())) {
+					dtm = dtm.plusDays(1);
+				}
+			}
+			if (dtm.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+				dtm = dtm.plusDays(2);
+			} else if (dtm.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+				dtm = dtm.plusDays(1);
+			}
+			result = dtm.toString();
+			
+			break;
+		default:
+			break;
+		}
+		
+		return result;
 	}
 	
 }

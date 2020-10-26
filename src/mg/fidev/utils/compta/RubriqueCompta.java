@@ -1,4 +1,4 @@
-package mg.fidev.utils;
+package mg.fidev.utils.compta;
 
 import java.io.Serializable;
 import java.util.List;
@@ -9,11 +9,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="headerCompta")
-public class HeaderCompta implements Serializable {
+@XmlRootElement(name="rubriqueCompta")
+public class RubriqueCompta implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	@XmlElement(name = "numCompte", required = false, nillable = true)
 	private String numCompte;
 	
@@ -25,22 +25,23 @@ public class HeaderCompta implements Serializable {
 	
 	@XmlElement(name = "devise", required = false, nillable = true)
 	private String devise;
-	
-	private List<RubriqueCompta> rubriques;
-	
-	public HeaderCompta() {
+
+	@XmlElement(name = "comptes", required = false, nillable = true)
+	private List<CompteCompta> comptes;
+
+	public RubriqueCompta() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public HeaderCompta(String numCompte, String libele, boolean isActive,
-			String devise, List<RubriqueCompta> rubriques) {
+	public RubriqueCompta(String numCompte, String libele, boolean isActive,
+			String devise, List<CompteCompta> comptes) {
 		super();
 		this.numCompte = numCompte;
 		this.libele = libele;
 		this.isActive = isActive;
 		this.devise = devise;
-		this.rubriques = rubriques;
+		this.comptes = comptes;
 	}
 
 	public String getNumCompte() {
@@ -75,12 +76,12 @@ public class HeaderCompta implements Serializable {
 		this.devise = devise;
 	}
 
-	public List<RubriqueCompta> getRubriques() {
-		return rubriques;
+	public List<CompteCompta> getComptes() {
+		return comptes;
 	}
 
-	public void setRubriques(List<RubriqueCompta> rubriques) {
-		this.rubriques = rubriques;
+	public void setComptes(List<CompteCompta> comptes) {
+		this.comptes = comptes;
 	}
-		
+
 }

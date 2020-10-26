@@ -35,7 +35,7 @@ public class Acces implements Serializable {
 	@ManyToMany(mappedBy="acces")
 	@XmlTransient
 	private List<Fonction> fonctions;
-
+         
 	public Acces() {
 	}
 

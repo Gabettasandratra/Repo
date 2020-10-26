@@ -40,6 +40,7 @@ import mg.fidev.model.Garant;
 import mg.fidev.model.GarantCredit;
 import mg.fidev.model.GarantieCredit;
 import mg.fidev.model.GarantieView;
+import mg.fidev.model.Grandlivre;
 import mg.fidev.model.Groupe;
 import mg.fidev.model.Individuel;
 import mg.fidev.model.JourFerier;
@@ -49,13 +50,14 @@ import mg.fidev.model.Remboursement;
 import mg.fidev.model.TransactionEpargne;
 import mg.fidev.model.Utilisateur;
 import mg.fidev.service.CreditService;
-import mg.fidev.utils.AfficheSoldeRestantDu;
 import mg.fidev.utils.Agent;
 import mg.fidev.utils.ClientAgent;
 import mg.fidev.utils.CodeIncrement;
+import mg.fidev.utils.credit.AfficheMontantDue;
+import mg.fidev.utils.credit.AfficheSoldeRestantDu;
 
 @WebService(name = "creditProduitService", targetNamespace = "http://fidev.mg.creditProduitService", serviceName = "creditProduitService", portName = "creditServicePort", endpointInterface = "mg.fidev.service.CreditService")
-public class CreditServiceImpl implements CreditService {  
+public class CreditServiceImpl implements CreditService {    
 	
 	
 	private static final String PERSISTENCE_UNIT_NAME = "FIDEV-Repository";
@@ -144,15 +146,20 @@ public class CreditServiceImpl implements CreditService {
 	//Chercher crédit par mot clé et situation 
 	@Override
 	public List<DemandeCredit> chercherCredit(String mc,String statu) {
-		TypedQuery<DemandeCredit> query = em.createQuery("select d from DemandeCredit d where d.numCredit like :x"
-				+ " and (d.approbationStatut =:ap) and d.supprimer=:y", DemandeCredit.class);
-		query.setParameter("x", mc+"%");
-		query.setParameter("ap",statu);
-		query.setParameter("y", false);
+		String sql = "select d from DemandeCredit d where d.numCredit like '"+mc+"%' and d.supprimer='false' ";
+		if(!statu.equals("")){
+			sql+= " and d.approbationStatut ='"+statu+"'";
+		}
+		TypedQuery<DemandeCredit> query = em.createQuery(sql, DemandeCredit.class);
 		//query.setParameter("ax","Rééchelonner");or d.approbationStatut =:ax
 		if(!query.getResultList().isEmpty())
 			return query.getResultList();
 		return null;
+	}
+	
+	@Override    
+	public DemandeCredit getOneDemande(String mc) {
+		return em.find(DemandeCredit.class, mc);
 	}
 	
 	@Override
@@ -482,6 +489,9 @@ public class CreditServiceImpl implements CreditService {
 		dm.setNbTranche(demandes.getNbTranche());
 		dm.setTaux(demandes.getTaux());
 		dm.setTypeTranche(demandes.getTypeTranche());
+		dm.setChriffreAffaire(demandes.getChriffreAffaire());
+		dm.setNbrEmplois(demandes.getNbrEmplois());
+		dm.setPatrimoine(demandes.getPatrimoine());
 	
 		//Vider table garantie view
 		//deleteGarantieVIew();
@@ -1574,31 +1584,10 @@ public class CreditServiceImpl implements CreditService {
 			grp = d.getDemandeCredit().getGroupe();
 			codeGrp = grp.getCodeGrp();
 		}
-		
-		/*************** //Inversement imputation comptable *********************/
-		double ancienMontant = d.getMontantDec();
-		Account accCred = null;
-		ConfigGlCredit confGl = d.getDemandeCredit().getProduitCredit().getConfigGlCredit();
-		
-		if(d.getTypePaie().equalsIgnoreCase("cash"))
-			accCred = CodeIncrement.getAcount(em, d.getValPaie());
-		else if(d.getTypePaie().equalsIgnoreCase("cheque"))
-			accCred = CodeIncrement.getAcount(em, confGl.getCptCheque());
-		else if(d.getTypePaie().equalsIgnoreCase("mobile")) 
-			accCred = CodeIncrement.getAcount(em, confGl.getCptCheque());
-		else if(d.getTypePaie().equalsIgnoreCase("epargne"))
-			accCred = CodeIncrement.getAcount(em, confGl.getCptCheque());	
-		
-		//Compte Debité 
-		ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Modification decaissement Cr. " +d.getDemandeCredit().getNumCredit(),
-				decaissement.getPiece(), 0, ancienMontant, ut, ind, grp, d.getDemandeCredit(), null, accCred);
-		
-		//Compte crédité
-		Account accDeb = CodeIncrement.getAcount(em, confGl.getCptPrincEnCoursInd());
-		ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Modification decaissement Cr. " +d.getDemandeCredit().getNumCredit(),
-				decaissement.getPiece(), ancienMontant, 0, ut, ind, grp, d.getDemandeCredit(), null, accDeb);
+
 		/****************************************************************/
 		/********************** Nouveau enregistrement *****************/
+		ConfigGlCredit confGl = d.getDemandeCredit().getProduitCredit().getConfigGlCredit();
 		//Nouvel imputation
 		String typ = "";
 		String vp = "";
@@ -1696,15 +1685,52 @@ public class CreditServiceImpl implements CreditService {
 			FicheCredit f = new FicheCredit(decaissement.getDateDec(), "Decaissement", decaissement.getPiece(), decaissement.getMontantDec(),
 					0, 0, 0, decaissement.getMontantDec(), 0, decaissement.getMontantDec(), d.getDemandeCredit().getNumCredit());
 			
+			List<Grandlivre> gs = CodeIncrement.getGrandLivreByCodeTrans(em, decaissement.getTcode());
 			//Compte Debité
 			Account accDebNouv = CodeIncrement.getAcount(em, confGl.getCptPrincEnCoursInd());
-			ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Decaissement crédit " +d.getDemandeCredit().getNumCredit(),
-					decaissement.getPiece(), 0, decaissement.getMontantDec(), ut, ind, grp, d.getDemandeCredit(), null, accDebNouv);
-						
-			//Compte crédité
-			ComptabliteServiceImpl.saveImputationLoan(d.getTcode(), decaissement.getDateDec(), "Decaissement crédit " +d.getDemandeCredit().getNumCredit(),
-					decaissement.getPiece(), decaissement.getMontantDec(), 0, ut, ind, grp, d.getDemandeCredit(), null, accCredNouv);
 			
+			String nouvDesc = "Decaissement crédit " +d.getDemandeCredit().getNumCredit();
+			String pieceCompta = decaissement.getPiece();
+			double montant = decaissement.getMontantDec();
+			
+			for (Grandlivre grandlivre : gs) {
+				if(grandlivre.getDebit() > 0){
+					grandlivre.setDate(decaissement.getDateDec());
+					grandlivre.setDescr(nouvDesc);
+					grandlivre.setPiece(pieceCompta);
+					grandlivre.setDebit(montant);
+					grandlivre.setCredit(0);
+					grandlivre.setUtilisateur(ut);
+					grandlivre.setCodeInd(ind);
+					grandlivre.setGroupe(grp);
+					grandlivre.setAgence(null);
+					grandlivre.setDemandeCredit(d.getDemandeCredit());
+					grandlivre.setAccount(accDebNouv);
+										
+				}
+				else if(grandlivre.getCredit() > 0){
+					grandlivre.setDate(decaissement.getDateDec());
+					grandlivre.setDescr(nouvDesc);
+					grandlivre.setPiece(pieceCompta);
+					grandlivre.setDebit(0);
+					grandlivre.setCredit(montant);
+					grandlivre.setUtilisateur(ut);
+					grandlivre.setCodeInd(ind);
+					grandlivre.setGroupe(grp);
+					grandlivre.setAgence(null);
+					grandlivre.setDemandeCredit(d.getDemandeCredit());
+					grandlivre.setAccount(accCredNouv);
+									
+				}
+				
+					transaction.begin();
+					em.merge(grandlivre);
+					transaction.commit(); 
+					em.refresh(grandlivre); 
+				
+			
+			}
+	
 			transaction.begin();
 			em.merge(d);
 			em.persist(f);
@@ -1796,18 +1822,38 @@ public class CreditServiceImpl implements CreditService {
 		return cals;
 	}
 	
+	//Recupérer le calendrier suivant
+	static Calapresdebl getNextCalendrier(String numCredit, String date){
+		
+		String sql = "select cl from Calapresdebl cl join cl.demandeCredit num where cl.date = "
+				+ "(select MIN(c.date) from Calapresdebl c join c.demandeCredit numCred where"
+						+ " c.payer = 'false' and numCred.numCredit = '"+numCredit+"' and c.date > '"+date+"') "
+								+ "and cl.payer = 'false' and num.numCredit = '"+numCredit+"'";
+		
+		Query q = em.createQuery(sql);
+		
+		Calapresdebl cals = null;
+		if(q.getResultList() != null)
+			cals = (Calapresdebl) q.getSingleResult();
+		
+		return cals;
+	}
+	
 	// Récupération du montant reste du dernier remboursement
 	static double getRestPaie(String numCredit){
 		double montant = 0;
 		Query qr = em.createQuery("select r.restaPaie from Remboursement r join r.demandeCredit numDem"
-						+ " where r.dateRemb =( SELECT MAX(rb.dateRemb) FROM Remboursement rb JOIN rb.demandeCredit nums WHERE nums.numCredit"
+						+ " where r.nbEcheance =( SELECT MAX(rb.nbEcheance) FROM Remboursement rb JOIN rb.demandeCredit nums WHERE nums.numCredit"
 						+ "= :numsCredit AND r.typeAction = :a) AND numDem.numCredit = :numero");
 		qr.setParameter("numsCredit", numCredit);
 		qr.setParameter("a", "Remboursement");
 		qr.setParameter("numero", numCredit);						
 
-		if (!qr.getResultList().isEmpty())
+		if (!qr.getResultList().isEmpty()){
 			montant = (double)qr.getFirstResult();							
+			if(montant < 0)
+				montant = montant *(-1);
+		}
 		System.out.println("montant reste au dernière paiement : "+ montant);
 		return montant;
 		
@@ -1922,7 +1968,7 @@ public class CreditServiceImpl implements CreditService {
 	public boolean saveRemboursement(String numCredit, int userId, String date,
 			double montant, String piece,String typePaie,String numTel,String numCheque, String cmptCaisse) { 
 
-		//Instance de crédit en question
+		//Instance de crédit en question  
 		DemandeCredit dm = em.find(DemandeCredit.class, numCredit); 
 		//Utilisateur de saisie
 		Utilisateur ut = em.find(Utilisateur.class, userId);
@@ -1952,11 +1998,12 @@ public class CreditServiceImpl implements CreditService {
 		//Verifie si le credit existe ou pas
 		if (dm != null) {			
 			//Verifie si le crédit est déjà remboursé ou pas
-			if (dm.getSolde_total() != 0) {//>										
+			if (dm.getSolde_total() > 0) {//>!=										
 				//Initialisation de la valeur du capital, intérêt à ajouter dans le grand livre
 				double capitals = 0.0;
 				double inters = 0.0;
 				double tots = 0.0;
+				double intR = 0.0;
 						
 				//Traitement remboursement
 				while(montant > 0){											
@@ -1964,9 +2011,13 @@ public class CreditServiceImpl implements CreditService {
 					String indexTcode = CodeIncrement.genTcode(em);				
 					//Recupération calendrier après deblocage du crédit 		
 					Calapresdebl cals = getInstanceCalapredebl(numCredit);					
-					//Récupération principal et interet du calapresdebl à rembouser
+					//Récupération principal, interet normal et intérêt de retard du calapresdebl à rembouser
 					double princ = cals.getMprinc();
 					double inter = cals.getMint();
+					double interRetard = cals.getMpen();
+					
+					//Calendrier suivant 
+					Calapresdebl suivantCal = getNextCalendrier(numCredit, cals.getDate());
 					
 					//Reste de payement intérêt et principal
 					double restMontant = 0.0;		
@@ -1979,7 +2030,9 @@ public class CreditServiceImpl implements CreditService {
 					
 									//Calcul remboursement
 					
-					//Intérêt remboursé
+					//Intérêt de retard remboursé
+					double irdRemb = 0.0;
+					//Intérêt normal remboursé
 					double interetRemb = 0.0;
 					//Principal remboursé
 					double principaleRem = 0.0;
@@ -2011,104 +2064,146 @@ public class CreditServiceImpl implements CreditService {
 						System.out.println("paiement préalable des intérêts");
 						
 						//Si le payement de l'intérêt est prioritaire
-						//On soustraire le montant total remboursé par montant intéret du calendrier de remboursement
+						//On soustraire le montant total remboursé par montant intéret de Retard (penalité) du calendrier de remboursement
+						double restPaieIrd = montRembourser - interRetard;
+						System.out.println("Reste paiement intérêt de rétard (penalité): "+restPaieIrd);
 						
-						double restPaieInt = montRembourser - inter;						
-						System.out.println("Reste paiement intérêt: "+restPaieInt);
-						//S'il y a de reste aprés soustraction par intérêt 
-						if (restPaieInt > 0.0) {
+						if(restPaieIrd > 0.0){
+							irdRemb = interRetard;
+							intR = irdRemb;
 							
-							interetRemb = inter;
-							inters = interetRemb;
-							
-							double restPaiePrinc = restPaieInt - princ;
-							System.out.println("Reste paiement principal: "+restPaiePrinc);
-							if (restPaiePrinc >= 0.0) {
-								//Si reste de paiement principal superieur ou égal à 0
-								principaleRem = princ;
-								//reste paiement
-								restMontant = restPaiePrinc; 
-								cals.setPayer(true);	
-								//System.out.println("Reste paiement: "+restMontant);
-							} else if (restPaiePrinc < 0.0) {
-								principaleRem = restPaieInt; 
+							double restPaieInt = restPaieIrd - inter;						
+							System.out.println("Reste paiement intérêt: "+restPaieInt);
+							//S'il y a de reste aprés soustraction par intérêt 
+							if (restPaieInt > 0.0) {
+								
+								interetRemb = inter;
+								inters = interetRemb;
+								
+								double restPaiePrinc = restPaieInt - princ;
+								System.out.println("Reste paiement principal: "+restPaiePrinc);
+								if (restPaiePrinc >= 0.0) {
+									//Si reste de paiement principal superieur ou égal à 0
+									principaleRem = princ;
+									//reste paiement
+									restMontant = restPaiePrinc; 
+									cals.setPayer(true);	
+									//System.out.println("Reste paiement: "+restMontant);
+								} else if (restPaiePrinc < 0.0) {
+									principaleRem = restPaieInt; 
+									//calcul pénalité
+									montantPenal = calculPenalite(dm.getProduitCredit(), restPaiePrinc);
+									
+									System.out.println("penalite: "+montantPenal);
+									suivantCal.setMpen((float) montantPenal);
+									cals.setPayer(true);
+									restMontant = restPaiePrinc + (montantPenal*(-1));
+								}
+								System.out.println("Reste paiement: "+restMontant);							
+								capitals = principaleRem;
+								
+							} else if (restPaieInt < 0.0) {
+								System.out.println("montant inferieur au interet due");
+								interetRemb = restPaieIrd;
+								inters = restPaieIrd;
 								//calcul pénalité
-								montantPenal = calculPenalite(dm.getProduitCredit(), restPaiePrinc);
+								montantPenal = calculPenalite(dm.getProduitCredit(), restPaieInt);
 								
 								System.out.println("penalite: "+montantPenal);
-								cals.setMpen((float) montantPenal);
+								suivantCal.setMpen((float)montantPenal);
 								cals.setPayer(true);
-								restMontant = restPaiePrinc + (montantPenal*(-1));
-							}
-							System.out.println("Reste paiement: "+restMontant);							
-							capitals = principaleRem;
+								restMontant = restPaieInt + (montantPenal*(-1));
+								System.out.println("Interêt payer: "+inters);
+							}		
 							
-						} else if (restPaieInt < 0.0) {
-							System.out.println("montant inferieur au interet due");
-							interetRemb = montRembourser;
-							inters = montRembourser;
+						}else if(restPaieIrd < 0.0){
+							System.out.println("montant inferieur au interet de retard due");
+							irdRemb = montRembourser;
+							intR = montRembourser;
 							//calcul pénalité
-							montantPenal = calculPenalite(dm.getProduitCredit(), restPaieInt);
+							montantPenal = calculPenalite(dm.getProduitCredit(), restPaieIrd);
 							
 							System.out.println("penalite: "+montantPenal);
-							cals.setMpen((float)montantPenal);
+							suivantCal.setMpen((float)montantPenal);
 							cals.setPayer(true);
-							restMontant = restPaieInt + (montantPenal*(-1));
+							restMontant = restPaieIrd + (montantPenal*(-1));
 							System.out.println("Interêt payer: "+inters);
-						}				
+						}
 						
 					}			
 					else if(cInd == false || cGrp == false){
 						System.out.println("Paiement de capital est prioritaire");
 						
-						//Si le paiement de capital est prioritaire
-						//On soustraire le montant total remboursé par montant du principal dans le calendrier de remboursement
-						double restPrinc = montRembourser - princ;						
-						System.out.println("Reste de Paiement de capital: "+restPrinc);
-						//S'il y a de reste aprés soustraction par intérêt 
-						if (restPrinc > 0.0) {
+						double restPaieIrd = montRembourser - interRetard;
+						System.out.println("Reste paiement intérêt de rétard (penalité): "+restPaieIrd);
+						
+						if(restPaieIrd > 0.0){
+							irdRemb = interRetard;
+							intR = irdRemb;
 							
-							principaleRem = princ;
-							capitals = princ;
-							
-							double restInt = restPrinc - inter;
-							System.out.println("Reste de Paiement intérêt: "+restInt);
-							if (restInt >= 0.0) {
-								//Si reste de paiement principal superieur ou égal à 0
-								interetRemb = inter;
-								//reste paiement
-								restMontant = restInt; 
-								cals.setPayer(true);
-								System.out.println("intérêt remboursé: "+interetRemb);
-								System.out.println("Reste montant: "+restMontant);
+							//Si le paiement de capital est prioritaire
+							//On soustraire le montant total remboursé par montant du principal dans le calendrier de remboursement
+							double restPrinc = restPaieIrd - princ;						
+							System.out.println("Reste de Paiement de capital: "+restPrinc);
+							//S'il y a de reste aprés soustraction par intérêt 
+							if (restPrinc > 0.0) {
 								
-							} else if (restInt < 0.0) {
-								interetRemb = restInt; 
+								principaleRem = princ;
+								capitals = princ;
+								
+								double restInt = restPrinc - inter;
+								System.out.println("Reste de Paiement intérêt: "+restInt);
+								if (restInt >= 0.0) {
+									//Si reste de paiement principal superieur ou égal à 0
+									interetRemb = inter;
+									//reste paiement
+									restMontant = restInt; 
+									cals.setPayer(true);
+									System.out.println("intérêt remboursé: "+interetRemb);
+									System.out.println("Reste montant: "+restMontant);
+									
+								} else if (restInt < 0.0) {
+									interetRemb = restInt; 
+									//calcul pénalité
+									montantPenal = calculPenalite(dm.getProduitCredit(), restInt);
+															
+									suivantCal.setMpen((float)montantPenal);
+									cals.setPayer(true);
+									restMontant = restInt + (montantPenal*(-1));
+									System.out.println("pénalité: "+montantPenal);
+									System.out.println("Reste montant: "+restMontant);
+								}								
+								inters = interetRemb;					
+								
+								
+							} else if (restPrinc < 0.0) {
+								System.out.println("montant inferieur au principal due");
+								principaleRem = restPaieIrd;
+								capitals = restPaieIrd;
 								//calcul pénalité
-								montantPenal = calculPenalite(dm.getProduitCredit(), restInt);
+								montantPenal = calculPenalite(dm.getProduitCredit(), restPrinc);
 														
-								cals.setMpen((float)montantPenal);
+								suivantCal.setMpen((float)montantPenal);
 								cals.setPayer(true);
-								restMontant = restInt + (montantPenal*(-1));
+								restMontant = restPrinc + (montantPenal*(-1));
 								System.out.println("pénalité: "+montantPenal);
 								System.out.println("Reste montant: "+restMontant);
-							}								
-							inters = interetRemb;					
+							}
 							
-							
-						} else if (restPrinc < 0.0) {
-							System.out.println("montant inferieur au principal due");
-							principaleRem = montRembourser;
-							capitals = montRembourser;
+						}else if(restPaieIrd < 0.0){
+							System.out.println("montant inferieur au interet de retard due");
+							irdRemb = montRembourser;
+							intR = montRembourser;
 							//calcul pénalité
-							montantPenal = calculPenalite(dm.getProduitCredit(), restPrinc);
-													
-							cals.setMpen((float)montantPenal);
+							montantPenal = calculPenalite(dm.getProduitCredit(), restPaieIrd);
+							
+							System.out.println("penalite: "+montantPenal);
+							suivantCal.setMpen((float)montantPenal);
 							cals.setPayer(true);
-							restMontant = restPrinc + (montantPenal*(-1));
-							System.out.println("pénalité: "+montantPenal);
-							System.out.println("Reste montant: "+restMontant);
-						}
+							restMontant = restPaieIrd + (montantPenal*(-1));
+							System.out.println("Interêt payer: "+inters);
+						}						
+						
 					}
 
 					// recupérer le dernier Principale total, intérêt total, solde total  du crédit
@@ -2155,14 +2250,17 @@ public class CreditServiceImpl implements CreditService {
 								montantPenal, principaleRem, interetRemb, cals.getDate());
 						transaction.begin();
 						em.merge(cals);
-						em.merge(dm);
+						em.merge(suivantCal);
 						em.persist(saveRemb);
+						em.merge(dm);
 						transaction.commit();
+						em.refresh(cals); 
+						em.refresh(suivantCal); 
 						em.refresh(saveRemb);
 						em.refresh(dm);
-						em.refresh(cals); 
 						results = "Remboursement Enregistrer!!!";
 						System.out.println(results);
+						
 						//imputation comptable 
 						//Remboursement des clients sain
 						if(dm.getIndividuel().isSain() == true || dm.getGroupe() != null){     
@@ -2173,15 +2271,24 @@ public class CreditServiceImpl implements CreditService {
 							ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Remboursement du crédit " +numCredit, 
 									piece, 0, tots, ut, ind, grp, dm, null, accDebit);
 							
-							// Solde Crédité 1 (Principal)
-							Account accCred1 = CodeIncrement.getAcount(em, confGl.getCptPrincEnCoursInd());				
-							ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Remboursement principal du crédit " +numCredit, 
-									piece, capitals, 0, ut, ind, grp, dm, null, accCred1);
+							// Solde Crédité 1 (Interet de retard (penalité))
+							//List<E>
+							if(intR > 0.0){
+								Account accCred1 = CodeIncrement.getAcount(em, confGl.getCptPenalCredit());
+								ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Remboursement Intérêt de retard du crédit " +numCredit, 
+										piece, intR, 0, ut, ind, grp, dm, null, accCred1);
+							}
 							
 							// Solde Crédité 2 (Interet)
 							Account accCred2 = CodeIncrement.getAcount(em, confGl.getCptIntRecCrdtInd());
-							ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Remboursement Interet du crédit " +numCredit, 
+							ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Remboursement Intérêt normal du crédit " +numCredit, 
 									piece, inters, 0, ut, ind, grp, dm, null, accCred2);
+
+							// Solde Crédité 3 (Principal)
+							Account accCred3 = CodeIncrement.getAcount(em, confGl.getCptPrincEnCoursInd());				
+							ComptabliteServiceImpl.saveImputationLoan(indexTcode, date, "Remboursement principal du crédit " +numCredit, 
+									piece, capitals, 0, ut, ind, grp, dm, null, accCred3);
+							
 							
 							System.out.println("Remboursement normal du crédit n° "+ dm.getNumCredit() +" bien enregistré");
 						}
@@ -2286,17 +2393,19 @@ public class CreditServiceImpl implements CreditService {
 	
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<String> getMontaRemb(String numCredit, String date) {
+	public AfficheMontantDue getMontaRemb(String numCredit, String date) {
 		
-		List<String> result = new ArrayList<String>();
+		AfficheMontantDue retour = null;
+		
+		String sql = "select cl from Calapresdebl cl join cl.demandeCredit d where cl.date = ("
+				+ "SELECT MIN(c.date) FROM Calapresdebl c JOIN c.demandeCredit numCred WHERE"
+						+ " c.payer = 'false' AND numCred.numCredit = '"+numCredit+"') and "
+								+ " cl.payer = 'false' AND d.numCredit = '"+numCredit+"'";
 		
 		// Selection de date qu'on doit faire le remboursement
-		Query requete = em.createQuery("SELECT MIN(c.date) FROM Calapresdebl c JOIN c.demandeCredit numCred WHERE"
-						+ " c.payer = :p AND numCred.numCredit = :numC");
-		requete.setParameter("p", false);
-		requete.setParameter("numC", numCredit);
-
-		String dateCal = (String) requete.getSingleResult();
+		Query requete = em.createQuery(sql);
+		Calapresdebl cal = (Calapresdebl) requete.getSingleResult();
+		String dateCal = cal.getDate();
 		
 		try {	
 			LocalDate dateparm = LocalDate.parse(date);
@@ -2310,67 +2419,26 @@ public class CreditServiceImpl implements CreditService {
 			System.out.println("difference entre "+ dateDu +" et "+ dateparm +" est "+ val + "\n");
 			//List<E>
 			if(val < 0){
-				String info = "Remboursement anticipative";
-				String nbJours = "remboursement dans:"+val+" jour(s)";
-				System.out.println(info);
-				result.add("0");
-				result.add("5000");
-				result.add("0");
-				result.add("0");
-				result.add("0");
-				result.add("0");
-				result.add("0");
-				result.add("0");
-				result.add("0");
-				result.add("0");
-				result.add(info);
-				result.add(nbJours);
-				result.add("");
+				double tot = cal.getMint() + cal.getMprinc() + cal.getMpen(); 
+				retour = new AfficheMontantDue
+						(0, cal.getMpen(), cal.getMcomm(), 0, 0, 0, 0, cal.getMint(), cal.getMprinc());
+				retour.setMontantTotal(tot);
+				retour.setInfo("Remboursement anticipative");
+				retour.setNbJours("remboursement dans:"+val+" jour(s)");
+				retour.setEcheance(" ");
+				
 			}
 			else if(val == 0){
 				System.out.println("Remboursement normal");
 				// Selection de principale due et intérêt due
-
-				Query query = em.createQuery("SELECT cl FROM Calapresdebl cl JOIN cl.demandeCredit num"
-								+ " WHERE cl.date = :dateRemb AND num.numCredit = :numCred");
-				// query.setParameter("x", false);cl.payer = :x AND
-				query.setParameter("dateRemb", dateCal);
-				query.setParameter("numCred", "" + numCredit + "");
-
-				double princ = 0.0;
-				double inter = 0.0;
-				double motantTotal = 0.0;
-
-				// Recupère le montant principal et interet à rembouser
-
-				if (! query.getResultList().isEmpty()) {
-					
-					Calapresdebl clps = (Calapresdebl) query.getSingleResult();
-					
-					princ = clps.getMprinc();
-					inter = clps.getMint();
-					
-					System.out.println("Principal total: " + princ);
-					System.out.println("Interet total: " + inter);
-					motantTotal = princ + inter;
-					
-					String info = "Remboursement normal";
-					//String nbJours = "remboursement dans "+val+" jour(s)";
-
-					result.add("0");
-					result.add("0");
-					result.add("0");
-					result.add("0");
-					result.add("0");
-					result.add(String.valueOf(inter));
-					result.add(String.valueOf(princ));
-					result.add("0");
-					result.add("0");
-					result.add(String.valueOf(motantTotal));
-					result.add(info);
-					result.add("");
-					result.add("");
-				}
+				
+				double tot = cal.getMint() + cal.getMprinc() + cal.getMpen(); 
+				retour = new AfficheMontantDue
+						(0, cal.getMpen(), cal.getMcomm(), 0, 0, cal.getMint(), cal.getMprinc(), 0, 0);
+				retour.setMontantTotal(tot);
+				retour.setInfo("Remboursement normal");
+				retour.setNbJours(" "); 
+				retour.setEcheance(" ");      
 
 			}
 			else if(val > 0){
@@ -2385,13 +2453,22 @@ public class CreditServiceImpl implements CreditService {
 				calPenlt = rq.getResultList();
 				
 				String echeansTard = "Echéance de retard : "+calPenlt.size();
-				
 				System.out.println(echeansTard);
 				double montRest = calPenlt.get(0).getMprinc() + calPenlt.get(0).getMint();
-				int tauxPenalite = 5;
-				double totalPenalte = ((montRest * tauxPenalite)/100)*calPenlt.size();
+			
+				DemandeCredit dm = em.find(DemandeCredit.class, numCredit);
+				ConfigPenaliteCredit confPenalit = dm.getProduitCredit().getConfigPenaliteCredit();
 				
-				System.out.println("pénalité de retard = "+totalPenalte);
+				double montantPenal = 0;
+				
+				if(confPenalit.getModeCalcul().equalsIgnoreCase("montant fixe")){
+					montantPenal = confPenalit.getMontantFixe();
+				}
+				if(confPenalit.getModeCalcul().equalsIgnoreCase("pourcentage")){
+					montantPenal = ((montRest*confPenalit.getPourcentage())/100)*calPenlt.size();
+				}
+				
+				System.out.println("pénalité de retard = "+montantPenal);
 				
 				String info = "";
 				String nbJours = "";
@@ -2400,7 +2477,6 @@ public class CreditServiceImpl implements CreditService {
 					System.out.println("Remboursement en retard");
 					
 					// Selection de principale due et intérêt due
-
 					Query query = em.createQuery("SELECT SUM(cl.mprinc),SUM(cl.mint) FROM Calapresdebl cl JOIN cl.demandeCredit num"
 									+ " WHERE cl.payer = :x AND cl.date <= :dateRemb AND num.numCredit = :numCred");
 					query.setParameter("x", false);
@@ -2424,25 +2500,19 @@ public class CreditServiceImpl implements CreditService {
 
 							princ = ligne[0].toString();
 							inter = ligne[1].toString();
-							motantTotal = Double.parseDouble(princ) + Double.parseDouble(inter);
+							motantTotal = Double.parseDouble(princ) + Double.parseDouble(inter) + montantPenal;
 							
 							System.out.println("Principal total: " + princ);
 							System.out.println("Interet total: " + inter);
 						
 						}
-						result.add("0");
-						result.add(String.valueOf(totalPenalte));
-						result.add("0");
-						result.add(inter);
-						result.add(princ);
-						result.add("0");
-						result.add("0");
-						result.add("0");
-						result.add("0");
-						result.add(String.valueOf(motantTotal));
-						result.add(info);
-						result.add(nbJours);
-						result.add(echeansTard);
+					
+						retour = new AfficheMontantDue
+								(0, montantPenal, 0, Double.parseDouble(inter), Double.parseDouble(princ), 0, 0, 0, 0);
+						retour.setInfo(info);
+						retour.setNbJours(nbJours); 
+						retour.setEcheance(echeansTard); 
+						retour.setMontantTotal(motantTotal); 
 					}
 					
 				}else if(val > 90){
@@ -2472,25 +2542,18 @@ public class CreditServiceImpl implements CreditService {
 
 							princ = ligne[0].toString();
 							inter = ligne[1].toString();
-							motantTotal = Double.parseDouble(princ) + Double.parseDouble(inter);
+							motantTotal = Double.parseDouble(princ) + Double.parseDouble(inter) + montantPenal;
 							
 							System.out.println("Principal total: " + princ);
 							System.out.println("Interet total: " + inter);
 						
 						}
-						result.add("0");
-						result.add(String.valueOf(totalPenalte));
-						result.add("0");
-						result.add(inter);
-						result.add(princ);
-						result.add("0");
-						result.add("0");
-						result.add("0");
-						result.add("0");
-						result.add(String.valueOf(motantTotal));
-						result.add(info);
-						result.add(nbJours);
-						result.add(echeansTard);
+						retour = new AfficheMontantDue
+								(0, montantPenal, 0, Double.parseDouble(inter), Double.parseDouble(princ), 0, 0, 0, 0);
+						retour.setInfo(info);
+						retour.setNbJours(nbJours); 
+						retour.setEcheance(echeansTard); 
+						retour.setMontantTotal(motantTotal); 
 					}
 				}					
 			}
@@ -2498,7 +2561,7 @@ public class CreditServiceImpl implements CreditService {
 				e.printStackTrace();
 			}
 			
-		return result;
+		return retour;
 	}
 
 	/***
@@ -2522,7 +2585,6 @@ public class CreditServiceImpl implements CreditService {
 	@Override
 	public List<Caisse> findAllComptCaisse() {
 		TypedQuery<Caisse> query = em.createQuery("SELECT c FROM Caisse c",Caisse.class);
-		
 		List<Caisse> result = query.getResultList();
 		return result;
 	}
@@ -2734,6 +2796,78 @@ public class CreditServiceImpl implements CreditService {
 	@Override
 	public List<GarantieCredit> getGarantieCredit(String numCredit) {
 		String sql = "select g from GarantieCredit g join g.demandeCredit d where d.numCredit='"+numCredit+"'";
+		TypedQuery<GarantieCredit> query = em.createQuery(sql,GarantieCredit.class);
+		if(!query.getResultList().isEmpty())
+			return query.getResultList();
+		return null;
+	}
+	
+	//Rapport liste de tous les garants crédits dans une période
+	@Override
+	public List<GarantCredit> getGarantCreditByPeriode(String agence, String client, String produit, String dateDeb,
+			String dateFin) {
+		String sql = "select g from GarantCredit g join g.credit d ";
+				
+		if(!agence.equalsIgnoreCase("") || !client.equalsIgnoreCase("") || !produit.equalsIgnoreCase("") 
+				|| !dateDeb.equalsIgnoreCase("") || !dateFin.equalsIgnoreCase("")){
+			sql +="where ";
+			
+			if(!agence.equalsIgnoreCase("")){
+				sql +=" d.numCredit like '"+agence+"%' and";
+			}
+			if(!client.equalsIgnoreCase("")){
+				if(client.equalsIgnoreCase("individuel"))
+					sql += " d.individuel is not null and";
+				if(client.equalsIgnoreCase("groupe"))
+					sql +=" d.groupe is not null and";
+			}
+			
+			if(!produit.equalsIgnoreCase(""))
+				sql +=" d.produitCredit.idProdCredit ='"+produit+"' and";
+			
+			if(!dateDeb.equalsIgnoreCase("") && !dateFin.equalsIgnoreCase(""))
+				sql += " d.dateDemande between '"+dateDeb+"' and '"+dateFin+"'";
+		}
+		
+		System.out.println("sql get garant : "+sql);
+		TypedQuery<GarantCredit> query = em.createQuery(sql,GarantCredit.class);
+		if(!query.getResultList().isEmpty())
+			return query.getResultList();
+		return null;
+	}
+
+	//Rapport liste de tous les garanties crédits dans une période
+	@Override
+	public List<GarantieCredit> getGarantieCreditByPeriode(String agence, String client, String produit, String dateDeb,
+			String dateFin, String type) {
+		String sql = "select g from GarantieCredit g join g.demandeCredit d ";
+		
+		if(!agence.equalsIgnoreCase("") || !client.equalsIgnoreCase("") || !produit.equalsIgnoreCase("") 
+				|| !type.equalsIgnoreCase("") || !dateDeb.equalsIgnoreCase("") || !dateFin.equalsIgnoreCase("")){
+			sql +="where ";
+			
+			if(!agence.equalsIgnoreCase("")){
+				sql +=" d.numCredit like '"+agence+"%' and";
+			}
+			if(!client.equalsIgnoreCase("")){
+				if(client.equalsIgnoreCase("individuel"))
+					sql += " d.individuel is not null and";
+				if(client.equalsIgnoreCase("groupe"))
+					sql +=" d.groupe is not null and";
+			}
+			
+			if(!produit.equalsIgnoreCase(""))
+				sql +=" d.produitCredit.idProdCredit ='"+produit+"' and";
+			
+			if(!type.equals("")){
+				sql +=" g.typeGarantie = '"+ type +"' and";
+			}
+			
+			if(!dateDeb.equalsIgnoreCase("") && !dateFin.equalsIgnoreCase(""))
+				sql += " d.dateDemande between '"+dateDeb+"' and '"+dateFin+"'";
+		}
+		
+		System.out.println("sql get garantie : "+sql);
 		TypedQuery<GarantieCredit> query = em.createQuery(sql,GarantieCredit.class);
 		if(!query.getResultList().isEmpty())
 			return query.getResultList();
@@ -3331,6 +3465,20 @@ public class CreditServiceImpl implements CreditService {
 			return result;
 		}
 		
+		return null;
+	}
+
+	@Override
+	public List<DemandeCredit> getHistoriqueCredit(String codeInd,
+			String codeGrp) {
+		if(!codeInd.equals("") && codeGrp.equals("")){
+			Individuel ind = em.find(Individuel.class, codeInd);
+			return ind.getDemandeCredits();
+		}
+		if(codeInd.equals("") && !codeGrp.equals("")){
+			Groupe grp = em.find(Groupe.class, codeGrp);
+			return grp.getDemandeCredits();
+		}
 		return null;
 	}
 		

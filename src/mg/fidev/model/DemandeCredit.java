@@ -99,6 +99,18 @@ public class DemandeCredit implements Serializable {
 	
 	@Column(name="supprimer")
 	private boolean supprimer;
+	
+	@Column(name="patrimoine")
+	private String patrimoine;
+	
+	@Column(name="nbrEmplois")
+	private int nbrEmplois;
+	
+	@Column(name="chriffreAffaire")
+	private double chriffreAffaire;
+	
+	@Column(name="dateProvisoirDec")
+	private String dateProvisoirDec;
 
 	/******************************************************************************************************************************/
 									/**********************RELEATION ONE TO MANY********************************/
@@ -341,6 +353,127 @@ public class DemandeCredit implements Serializable {
 	public void setMotifRechelonne(String motifRechelonne) {
 		this.motifRechelonne = motifRechelonne;
 	}
+	
+	public double getTaux() {
+		return taux;
+	}
+
+	public void setTaux(double taux) {
+		this.taux = taux;
+	}
+
+	public int getNbTranche() {
+		return nbTranche;
+	}
+
+	public void setNbTranche(int nbTranche) {
+		this.nbTranche = nbTranche;
+	}
+
+	public String getTypeTranche() {
+		return typeTranche;
+	}
+
+	public void setTypeTranche(String typeTranche) {
+		this.typeTranche = typeTranche;
+	}
+
+	public int getDiffPaie() {
+		return diffPaie;
+	}
+
+	public void setDiffPaie(int diffPaie) {
+		this.diffPaie = diffPaie;
+	}
+
+	public String getModeCalculInteret() {
+		return modeCalculInteret;
+	}
+
+	public void setModeCalculInteret(String modeCalculInteret) {
+		this.modeCalculInteret = modeCalculInteret;
+	}
+
+	public List<ApprobationCredit> getApprobations() {
+		return approbations;
+	}
+
+	public void setApprobations(List<ApprobationCredit> approbations) {
+		this.approbations = approbations;
+	}
+
+	public double getInteret() {
+		return interet;
+	}
+
+	public void setInteret(double interet) {
+		this.interet = interet;
+	}
+	
+
+	public String getDateApprobation() {
+		return dateApprobation;
+	}
+
+	public void setDateApprobation(String dateApprobation) {
+		this.dateApprobation = dateApprobation;
+	}
+
+	public List<CreditMembreGroupe> getMontantMembres() {
+		return montantMembres;
+	}
+
+	public void setMontantMembres(List<CreditMembreGroupe> montantMembres) {
+		this.montantMembres = montantMembres;
+	}
+
+	public boolean isSupprimer() {
+		return supprimer;
+	}
+
+	public void setSupprimer(boolean supprimer) {
+		this.supprimer = supprimer;
+	}
+
+	public boolean isDecaisser() {
+		return decaisser;
+	}
+
+	public void setDecaisser(boolean decaisser) {
+		this.decaisser = decaisser;
+	}
+	
+	public String getPatrimoine() {
+		return patrimoine;
+	}
+
+	public void setPatrimoine(String patrimoine) {
+		this.patrimoine = patrimoine;
+	}
+
+	public int getNbrEmplois() {
+		return nbrEmplois;
+	}
+
+	public void setNbrEmplois(int nbrEmplois) {
+		this.nbrEmplois = nbrEmplois;
+	}
+
+	public double getChriffreAffaire() {
+		return chriffreAffaire;
+	}
+
+	public void setChriffreAffaire(double chriffreAffaire) {
+		this.chriffreAffaire = chriffreAffaire;
+	}
+
+	public String getDateProvisoirDec() {
+		return dateProvisoirDec;
+	}
+
+	public void setDateProvisoirDec(String dateProvisoirDec) {
+		this.dateProvisoirDec = dateProvisoirDec;
+	}
 
 	public List<Calpaiementdue> getCalpaiementdues() {
 		return this.calpaiementdues;
@@ -536,95 +669,6 @@ public class DemandeCredit implements Serializable {
 
 	public void setAgent(Utilisateur agent) {
 		this.agent = agent;
-	}
-
-	public double getTaux() {
-		return taux;
-	}
-
-	public void setTaux(double taux) {
-		this.taux = taux;
-	}
-
-	public int getNbTranche() {
-		return nbTranche;
-	}
-
-	public void setNbTranche(int nbTranche) {
-		this.nbTranche = nbTranche;
-	}
-
-	public String getTypeTranche() {
-		return typeTranche;
-	}
-
-	public void setTypeTranche(String typeTranche) {
-		this.typeTranche = typeTranche;
-	}
-
-	public int getDiffPaie() {
-		return diffPaie;
-	}
-
-	public void setDiffPaie(int diffPaie) {
-		this.diffPaie = diffPaie;
-	}
-
-	public String getModeCalculInteret() {
-		return modeCalculInteret;
-	}
-
-	public void setModeCalculInteret(String modeCalculInteret) {
-		this.modeCalculInteret = modeCalculInteret;
-	}
-
-	public List<ApprobationCredit> getApprobations() {
-		return approbations;
-	}
-
-	public void setApprobations(List<ApprobationCredit> approbations) {
-		this.approbations = approbations;
-	}
-
-	public double getInteret() {
-		return interet;
-	}
-
-	public void setInteret(double interet) {
-		this.interet = interet;
-	}
-	
-
-	public String getDateApprobation() {
-		return dateApprobation;
-	}
-
-	public void setDateApprobation(String dateApprobation) {
-		this.dateApprobation = dateApprobation;
-	}
-
-	public List<CreditMembreGroupe> getMontantMembres() {
-		return montantMembres;
-	}
-
-	public void setMontantMembres(List<CreditMembreGroupe> montantMembres) {
-		this.montantMembres = montantMembres;
-	}
-
-	public boolean isSupprimer() {
-		return supprimer;
-	}
-
-	public void setSupprimer(boolean supprimer) {
-		this.supprimer = supprimer;
-	}
-
-	public boolean isDecaisser() {
-		return decaisser;
-	}
-
-	public void setDecaisser(boolean decaisser) {
-		this.decaisser = decaisser;
 	}
 
 	public Utilisateur getUser_update() {
