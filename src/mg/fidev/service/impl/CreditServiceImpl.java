@@ -70,7 +70,7 @@ public class CreditServiceImpl implements CreditService {
 	
 	/***********************************************************************************************************************************************/
 	
-	/**
+	/**       
 	 * Récupère le dernier index d'un produit crédit     
 	 * **/
 	static int getLastIndexPdt() {
@@ -89,7 +89,7 @@ public class CreditServiceImpl implements CreditService {
 			int lastIndex = getLastIndexPdt();
 			String index = String.format("%03d", ++lastIndex);
 
-			ProduitCredit pdtCredit = new ProduitCredit("L" + index, etat, nomProdCredit); 
+			ProduitCredit pdtCredit = new ProduitCredit("C" + index, etat, nomProdCredit); 
 
 			transaction.begin();
 			em.persist(pdtCredit);
@@ -273,8 +273,8 @@ public class CreditServiceImpl implements CreditService {
 		return res;
 	}
 	
-	
-	/******************************************************** DEMANDE CREDIT *************************************************************************/
+	//------------------------------------------------------------------------------------------------------------------
+	/****************************** DEMANDE CREDIT ***********************************/
 
 	//Supprimer un crédit
 	@Override
@@ -2472,6 +2472,8 @@ public class CreditServiceImpl implements CreditService {
 				
 				String info = "";
 				String nbJours = "";
+				
+				montantPenal = montantPenal * calPenlt.size();
 				
 				if(val < 90){
 					System.out.println("Remboursement en retard");

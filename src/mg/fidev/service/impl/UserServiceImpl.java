@@ -958,4 +958,19 @@ public class UserServiceImpl implements UserService {
 		return q.getResultList();
 	}
 
+	//Liste des menus
+	@Override
+	public List<Acces> getAllMenu() {
+		String sql = "select a from Acces a";
+		TypedQuery<Acces> q = em.createQuery(sql, Acces.class);
+		return q.getResultList();
+	}
+
+	//Liste acces par utilisateurs
+	@Override
+	public List<Acces> getAccesUser(int idUser) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -62,7 +62,7 @@ public class CodeIncrement {
 	public static String getCodeGar(EntityManager em, String agence){
 		int lastIndex = getLastIndexGar(em, agence);
 		String index = String.format("%06d", ++lastIndex);
-		return agence.substring(0, 2) + "/Gar/" + index;
+		return agence.substring(0, 2) + "/GAR/" + index;
 	}
 	
 	//Generate code budgét
@@ -134,9 +134,9 @@ public class CodeIncrement {
 		
 		if(result != 0){
 			String index = String.format("%06d", ++result);
-			return agence.substring(0, 2)+"/Pers/" + index;
+			return agence.substring(0, 2)+"/PER/" + index;
 		}else{
-			return agence.substring(0, 2)+"/Pers/" + "000001";
+			return agence.substring(0, 2)+"/PER/" + "000001";
 		}
 	}
 	

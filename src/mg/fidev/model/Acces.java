@@ -30,11 +30,18 @@ public class Acces implements Serializable {
 
 	@XmlElement
 	private String titreAcces;
+	
+	private String abrevAcces;
 
 	//bi-directional many-to-many association to Fonction
 	@ManyToMany(mappedBy="acces")
 	@XmlTransient
 	private List<Fonction> fonctions;
+	
+	//bi-directional many-to-many association to Utilisateur
+	@ManyToMany(mappedBy="acces")
+	@XmlTransient
+	private List<Utilisateur> utilisateurs;
          
 	public Acces() {
 	}
@@ -54,6 +61,14 @@ public class Acces implements Serializable {
 	public void setTitreAcces(String titreAcces) {
 		this.titreAcces = titreAcces;
 	}
+	
+	public String getAbrevAcces() {
+		return abrevAcces;
+	}
+
+	public void setAbrevAcces(String abrevAcces) {
+		this.abrevAcces = abrevAcces;
+	}
 
 	public List<Fonction> getFonctions() {
 		return this.fonctions;
@@ -63,4 +78,11 @@ public class Acces implements Serializable {
 		this.fonctions = fonctions;
 	}
 
+	public List<Utilisateur> getUtilisateurs() {
+		return utilisateurs;
+	}
+
+	public void setUtilisateurs(List<Utilisateur> utilisateurs) {
+		this.utilisateurs = utilisateurs;
+	}
 }

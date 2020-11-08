@@ -10,6 +10,7 @@ import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.ParameterStyle;
 import javax.xml.bind.annotation.XmlElement;
 
+import mg.fidev.model.Acces;
 import mg.fidev.model.Agence;
 import mg.fidev.model.Caisse;
 import mg.fidev.model.FichierEtatCivil;
@@ -345,5 +346,19 @@ public interface UserService {
 	@WebMethod 
 	@WebResult(name="resultat")
 	public List<Caisse> getAllCaisse();
+	
+	//----------------------------------------------------------------------------------------------
+	/******************************** Gestion accès ***********************************************/
+	
+	//Liste de tous les menus
+	@WebMethod 
+	@WebResult(name="resultat")
+	public List<Acces> getAllMenu();
+	
+	//Liste accès par utilisateurs
+	@WebMethod 
+	@WebResult(name="resultat")
+	public List<Acces> getAccesUser(
+			@XmlElement(required=true) @WebParam(name="idUser") int idUser);
 	
 }

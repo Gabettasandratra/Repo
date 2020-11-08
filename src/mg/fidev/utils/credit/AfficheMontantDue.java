@@ -40,7 +40,6 @@ public class AfficheMontantDue implements Serializable {
 	@XmlElement(name = "princAnt", required = false, nillable = true)
 	private double princAnt;
 	
-
 	@XmlElement(name = "montantTotal", required = false, nillable = true)
 	private double montantTotal;
 	

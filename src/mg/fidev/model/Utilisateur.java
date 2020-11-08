@@ -170,6 +170,20 @@ public class Utilisateur implements Serializable {
 		)
 	@XmlTransient
 	private List<Caisse> caisses;
+	
+	//bi-directional many-to-many association to acces
+	@ManyToMany(cascade=CascadeType.PERSIST)
+	@JoinTable(
+		name="utilisateur_acces"
+		, joinColumns={
+			@JoinColumn(name="utilisateurId")
+			}
+		, inverseJoinColumns={
+			@JoinColumn(name="accesId")
+			}
+		)
+	@XmlTransient
+	private List<Acces> acces; 
 
 	//bi-directional many-to-one association to Fonction
 	@ManyToOne
@@ -541,6 +555,13 @@ public class Utilisateur implements Serializable {
 
 	public void setUpdateTrans(List<TransactionPep> updateTrans) {
 		this.updateTrans = updateTrans;
-	}	
+	}
 
+	public List<Acces> getAcces() {
+		return acces;
+	}
+
+	public void setAcces(List<Acces> acces) {
+		this.acces = acces;
+	}
 }

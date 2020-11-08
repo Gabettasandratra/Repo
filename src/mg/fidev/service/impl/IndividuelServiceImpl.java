@@ -89,7 +89,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 							individuel.getDateNaissance(),individuel.getDateInscription()
 							, individuel.getEmail(), true, individuel.getProfession(), 
 							individuel.getSexe(), individuel.getCodeInd(), null, adresse);
-						
+					gar.setAgence(ag); 
 					docIdentite.setGarant(gar);
 					transaction.begin();
 					em.persist(gar);
@@ -367,7 +367,7 @@ public class IndividuelServiceImpl implements IndividuelService {
 		List<Individuel> result = new ArrayList<Individuel>();
 		
 		List<Agence> ag = ut.getAgences();
-		
+	
 		if(ag != null){
 			for (Agence agence : ag) {
 				String sql = "select i from Individuel i join i.agence ag where "
